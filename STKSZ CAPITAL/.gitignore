@@ -1,0 +1,37 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Build çıktıları
+build/
+dist/
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/captures/
+ios/App/Pods/
+ios/App/build/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/DerivedData/
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
+
+# Editör
+.idea/
+.vscode/
+*.iml
+
+# Arena çalışma dosyaları (repo'ya girmez)
+*.zip
+*.bundle
+uploads/
+
+# Ortam önbellekleri (asla commit edilmez)
+.npm/
+.cache/
+.venv/
+__pycache__/

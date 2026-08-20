@@ -1,0 +1,30 @@
+{
+  "name": "stksz-komuta-merkezi",
+  "version": "1.0.0",
+  "description": "STKSZ Komuta Merkezi - BIST portfoy ve piyasa takip uygulamasi (Web/PWA + Android + iOS)",
+  "private": true,
+  "scripts": {
+    "sync": "cap sync",
+    "sync:ios": "cap sync ios",
+    "sync:android": "cap sync android",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android",
+    "serve": "python3 -m http.server 8080 --directory www"
+  },
+  "keywords": [
+    "stksz",
+    "bist",
+    "capacitor",
+    "pwa"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^8.0.2",
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/app": "^6.0.3",
+    "@capacitor/app-launcher": "^6.0.4",
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/ios": "^6.2.1"
+  }
+}

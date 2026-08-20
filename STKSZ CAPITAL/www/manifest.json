@@ -1,0 +1,49 @@
+{
+  "id": "/",
+  "name": "STKSZ",
+  "short_name": "STKSZ",
+  "description": "BIST portföyü, EOD piyasa verisi, haber, risk ve fırsat takibi için yerel öncelikli finans komuta merkezi.",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#1E222A",
+  "theme_color": "#1E222A",
+  "lang": "tr-TR",
+  "dir": "ltr",
+  "categories": ["finance", "productivity"],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icons/maskable-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portföy",
+      "short_name": "Portföy",
+      "description": "STKSZ portföy ekranını aç",
+      "url": "./?page=portfolio",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Risk",
+      "short_name": "Risk",
+      "description": "Risk yönetimi ekranını aç",
+      "url": "./?page=risk",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Fırsatlar",
+      "short_name": "Fırsatlar",
+      "description": "Fırsatlar ekranını aç",
+      "url": "./?page=opportunities",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

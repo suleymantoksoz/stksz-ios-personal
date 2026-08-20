@@ -1,0 +1,14 @@
+{
+  "appId": "com.stksz.app",
+  "appName": "STKSZ",
+  "webDir": "www",
+  "backgroundColor": "#050607",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#050607",
+    "scrollEnabled": false
+  },
+  "android": {
+    "backgroundColor": "#050607"
+  }
+}

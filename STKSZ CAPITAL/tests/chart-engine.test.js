@@ -1,0 +1,25 @@
+const fs=require("fs");const src=fs.readFileSync("/home/user/www/stksz-chart.js","utf8");
+let pass=0,fail=0;function t(n,c){c?(pass++):(fail++,console.log("❌ "+n));}
+const calls=[];const ctx=new Proxy({},{get:(tg,p)=>{if(p==="measureText")return()=>({width:20});return(...a)=>{calls.push(p);};},set:()=>true});
+const listeners={};
+const cv={width:800,height:400,style:{},getContext:()=>ctx,addEventListener:(e,f)=>{listeners[e]=f;},removeEventListener:()=>{},getBoundingClientRect:()=>({left:0,top:0,width:800,height:400}),parentElement:{clientWidth:800,clientHeight:400},setPointerCapture:()=>{},releasePointerCapture:()=>{}};
+global.window={devicePixelRatio:1,addEventListener:()=>{},requestAnimationFrame:f=>f(),localStorage:{_s:{},getItem(k){return this._s[k]||null;},setItem(k,v){this._s[k]=v;},removeItem(k){delete this._s[k];}},matchMedia:()=>({matches:false,addEventListener(){}})};
+global.localStorage=global.window.localStorage;global.requestAnimationFrame=f=>f();
+global.document={createElement:()=>({style:{},getContext:()=>ctx}),addEventListener:()=>{}};
+new Function("window","localStorage","document","requestAnimationFrame",src)(global.window,global.localStorage,global.document,global.requestAnimationFrame);
+const c=new global.window.STKSZChart.StkszChart(cv);c.setSymbol("TCELL");
+const candles=[];const t0=Date.parse("2026-05-01");
+for(let i=0;i<60;i++)candles.push({t:t0+i*86400000,o:100+i,h:103+i,l:98+i,c:101+i,v:50000});
+c.setData(candles);c.resize();
+t("render çizer",calls.length>30);
+t("10 araç",["cursor","trend","hline","vline","channel","rect","fib","measure","mark","erase"].every(x=>{c.setTool(x);return c.tool===x;}));
+const ev=(x,y,id)=>({clientX:x,clientY:y,pointerId:id,preventDefault(){}});
+c.setTool("trend");const n0=c.drawings.length;listeners.pointerdown(ev(100,100,1));listeners.pointermove(ev(300,150,1));listeners.pointerup(ev(300,150,1));
+t("trend çizimi",c.drawings.length===n0+1);
+const b0=c.bars;listeners.wheel({deltaY:-100,clientX:400,clientY:200,preventDefault(){}});
+t("zoom",c.bars!==b0);
+listeners.pointerdown(ev(795,100,8));listeners.pointermove(ev(795,240,8));listeners.pointerup(ev(795,240,8));
+t("eksen ölçekleme",c.manualScale!==null);
+listeners.pointerdown(ev(795,100,9));listeners.pointerup(ev(795,100,9));listeners.pointerdown(ev(795,100,10));listeners.pointerup(ev(795,100,10));
+t("çift dokunuş=otomatik",c.manualScale===null);
+console.log(`GRAFİK: ${pass}/${pass+fail}`);process.exit(fail?1:0);

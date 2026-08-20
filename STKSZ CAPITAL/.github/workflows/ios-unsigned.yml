@@ -1,0 +1,103 @@
+name: Build STKSZ unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["www/**", "ios/**", "package.json", "capacitor.config.json", ".github/workflows/ios-unsigned.yml"]
+
+jobs:
+  build-ios:
+    name: Build STKSZ unsigned IPA
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: On kontrol - repo yapisi dogru mu?
+        run: |
+          eksik=0
+          for f in package.json package-lock.json capacitor.config.json www/index.html ios/App/Podfile ios/App/App.xcworkspace/contents.xcworkspacedata; do
+            if [ ! -e "$f" ]; then echo "::error::EKSIK DOSYA: $f — stksz-github-repo.zip icerigini repo KOKUNE cikardigindan emin ol."; eksik=1; fi
+          done
+          if [ $eksik -eq 1 ]; then
+            echo "Repo kok dizini icerigi:"; ls -la
+            exit 1
+          fi
+          echo "Tum on kosullar tamam."
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci || npm install --no-fund --no-audit
+
+      - name: Capacitor sync iOS (www -> ios/App/App/public)
+        run: npx cap sync ios
+
+      - name: CocoaPods install
+        working-directory: ios/App
+        run: pod install
+
+      - name: Build unsigned archive with xcodebuild
+        working-directory: ios/App
+        run: |
+          xcodebuild archive \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$PWD/build/App.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM=""
+
+      - name: Package .app into STKSZ.ipa (standart iOS dizilimi)
+        working-directory: ios/App/build
+        run: |
+          # Temiz baslangic
+          rm -rf Payload STKSZ.ipa
+
+          # 1) Payload klasoru olustur
+          mkdir Payload
+
+          # 2) .app derleme ciktisini Payload/App.app altina kopyala
+          cp -R App.xcarchive/Products/Applications/App.app Payload/App.app
+
+          # macOS artiklarini temizle (zip icine sizmasin)
+          xattr -cr Payload || true
+          find Payload -name ".DS_Store" -delete || true
+
+          # Info.plist gecerli mi? (yalnizca dogrulama - format degistirilmez)
+          plutil -lint Payload/App.app/Info.plist
+
+          # 3) Kok dizinden standart paketleme: zip -r STKSZ.ipa Payload
+          zip -r -X STKSZ.ipa Payload
+
+          # Dogrulama: IPA kokunde Payload/App.app olmali
+          unzip -t STKSZ.ipa > /dev/null && echo "ZIP butunlugu OK"
+          unzip -l STKSZ.ipa | head -10
+          ls -la STKSZ.ipa
+
+      - name: Kullanim notu
+        run: |
+          echo "=============================================================="
+          echo "ONEMLI - AltStore 3840 hatasinin yaygin nedeni:"
+          echo "GitHub Artifacts, IPA'yi bir ZIP icinde indirir."
+          echo "Indirdiginiz STKSZ-ipa.zip dosyasini ONCE ACIN,"
+          echo "icinden cikan STKSZ.ipa dosyasini AltStore'a verin."
+          echo "Dis zip'i .ipa diye yuklerseniz 3840 hatasi alirsiniz!"
+          echo "=============================================================="
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: STKSZ-ipa
+          path: ios/App/build/STKSZ.ipa
+          if-no-files-found: error
+          retention-days: 14
