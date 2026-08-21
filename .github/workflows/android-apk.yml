@@ -51,12 +51,12 @@ jobs:
           cache: npm
           cache-dependency-path: "STKSZ Capital/package-lock.json"
 
-      # ── 4) Java 17 Temurin ──
-      - name: Setup Java 17 (Temurin)
+      # ── 4) Java 21 Temurin ──
+      - name: Setup Java 21 (Temurin)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       # ── 5) Android SDK ──
       - name: Setup Android SDK
@@ -67,22 +67,28 @@ jobs:
         working-directory: STKSZ Capital
         run: npm ci || npm install --no-fund --no-audit
 
-      # ── 7) Capacitor sync ──
+      # ── 7) www dizinini garanti altina al ──
+      - name: Ensure www directory exists
+        run: mkdir -p "$SRC/www"
+
+      # ── 8) Capacitor sync ──
       - name: Capacitor sync android
         working-directory: STKSZ Capital
         run: npx cap sync android
 
-      # ── 8) Gradle izni ──
+      # ── 9) Gradle izni (root + android) ──
       - name: Grant gradlew execute permission
-        working-directory: STKSZ Capital/android
-        run: chmod +x gradlew
+        run: |
+          chmod +x "$SRC/android/gradlew"
+          chmod +x "$SRC/gradlew" 2>/dev/null || true
+          ls -la "$SRC/android/gradlew"
 
-      # ── 9) Gradle build ──
+      # ── 10) Gradle build ──
       - name: Build debug APK
         working-directory: STKSZ Capital/android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all
 
-      # ── 10) APK yukle ──
+      # ── 11) APK yukle ──
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
