@@ -3052,3 +3052,71 @@ body[data-theme="light"] .badge-kind-system{background:rgba(50,100,180,.08);colo
 .telegram-bot-panel .tg-bot-icon{font-size:48px;margin-bottom:12px;display:block}
 .telegram-bot-panel h3{margin:0 0 8px;font-size:14px;color:#D0904E;letter-spacing:.5px}
 .telegram-bot-panel p{color:#8a7e72;font-size:10px;line-height:1.5;max-width:320px;margin:0 auto}
+
+/* === v130: KRİPTO, PARA BİRİMİ, REKLAM, ROZET GELİŞTİRMELERİ === */
+
+/* Crypto page */
+.crypto-toolbar{display:flex;gap:8px;padding:0 0 10px}
+.crypto-search{flex:1;padding:8px 12px;border-radius:10px;border:1px solid #2a2318;background:#0e0b08;color:#e2a968;font-size:12px;outline:none}
+.crypto-search:focus{border-color:#B87333}
+.crypto-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:4px 0 16px}
+.crypto-card{padding:12px;border-radius:12px;border:1px solid #2a2318;background:linear-gradient(145deg,#0e0b08,#090706);display:grid;gap:6px;transition:border-color .2s}
+.crypto-card:hover{border-color:#B87333}
+.crypto-card-head{display:flex;align-items:baseline;gap:4px}
+.crypto-card-head b{font-size:13px;color:#e2a968;letter-spacing:.5px}
+.crypto-pair{font-size:9px;color:#8a7e72}
+.crypto-price{font-size:16px;font-weight:900;color:#f0d9b8;letter-spacing:.3px}
+.crypto-change{font-size:11px;font-weight:800;letter-spacing:.3px}
+.crypto-change.positive{color:#00df78}
+.crypto-change.negative{color:#ff4d4d}
+.crypto-meta{display:flex;gap:8px;font-size:8px;color:#8a7e72}
+body[data-theme="light"] .crypto-search{background:#fff;border-color:#d4ddd7;color:#1a2018}
+body[data-theme="light"] .crypto-card{background:#fff;border-color:#d4ddd7}
+body[data-theme="light"] .crypto-price{color:#1a2018}
+body[data-theme="light"] .crypto-card-head b{color:#8C5220}
+
+/* Currency selector */
+.currency-options{display:grid;gap:8px;padding:8px 0}
+.currency-option{display:flex;align-items:center;gap:10px;padding:12px;border-radius:10px;border:1px solid #2a2318;background:linear-gradient(145deg,#0e0b08,#090706);cursor:pointer;transition:border-color .2s,background .2s}
+.currency-option:has(input:checked){border-color:#B87333;background:rgba(184,115,51,.08)}
+.currency-option input[type="radio"]{accent-color:#B87333}
+.currency-label{display:flex;align-items:center;gap:6px;font-size:12px;color:#e2a968}
+.currency-label b{font-size:16px;width:24px;text-align:center}
+body[data-theme="light"] .currency-option{background:#fff;border-color:#d4ddd7}
+body[data-theme="light"] .currency-option:has(input:checked){background:rgba(140,82,32,.06);border-color:#8C5220}
+body[data-theme="light"] .currency-label{color:#8C5220}
+
+/* Ad banner */
+.ad-banner{position:fixed;left:0;right:0;bottom:var(--fixed-nav-height,64px);z-index:1050;background:linear-gradient(135deg,#1a1208,#140e07);border-top:1px solid #2a2318;box-shadow:0 -4px 16px rgba(0,0,0,.3)}
+.ad-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;max-width:1080px;margin:0 auto}
+.ad-banner-content{display:flex;align-items:center;gap:8px;min-width:0}
+.ad-banner-tag{font-size:7px;font-weight:900;color:#8a7e72;letter-spacing:1px;padding:2px 6px;border:1px solid #2a2318;border-radius:4px;white-space:nowrap}
+.ad-banner-text{font-size:10px;color:#8a7e72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ad-banner-upgrade{background:none;border:1px solid rgba(184,115,51,.3);color:#D0904E;font-size:9px;font-weight:700;padding:4px 10px;border-radius:8px;cursor:pointer;white-space:nowrap;letter-spacing:.3px;transition:all .2s}
+.ad-banner-upgrade:hover{background:rgba(184,115,51,.1);border-color:#B87333}
+.ad-banner[hidden]{display:none!important}
+body[data-theme="light"] .ad-banner{background:#faf6f0;border-top-color:#d4ddd7}
+body[data-theme="light"] .ad-banner-text{color:#5a4a3a}
+body[data-theme="light"] .ad-banner-upgrade{border-color:rgba(140,82,32,.3);color:#8C5220}
+
+/* Enhanced Pro Trader badge: RGB conic-gradient neon */
+.badge-shop-50{border:none!important;background:#0a0806!important;position:relative;overflow:hidden}
+.badge-shop-50::before{content:"";position:absolute;inset:-3px;border-radius:16px;padding:3px;background:conic-gradient(from var(--neon-angle,0deg),#ff4500,#ff8800,#00e5ff,#b87333,#ff4500);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:pro-neon-spin 3s linear infinite;pointer-events:none}
+@keyframes pro-neon-spin{0%{--neon-angle:0deg}100%{--neon-angle:360deg}}
+@supports not (mask-composite:exclude){.badge-shop-50::before{background:linear-gradient(#0a0806,#0a0806)) padding-box,conic-gradient(from 0deg,#ff4500,#ff8800,#00e5ff,#b87333,#ff4500) border-box;border:3px solid transparent;animation:pro-neon-spin 3s linear infinite}}
+.badge-shop-50 .badge-shop-icon{position:relative;z-index:1;box-shadow:0 0 16px rgba(255,69,0,.45),0 0 32px rgba(0,229,255,.25),0 0 48px rgba(184,115,51,.2);animation:pro-neon-pulse 2s ease-in-out infinite alternate}
+@keyframes pro-neon-pulse{0%{box-shadow:0 0 16px rgba(255,69,0,.5),0 0 32px rgba(0,229,255,.3),0 0 48px rgba(184,115,51,.2)}50%{box-shadow:0 0 20px rgba(0,229,255,.5),0 0 36px rgba(255,136,0,.3),0 0 52px rgba(255,69,0,.2)}100%{box-shadow:0 0 18px rgba(184,115,51,.5),0 0 34px rgba(255,69,0,.3),0 0 50px rgba(0,229,255,.2)}}
+.badge-shop-50 .badge-shop-price{color:#ff6b6b;text-shadow:0 0 8px rgba(255,69,0,.3)}
+
+/* Enhanced Elite Trader badge: gold shimmer */
+.badge-shop-100{border:none!important;background:linear-gradient(145deg,#1a1208,#0e0a06)!important;position:relative;overflow:hidden}
+.badge-shop-100::before{content:"";position:absolute;top:-50%;left:-60%;width:220%;height:200%;background:linear-gradient(60deg,transparent 40%,rgba(255,215,0,.08) 45%,rgba(208,144,78,.14) 50%,rgba(255,215,0,.08) 55%,transparent 60%);animation:elite-shimmer 3s ease-in-out infinite;pointer-events:none}
+@keyframes elite-shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.badge-shop-100::after{content:"";position:absolute;inset:0;border-radius:14px;border:1px solid transparent;background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(184,115,51,.15),rgba(208,144,78,.2)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.badge-shop-100 .badge-shop-icon{position:relative;z-index:1;box-shadow:0 0 24px rgba(208,144,78,.4),0 0 48px rgba(255,215,0,.15),inset 0 0 12px rgba(208,144,78,.12)}
+.badge-shop-100 .badge-shop-price{color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,.35)}
+
+/* Elite-only & elite-locked menu cards */
+.menu-nav-card[data-elite-locked] .menu-nav-trigger{opacity:.7}
+.menu-nav-card[data-elite-locked] .menu-nav-trigger i{color:#8a7e72}
+.menu-nav-card[data-elite-locked] .menu-nav-trigger small{color:#8a7e72}

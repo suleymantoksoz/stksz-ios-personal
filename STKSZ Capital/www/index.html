@@ -419,6 +419,16 @@
   </div>
 </section>
 
+<section class="page" id="page-crypto">
+  <div class="section-title">KRİPTO PARALAR · CANLI</div>
+  <div class="crypto-toolbar">
+    <input id="cryptoSearchInput" type="text" class="crypto-search" placeholder="Coin ara (BTC, ETH...)" autocomplete="off" oninput="filterCryptoList()">
+    <button type="button" class="btn small" onclick="refreshCryptoPrices(true)">YENİLE</button>
+  </div>
+  <div id="cryptoListStatus" class="source-fact">Binance API ile canlı veri alınıyor…</div>
+  <div id="cryptoList" class="crypto-grid"></div>
+</section>
+
 <section class="page" id="page-settings">
   <div class="menu-view menu-home-view" id="menuHome">
     <div class="menu-view-head modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeUnifiedMenu()">KAPAT</button><div><h2>MENÜ</h2></div><span></span></div>
@@ -430,9 +440,12 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSettingsHub')"><span><b>AYARLAR</b><small>Görünüm, hava, güvenlik ve bildirim</small></span><i>→</i></button></div>
       <div class="menu-nav-card ai-nav-card"><button type="button" class="menu-nav-trigger" onclick="openStkszAi()"><span><b>🤖 STKSZ AI</b><small>Portföy yorumu, haber özeti ve soru-cevap</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar, veri kaynakları ve bağlantı testleri</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-elite-only hidden><button type="button" class="menu-nav-trigger" onclick="openStkszEditorFromMenu()"><span><b>✏️ STKSZ EDİTÖR</b><small>Kendi stratejini ve endikatörünü yaz</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-elite-locked hidden><button type="button" class="menu-nav-trigger" onclick="showToast('STKSZ Editör yalnızca Elite Trader (100₺) rozeti sahiplerine özeldir.')"><span><b>🔒 STKSZ EDİTÖR</b><small>100₺ Elite Trader rozeti ile erişilebilir</small></span><i>🔒</i></button></div>
 
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuVirtualWallet')"><span><b>🧪 SANAL CÜZDAN</b><small>Simülasyon · gerçek para değildir</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuDataManagement')"><span><b>VERİ YÖNETİMİ</b><small>Yedek, geri yükleme ve CSV</small></span><i>→</i></button></div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuCurrency')"><span><b>💱 PARA BİRİMİ</b><small>TL ₺, USD $, EUR €, SAR ﷼</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAbout')"><span><b>HAKKINDA</b><small>STKSZ veri ve güvenlik ilkeleri</small></span><i>→</i></button></div>
       <div class="menu-nav-card menu-telegram-card" data-telegram-only hidden><button type="button" class="menu-nav-trigger" onclick="openTelegramBot()"><span><b>🤖 TELEGRAM BOT</b><small>Otomatik bildirim ve sinyal botu</small></span><i>→</i></button></div>
       <div class="menu-nav-card menu-telegram-locked" data-telegram-locked hidden><button type="button" class="menu-nav-trigger" onclick="showToast('Telegram Bot erişimi için 100₺ Premium Rozet edinin veya Admin olun.')"><span><b>🔒 TELEGRAM BOT</b><small>100₺ Premium Rozet ile erişilebilir</small></span><i>🔒</i></button></div>
@@ -633,6 +646,23 @@
         </div>
         <div class="api-card-foot"><em id="aiTestState">TEST EDİLMEDİ</em><a class="api-get-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Ücretsiz Anahtar ↗</a></div>
         <p class="help">Yedek anahtar yalnızca bu cihazda saklanır; ENR verilerin ve diğer anahtarların AI'ya ASLA gönderilmez.</p>
+      </div>
+
+      <div class="api-key-block" data-api-card="crypto_api">
+        <div class="api-key-head"><b>🪙 Kripto Veri API</b><small>İsteğe bağlı · Binance ücretsiz zaten bağlı</small><span class="api-key-state" id="apiKeyStateCrypto">ÜCRETSİZ AKTİF</span></div>
+        <p class="help">Kripto paralar için varsayılan olarak Binance Public API kullanılır (anahtar gerekmez). Özel bir borsa API anahtarı girerek ek kaynaklar ekleyebilirsiniz.</p>
+        <div class="field api-key-field">
+          <div class="api-key-input-row">
+            <input id="apiKeyCryptoInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="İsteğe bağlı: Borsa API anahtarı (şimdilik gerekli değil)">
+            <button type="button" class="icon-btn api-key-eye" onclick="toggleApiKeyVisibility('apiKeyCryptoInput',this)" aria-label="Anahtarı göster/gizle">👁</button>
+          </div>
+        </div>
+        <div class="api-btn-row">
+          <button type="button" class="api-btn" onclick="pasteApiKey('apiKeyCryptoInput')">📋 YAPIŞTIR</button>
+          <button type="button" class="api-btn save" onclick="saveProviderKey('crypto_api')">💾 KAYDET</button>
+          <button type="button" class="api-btn danger" onclick="removeApiKey('crypto_api')">🗑 SİL</button>
+        </div>
+        <div class="api-card-foot"><em>TEST EDİLMEDİ</em><a class="api-get-link" href="https://www.binance.com/en/binance-api" target="_blank" rel="noopener noreferrer">Binance API ↗</a></div>
       </div>
 
       <div class="api-key-block api-free-block" data-api-card="free">
@@ -843,6 +873,21 @@
     <div class="menu-form-card"><h3>STKSZ Komuta Merkezi</h3><p class="help">Öncelik sırası: veri doğruluğu, kullanıcı onayı, risk kontrolü ve analiz. Veri yoksa veri üretilmez. ENR verileri Midas toplamı, skor, risk ve raporlardan ayrı tutulur.</p><div class="source-fact">Sürüm: <span id="menuBuildInfo">v1</span> <small id="menuBuildDetail" style="opacity:.45"></small></div><div class="toolbar"><a class="btn btn-link" href="legal/privacy.html">Gizlilik Politikası</a><a class="btn btn-link" href="legal/support.html">Destek</a></div></div>
   </section>
 
+  <section class="menu-view menu-subpage" id="menuCurrency" data-menu-parent="menuHome" hidden>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>PARA BİRİMİ</h2></div><span></span></div>
+    <div class="menu-form-card">
+      <div class="section-title">GÖRÜNÜM PARA BİRİMİ</div>
+      <p class="help">Uygulama genelindeki_para birimi sembolünü ve dönüşümünü değiştirir. Kur verileri döviz kurlarından otomatik alınır.</p>
+      <div class="currency-options">
+        <label class="currency-option"><input type="radio" name="currencySelect" value="TL" onchange="switchCurrency('TL')"> <span class="currency-label"><b>₺</b> Türk Lirası</span></label>
+        <label class="currency-option"><input type="radio" name="currencySelect" value="USD" onchange="switchCurrency('USD')"> <span class="currency-label"><b>$</b> ABD Doları</span></label>
+        <label class="currency-option"><input type="radio" name="currencySelect" value="EUR" onchange="switchCurrency('EUR')"> <span class="currency-label"><b>€</b> Euro</span></label>
+        <label class="currency-option"><input type="radio" name="currencySelect" value="SAR" onchange="switchCurrency('SAR')"> <span class="currency-label"><b>﷼</b> Suudi Riyali</span></label>
+      </div>
+      <div id="currencyStatus" class="source-fact">Seçili: TL ₺</div>
+    </div>
+  </section>
+
   <section class="menu-view menu-subpage" id="menuTelegramBot" data-menu-parent="menuHome" hidden>
     <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>TELEGRAM BOT</h2></div><span></span></div>
     <div class="menu-form-card telegram-bot-panel">
@@ -858,12 +903,20 @@
 </section>
 </main>
 
+<div id="adBanner" class="ad-banner" hidden>
+  <div class="ad-banner-inner">
+    <div class="ad-banner-content"><span class="ad-banner-tag">REKLAM</span><span class="ad-banner-text">STKSZ ile yatırımlarını takip et</span></div>
+    <button type="button" class="ad-banner-upgrade" onclick="openMenuPanel('menuProfile')">Reklamları Kaldır (Pro Trader) →</button>
+  </div>
+</div>
+
 <nav class="nav" aria-label="Ana navigasyon">
   <button type="button" class="active" data-page="home" aria-current="page" aria-controls="page-home" onclick="showPage('home',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span><span class="nav-label">Ana Sayfa</span></button>
   <button type="button" data-page="portfolio" aria-controls="page-portfolio" onclick="showPage('portfolio',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span><span class="nav-label">Portföy</span></button>
   <button type="button" data-page="news" aria-controls="page-news" onclick="showPage('news',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg></span><span class="nav-label">Haberler</span></button>
   <button type="button" data-page="status" aria-controls="page-status" onclick="showPage('status',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span><span class="nav-label">Durum</span></button>
   <button type="button" data-page="opportunities" aria-controls="page-opportunities" onclick="showPage('opportunities',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span><span class="nav-label">Fırsatlar</span></button>
+  <button type="button" data-page="crypto" aria-controls="page-crypto" onclick="showPage('crypto',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.5 8h5a2.5 2.5 0 0 1 0 5H9m0 0h5.5a2.5 2.5 0 0 1 0 5H9.5"/><path d="M12 6v2m0 8v2"/></svg></span><span class="nav-label">Kripto</span></button>
   <button type="button" class="nav-ai-btn" onclick="openStkszAi()" aria-label="STKSZ AI asistanını aç" title="STKSZ AI"><span class="nav-ai-ring" aria-hidden="true"></span><span class="nav-ai-core"><b>STKSZ</b><b>AI</b></span></button>
 </nav>
 
@@ -1239,7 +1292,7 @@ const defaultData={
  ]
 };
 
-const defaultPrefs={provider:"bist_market_chain",newsProvider:"marketaux",weatherProvider:"open_meteo",autoUpdate:false,compact:false,menuGoal:"",menuNotes:"",theme:"dark",profileName:"",investorProfile:"",profilePhoto:"",selectedPortfolioSymbol:"",notifyPrice:false,notifyKap:false,notifyIpo:false,notifyDaily:false,notifyEmail:"",weatherLocation:{name:"Karaman",country:"Türkiye",latitude:37.18111,longitude:33.215,timezone:"Europe/Istanbul"}};
+const defaultPrefs={provider:"bist_market_chain",newsProvider:"marketaux",weatherProvider:"open_meteo",autoUpdate:false,compact:false,menuGoal:"",menuNotes:"",theme:"dark",profileName:"",investorProfile:"",profilePhoto:"",selectedPortfolioSymbol:"",selectedCurrency:"TL",notifyPrice:false,notifyKap:false,notifyIpo:false,notifyDaily:false,notifyEmail:"",weatherLocation:{name:"Karaman",country:"Türkiye",latitude:37.18111,longitude:33.215,timezone:"Europe/Istanbul"}};
 let storageAvailable=true;
 let sessionAvailable=true;
 const volatileSession={};
@@ -1348,7 +1401,7 @@ let weatherCache=safeJson(storageGet("stkszWeatherCache"),null);if(weatherCache&
 
 const formatNumber=(value,min=2,max=2)=>new Intl.NumberFormat("tr-TR",{minimumFractionDigits:min,maximumFractionDigits:max}).format(Number(value)||0);
 const fmt=value=>formatNumber(value,2,2);
-const money=value=>"₺"+fmt(value);
+const money=value=>appMoney(value);
 const signedMoney=value=>(Number(value)>=0?"+":"-")+"₺"+fmt(Math.abs(Number(value)||0));
 const signedTL=value=>(Number(value)>=0?"+":"-")+fmt(Math.abs(Number(value)||0))+" TL";
 const pct=value=>(Number(value)>=0?"+":"")+fmt(value)+"%";
@@ -1425,6 +1478,7 @@ function showPage(id,button){
  if(id==="portfolio")initEnrSecurity();
  if(id==="status")renderRisk();/* v119: risk kartları artık Durum sayfasında */
  if(id==="opportunities"){try{harvestIpoSilently();}catch(error){}}
+ if(id==="crypto"){try{refreshCryptoPrices(false);}catch(error){}}
  if(id==="settings")renderSettings();else{document.querySelector(".header-menu-btn")?.setAttribute("aria-expanded","false");}
  appScrollTo(0);updateFixedShellOffsets();
 }
@@ -1433,7 +1487,7 @@ function setVisibleMenuView(id){document.querySelectorAll("#page-settings .menu-
 function showMenuHome(){menuPanelStack=[];pendingProfilePhoto="";setVisibleMenuView("menuHome");}
 function openUnifiedMenu(){const settings=document.getElementById("page-settings"),button=document.querySelector(".header-menu-btn");if(settings?.classList.contains("active")){closeUnifiedMenu();return;}const active=[...document.querySelectorAll(".page.active")].find(page=>page.id!=="page-settings");menuReturnPage=active?.id.replace("page-","")||"home";showPage("settings");showMenuHome();button?.setAttribute("aria-expanded","true");}
 function closeUnifiedMenu(){const target=document.getElementById("page-"+menuReturnPage)?menuReturnPage:"home";showMenuHome();showPage(target,document.querySelector(`.nav button[data-page="${target}"]`));document.querySelector(".header-menu-btn")?.setAttribute("aria-expanded","false");}
-function openMenuPanel(id){const target=document.getElementById(id);if(!target)return;const current=visibleMenuView();if(current&&current.id!==id)menuPanelStack.push(current.id);setVisibleMenuView(id);if(id==="menuActivityPanel")renderMenuActivity();if(id==="menuSecurity")refreshMenuSecurityState();if(id==="menuApiKeys"){renderApiKeysPanel();renderAdminPanelVisibility();refreshNonAdminStates();}if(id==="menuProfile")renderInvestorProfileUI();if(id==="menuFxData")refreshFxPanel();if(id==="menuVirtualWallet")renderVirtualWallet();if(id==="menuDataManagement")renderSyncState();}
+function openMenuPanel(id){const target=document.getElementById(id);if(!target)return;const current=visibleMenuView();if(current&&current.id!==id)menuPanelStack.push(current.id);setVisibleMenuView(id);if(id==="menuActivityPanel")renderMenuActivity();if(id==="menuSecurity")refreshMenuSecurityState();if(id==="menuApiKeys"){renderApiKeysPanel();renderAdminPanelVisibility();refreshNonAdminStates();}if(id==="menuProfile")renderInvestorProfileUI();if(id==="menuFxData")refreshFxPanel();if(id==="menuVirtualWallet")renderVirtualWallet();if(id==="menuDataManagement")renderSyncState();if(id==="menuCurrency")renderCurrencyPanel();}
 function closeMenuPanel(){const current=visibleMenuView();if(current?.id==="menuProfile"){pendingProfilePhoto="";renderSettings();}const previous=menuPanelStack.pop()||"menuHome";setVisibleMenuView(previous);}
 function saveProfileAndClose(){saveProfile();closeMenuPanel();}
 function saveGoalsAndClose(){saveMenuNotes();closeMenuPanel();}
@@ -2388,6 +2442,95 @@ async function redeemBadgeCode(){
   renderInvestorProfileUI();
  }catch(error){if(status){status.textContent="⛔ "+String(error?.message||"Kod doğrulanamadı.");status.className="provider-test-state error";}}
 }
+/* ---- PARA BİRİMİ SEÇİMİ ---- */
+const CURRENCY_SYMBOLS={TL:"₺",USD:"$",EUR:"€",SAR:"﷼"};
+const CURRENCY_NAMES={TL:"Türk Lirası",USD:"ABD Doları",EUR:"Euro",SAR:"Suudi Riyali"};
+const CURRENCY_RATES={TL:1};
+function getCurrencyRate(){
+ const cur=prefs.selectedCurrency||"TL";
+ if(cur==="TL")return 1;
+ const usd=finite(fxRates?.usdtry),eur=finite(fxRates?.eurtry);
+ if(cur==="USD"&&usd&&usd>0)return 1/usd;
+ if(cur==="EUR"&&eur&&eur>0)return 1/eur;
+ if(cur==="SAR"&&usd&&usd>0)return 1/(usd*3.75);
+ return 1;
+}
+function switchCurrency(code){
+ if(!CURRENCY_SYMBOLS[code])return;
+ prefs.selectedCurrency=code;savePrefs();renderCurrencyPanel();
+ /* money() fonksiyonunu intercept et: sayfayı yeniden çiz */
+ try{render();}catch(e){}
+ showToast(CURRENCY_NAMES[code]+" ("+CURRENCY_SYMBOLS[code]+") seçildi.");
+}
+function renderCurrencyPanel(){
+ const cur=prefs.selectedCurrency||"TL";
+ document.querySelectorAll('input[name="currencySelect"]').forEach(r=>{r.checked=(r.value===cur);});
+ const rate=getCurrencyRate();
+ const sym=CURRENCY_SYMBOLS[cur];
+ setText("currencyStatus","Seçili: "+sym+" "+CURRENCY_NAMES[cur]+" · Çevrim katsayısı: "+formatNumber(rate,6,6));
+}
+function appMoney(value){
+ const cur=prefs.selectedCurrency||"TL";
+ const sym=CURRENCY_SYMBOLS[cur]||"₺";
+ const rate=getCurrencyRate();
+ const converted=Number(value)||0;
+ return sym+formatNumber(converted*rate,2,2);
+}
+/* ---- KRİPTO PARALAR (Binance Public API) ---- */
+let cryptoPriceCache=[],cryptoLoading=false;
+async function refreshCryptoPrices(force=false){
+ if(cryptoLoading)return;cryptoLoading=true;
+ const statusEl=document.getElementById("cryptoListStatus");
+ if(statusEl)statusEl.textContent="Binance API ile canlı veri alınıyor…";
+ try{
+  const symbols=["BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","XRPUSDT","ADAUSDT","DOGEUSDT","DOTUSDT","AVAXUSDT","LINKUSDT","MATICUSDT","SHIBUSDT","LTCUSDT","UNIUSDT","ATOMUSDT"];
+  const res=await fetch("https://api.binance.com/api/v3/ticker/24hr");
+  if(!res.ok)throw new Error("HTTP "+res.status);
+  const all=await res.json();
+  cryptoPriceCache=symbols.map(sym=>{
+   const t=all.find(x=>x.symbol===sym);if(!t)return null;
+   return {symbol:sym.replace("USDT",""),price:parseFloat(t.lastPrice),change:parseFloat(t.priceChangePercent),volume:parseFloat(t.quoteVolume),high:parseFloat(t.highPrice),low:parseFloat(t.lowPrice)};
+  }).filter(Boolean);
+  renderCryptoList();
+  if(statusEl)statusEl.textContent="Binance · Canlı · "+new Date().toLocaleTimeString("tr-TR");
+ }catch(error){
+  if(statusEl)statusEl.textContent="Binance API hatası: "+(error?.message||"Bağlantı yok");
+  cryptoPriceCache=[];
+ }
+ cryptoLoading=false;
+}
+function renderCryptoList(filter=""){
+ const box=document.getElementById("cryptoList");if(!box)return;
+ const items=cryptoPriceCache.filter(c=>!filter||c.symbol.toLowerCase().includes(filter.toLowerCase()));
+ if(!items.length){box.innerHTML='<div class="empty-state">'+(cryptoLoading?"Yükleniyor…":"Kripto verisi yok — YENİLE butonuna basın.")+'</div>';return;}
+ box.innerHTML=items.map(c=>{
+  const up=c.change>=0;
+  return `<div class="crypto-card"><div class="crypto-card-head"><b>${esc(c.symbol)}</b><span class="crypto-pair">/USDT</span></div><div class="crypto-price">${formatNumber(c.price,c.price>=1000?2:c.price>=1?4:6)}</div><div class="crypto-change ${up?"positive":"negative"}">${up?"+":""}${formatNumber(c.change,2,2)}%</div><div class="crypto-meta"><span>Hacim: $${formatNumber(c.volume/1e6,1,1)}M</span><span>↑${formatNumber(c.high,2,2)} ↓${formatNumber(c.low,2,2)}</span></div></div>`;
+ }).join("");
+}
+function filterCryptoList(){
+ const q=document.getElementById("cryptoSearchInput")?.value||"";
+ renderCryptoList(q);
+}
+/* ---- Alt Bar Reklam Alanı ---- */
+let showAds=true;
+function updateAdBanner(){
+ const eng=window.STKSZAIEngine;
+ const hasAnyBadge=eng?.entitlements?.badges()?.some(b=>["STKSZ_PRO","STKSZ_ELITE"].includes(b.id));
+ showAds=!hasAnyBadge&&authState?.mode!=="guest";
+ const banner=document.getElementById("adBanner");
+ if(banner)banner.hidden=!showAds;
+ if(!showAds&&banner)banner.remove();
+}
+/* ---- STKSZ EDİTÖR Menü Erişimi ---- */
+function openStkszEditorFromMenu(){
+ const eng=window.STKSZAIEngine;if(!eng)return;
+ const admin=eng.entitlements.isAdmin();
+ const hasElite=eng.entitlements.badges().some(b=>b.id==="STKSZ_ELITE");
+ if(!admin&&!hasElite){showToast("STKSZ Editör yalnızca Elite Trader (100₺) rozeti sahiplerine özeldir.");return;}
+ closeUnifiedMenu();showPage("home");
+ setTimeout(()=>{const btn=document.querySelector("[data-chart-editor]");if(btn)btn.click();else showToast("Editöre erişim için bir grafik açın.");},400);
+}
 /* ---- ADMIN görünümü: API Yönetimi yalnız admin'e tam açılır ----
    Asıl yetki kontrolü BACKEND'dedir (x-stksz-admin-token). Buradaki
    gizleme yalnız normal kullanıcı deneyimi içindir. */
@@ -2399,12 +2542,16 @@ function renderAdminPanelVisibility(){
  const admin=eng.entitlements.isAdmin();
  const hasElite=eng.entitlements.badges().some(b=>b.id==="STKSZ_ELITE");
  const tgAccess=admin||hasElite;
+ const editorAccess=admin||hasElite;
  document.querySelectorAll("[data-admin-only]").forEach(el=>{el.hidden=!admin;});
  document.querySelectorAll("[data-non-admin-note]").forEach(el=>{el.hidden=admin;});
  document.querySelectorAll("[data-telegram-only]").forEach(el=>{el.hidden=!tgAccess;});
  document.querySelectorAll("[data-telegram-locked]").forEach(el=>{el.hidden=tgAccess;});
+ document.querySelectorAll("[data-elite-only]").forEach(el=>{el.hidden=!editorAccess;});
+ document.querySelectorAll("[data-elite-locked]").forEach(el=>{el.hidden=editorAccess;});
  applyGuestMode();
  try{updateHeaderInvestorChip();}catch(e){}
+ try{updateAdBanner();}catch(e){}
 }
 /* ---- Misafir modu: menü kartları üzerinde overlay + kilit ---- */
 function applyGuestMode(){
@@ -3190,7 +3337,7 @@ async function refreshAiConnBadge(){
 const AUTH_ENABLED=true;
 let authState=safeJson(storageGet("stkszAuth"),null);
 let authReady=false;
-const GUEST_BLOCKED_FNS=["openPlEditor","openCashEditor","openManual","openAddAsset","openNewTransaction","vwInit","vwExecute","vwTradeConfirm","aiApplyTradeProposal","aiApplyDividendProposal","saveProviderKey","syncCreateAccount","syncPairDevice","openVwTrade","purchaseBadge","openTelegramBot"];
+const GUEST_BLOCKED_FNS=["openPlEditor","openCashEditor","openManual","openAddAsset","openNewTransaction","vwInit","vwExecute","vwTradeConfirm","aiApplyTradeProposal","aiApplyDividendProposal","saveProviderKey","syncCreateAccount","syncPairDevice","openVwTrade","purchaseBadge","openTelegramBot","openStkszEditorFromMenu"];
 function isGuest(){return authState?.mode==="guest";}
 function isAuthed(){return Boolean(authState&&(authState.mode==="account"||authState.mode==="guest"));}
 function authPersist(){storageSet("stkszAuth",JSON.stringify(authState));}
@@ -4338,7 +4485,7 @@ const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMe
    else lastAutoRefreshAt=Number.isFinite(lastSuccess)?lastSuccess:Date.now();
   }
  }catch(error){}
-ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{updateHeaderInvestorChip();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
+ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{updateHeaderInvestorChip();}catch(e){}try{updateAdBanner();}catch(e){}try{renderCurrencyPanel();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
 </script>
 </body>
 </html>
