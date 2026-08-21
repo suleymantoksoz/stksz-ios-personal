@@ -428,7 +428,7 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuActivityPanel')"><span><b>İŞLEM GEÇMİŞİ</b><small>Varlık ve emir kayıtları</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSettingsHub')"><span><b>AYARLAR</b><small>Görünüm, hava, güvenlik ve bildirim</small></span><i>→</i></button></div>
       <div class="menu-nav-card ai-nav-card"><button type="button" class="menu-nav-trigger" onclick="openStkszAi()"><span><b>🤖 STKSZ AI</b><small>Portföy yorumu, haber özeti ve soru-cevap</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar, veri kaynakları ve bağlantı testleri</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar, veri kaynakları ve bağlantı testleri</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="closeUnifiedMenu();showPage('status')"><span><b>PİYASA DURUMU</b><small>BIST özeti, STKSZ CORE · SCORE ve risk (Durum sayfası)</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuVirtualWallet')"><span><b>🧪 SANAL CÜZDAN</b><small>Simülasyon · gerçek para değildir</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuDataManagement')"><span><b>VERİ YÖNETİMİ</b><small>Yedek, geri yükleme ve CSV</small></span><i>→</i></button></div>
@@ -492,7 +492,7 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuWeather')"><span><b>HAVA DURUMU</b><small>Konum ve güncelleme</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSecurity')"><span><b>GÜVENLİK / BİYOMETRİK</b><small>ENR koruma durumu</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuNotifications')"><span><b>BİLDİRİMLER</b><small>Tarayıcı ve yerel tercihler</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar ve veri kaynakları</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar ve veri kaynakları</small></span><i>→</i></button></div>
     </div>
   </section>
 
@@ -2337,6 +2337,9 @@ async function redeemBadgeCode(){
    gizleme yalnız normal kullanıcı deneyimi içindir. */
 function renderAdminPanelVisibility(){
  const eng=window.STKSZAIEngine;if(!eng)return;
+ if(typeof authState!=="undefined"&&authState?.mode==="account"&&authState.username==="admin"&&!eng.entitlements.isAdmin()){
+  eng.entitlements.grant("ADMIN","system:auto");
+ }
  const admin=eng.entitlements.isAdmin();
  document.querySelectorAll("[data-admin-only]").forEach(el=>{el.hidden=!admin;});
  document.querySelectorAll("[data-non-admin-note]").forEach(el=>{el.hidden=admin;});
@@ -3108,10 +3111,10 @@ async function authLoginWithPassword(){
  const hash=await hashPassword(password);
  if(hash!==user.passwordHash){if(errEl){errEl.textContent="Şifre hatalı.";errEl.hidden=false;}return;}
  authState={mode:"account",provider:"password",username,email:user.email||"",name:user.displayName||username,createdAt:user.createdAt||nowTr(),quickLock:false};
- authPersist();renderAuthGate();renderProfileAuth();showToast("Hoş geldin, "+(user.displayName||username)+"!");
+  authPersist();renderAuthGate();renderProfileAuth();try{renderAdminPanelVisibility();}catch(e){}showToast("Hoş geldin, "+(user.displayName||username)+"!");
  setTimeout(offerBiometricSetup,600);
 }
-function authGuest(){authState={mode:"guest",createdAt:nowTr()};authPersist();renderAuthGate();renderProfileAuth();showToast("Misafir modu: görüntüleme açık, düzenleme/işlem kapalı.");}
+function authGuest(){authState={mode:"guest",createdAt:nowTr()};authPersist();renderAuthGate();renderProfileAuth();try{renderAdminPanelVisibility();}catch(e){}showToast("Misafir modu: görüntüleme açık, düzenleme/işlem kapalı.");}
 async function offerBiometricSetup(){
  try{
   const canNative=window.STKSZNative?.isNative?.()&&window.STKSZNative?.biometricAvailable;
@@ -3134,7 +3137,7 @@ async function authBiometricLogin(){
  }catch(error){showToast("Biyometrik giriş kullanılamadı; Farklı hesapla devam edebilirsin.");}
 }
 function authShowChoices(){document.getElementById("authBiometric").hidden=true;document.getElementById("authChoices").hidden=false;}
-function authLogout(){if(!confirm("Oturum kapatılsın mı? Verilerin cihazda korunur."))return;authState=null;storageRemove("stkszAuth");renderAuthGate();renderProfileAuth();}
+function authLogout(){if(!confirm("Oturum kapatılsın mı? Verilerin cihazda korunur."))return;authState=null;storageRemove("stkszAuth");renderAuthGate();renderProfileAuth();try{renderAdminPanelVisibility();}catch(e){}}
 async function changePassword(){
  if(!isAuthed()||isGuest())return;
  const cur=document.getElementById("pwCurrent")?.value||"";
@@ -4220,7 +4223,7 @@ const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMe
    else lastAutoRefreshAt=Number.isFinite(lastSuccess)?lastSuccess:Date.now();
   }
  }catch(error){}
-ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
+ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
 </script>
 </body>
 </html>
