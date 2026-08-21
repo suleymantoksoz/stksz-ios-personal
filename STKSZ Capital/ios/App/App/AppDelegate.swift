@@ -1,6 +1,7 @@
 import UIKit
 import Capacitor
 import GoogleMobileAds
+import AppTrackingTransparency
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -8,8 +9,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        GADMobileAds.sharedInstance().start(completionHandler: nil)
+        requestATTThenStartAds()
         return true
+    }
+
+    private func requestATTThenStartAds() {
+        if #available(iOS 14, *) {
+            ATTrackingManager.requestTrackingAuthorization { _ in
+                GADMobileAds.sharedInstance().start(completionHandler: nil)
+            }
+        } else {
+            GADMobileAds.sharedInstance().start(completionHandler: nil)
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

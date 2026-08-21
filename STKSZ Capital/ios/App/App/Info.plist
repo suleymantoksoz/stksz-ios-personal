@@ -107,5 +107,9 @@
 			<string>lr83lhsbwj.skadnetwork</string>
 		</dict>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Reklam deneyimini kişiselleştirmek için reklam tanımlayıcısı kullanılır.</string>
 </dict>
 </plist>
