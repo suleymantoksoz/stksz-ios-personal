@@ -93,36 +93,32 @@ jobs:
       - name: Build debug APK
         id: gradle-build
         working-directory: STKSZ Capital/android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all --info 2>&1 | tee "$RUNNER_TEMP/gradle-output.log"
-        continue-on-error: true
+        run: ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tee "$RUNNER_TEMP/gradle-output.log"
 
-      # ── 12) Hata analizi ──
+      # ── 12) Hata teshis (Sadece Build Basarisizsa) ──
       - name: Diagnose build failure
-        if: always() && steps.gradle-build.outcome == 'failure'
+        if: failure() || steps.gradle-build.outcome == 'failure'
         run: |
           echo "=== GRADLE BUILD BASARISIZ ==="
           LOG="$RUNNER_TEMP/gradle-output.log"
           if [ -f "$LOG" ]; then
-            echo "=== Caused by satirlari ==="
             grep -C 3 "Caused by:" "$LOG" || true
-            echo "=== Son 100 satir ==="
             tail -n 100 "$LOG"
           fi
-          exit 1
 
-      # ── 11) APK yukle ──
+      # ── 13) APK yukle (Sadece Build Basariliysa) ──
       - name: Upload APK artifact
         if: steps.gradle-build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
-          path: STKSZ Capital/android/app/build/outputs/apk/debug/app-debug.apk
+          path: STKSZ Capital/android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
 
-      # ── 13) Hata logunu artifact olarak yukle ──
+      # ── 14) Hata logunu yukle (Sadece Build Basarisizsa) ──
       - name: Upload build log on failure
-        if: always() && steps.gradle-build.outcome == 'failure'
+        if: failure() || steps.gradle-build.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-gradle-build-log
