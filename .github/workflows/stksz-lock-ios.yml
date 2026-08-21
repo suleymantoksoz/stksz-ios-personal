@@ -24,7 +24,6 @@ jobs:
 
     env:
       PROJECT_DIR: STKSZ Lock/privacy_vault
-      BUILD_DIR: ${{ github.workspace }}/lock-build-output
 
     steps:
       # ── 1) Checkout ──
@@ -96,31 +95,35 @@ jobs:
       # ── 8) Runner.app -> imzasız .ipa paketle ──
       - name: Package unsigned IPA
         run: |
-          APP_DIR="$PROJECT_DIR/build/ios/iphoneos/Runner.app"
+          # TUM yollar MUTLAK: cd sonrasi goreli yol kirilmasin (v1 hatasi buydu)
+          ROOT="$GITHUB_WORKSPACE"
+          APP_DIR="$ROOT/$PROJECT_DIR/build/ios/iphoneos/Runner.app"
+          OUT_DIR="$ROOT/lock-build-output"
+
           if [ ! -d "$APP_DIR" ]; then
-            echo "::error::Runner.app bulunamadi! Mevcut icerik:"
-            ls -la "$PROJECT_DIR/build/ios/iphoneos/" || true
+            echo "::error::Runner.app bulunamadi: $APP_DIR"
+            ls -la "$ROOT/$PROJECT_DIR/build/ios/iphoneos/" || true
             exit 1
           fi
 
-          mkdir -p "$BUILD_DIR"
-          cd "$BUILD_DIR"
-          rm -rf Payload STKSZ-Lock-iOS-Unsigned.ipa
-          mkdir Payload
-          cp -R "$APP_DIR" Payload/Runner.app
-          xattr -cr Payload || true
-          find Payload -name ".DS_Store" -delete || true
+          mkdir -p "$OUT_DIR/Payload"
+          rm -rf "$OUT_DIR/Payload/Runner.app" "$OUT_DIR/STKSZ-Lock-iOS-Unsigned.ipa"
+          cp -R "$APP_DIR" "$OUT_DIR/Payload/Runner.app" || { echo "::error::Runner.app kopyalanamadi"; exit 1; }
+          xattr -cr "$OUT_DIR/Payload" || true
+          find "$OUT_DIR/Payload" -name ".DS_Store" -delete || true
 
           echo "=== Info.plist kontrol ==="
-          plutil -lint Payload/Runner.app/Info.plist || true
-          /usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" Payload/Runner.app/Info.plist 2>/dev/null || true
-          /usr/libexec/PlistBuddy -c "Print MinimumOSVersion" Payload/Runner.app/Info.plist 2>/dev/null || true
+          plutil -lint "$OUT_DIR/Payload/Runner.app/Info.plist" || true
+          /usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$OUT_DIR/Payload/Runner.app/Info.plist" 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Print MinimumOSVersion" "$OUT_DIR/Payload/Runner.app/Info.plist" 2>/dev/null || true
 
           echo ""
           echo "=== IPA olusturuluyor (imzasiz) ==="
-          zip -r -X STKSZ-Lock-iOS-Unsigned.ipa Payload
-          unzip -t STKSZ-Lock-iOS-Unsigned.ipa > /dev/null && echo "ZIP dogrulama: OK"
-          ls -lh STKSZ-Lock-iOS-Unsigned.ipa
+          (cd "$OUT_DIR" && zip -r -q -X STKSZ-Lock-iOS-Unsigned.ipa Payload) || { echo "::error::zip basarisiz"; exit 1; }
+
+          [ -s "$OUT_DIR/STKSZ-Lock-iOS-Unsigned.ipa" ] || { echo "::error::IPA olusmadi/bos"; exit 1; }
+          unzip -t "$OUT_DIR/STKSZ-Lock-iOS-Unsigned.ipa" > /dev/null || { echo "::error::ZIP dogrulama hatasi"; exit 1; }
+          ls -lh "$OUT_DIR/STKSZ-Lock-iOS-Unsigned.ipa"
 
       # ── 9) Artifact yukle ──
       - name: Upload unsigned IPA

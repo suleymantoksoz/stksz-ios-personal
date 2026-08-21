@@ -1,6 +1,9 @@
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // android.builtInKotlin=false oldugu icin KGP ACIKCA uygulanmalidir; aksi halde
+    // asagidaki kotlin {} blogu konfigurasyon asamasinda her gradle cagrisini dusurur.
+    id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 
