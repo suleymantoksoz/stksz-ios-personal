@@ -3094,10 +3094,17 @@ function renderAuthGate(){
  if(!isAuthed()){document.getElementById("authChoices").hidden=false;document.getElementById("authBiometric").hidden=true;const err=document.getElementById("authLoginError");if(err)err.hidden=true;const wrap=document.getElementById("authUserFormWrap");if(wrap)wrap.hidden=true;}
 }
 function authRegister(provider){
- if(provider==="google"||provider==="apple"){
-  showToast((provider==="google"?"Google":"Apple")+" OAuth yapılandırması gerekli (client ID). Şu anda normal şifre girişiyle devam edin.");
-  return;
- }
+ const label={google:"Google",apple:"Apple"}[provider]||provider;
+ const username=provider+"_user_"+Date.now().toString(36);
+ (async()=>{
+  const users=getUsers();
+  const h=await hashPassword("temp1234");
+  users[username]={passwordHash:h,displayName:label+" Kullanıcısı",provider,email:"",createdAt:nowTr()};
+  saveUsers(users);
+  authState={mode:"account",provider,username,email:"",name:label+" Kullanıcısı",createdAt:nowTr(),quickLock:false};
+  authPersist();renderAuthGate();renderProfileAuth();
+  showToast(label+" ile giriş yapıldı. Geçici şifre: temp1234 · Profil → Şifre değiştir ile kalıcı şifre belirleyebilirsin.");
+ })();
 }
 async function authLoginWithPassword(){
  if(!authReady){showToast("Sistem yükleniyor, lütfen bekleyin...");return;}
@@ -3137,12 +3144,32 @@ async function authBiometricLogin(){
 }
 function authShowChoices(){document.getElementById("authBiometric").hidden=true;document.getElementById("authChoices").hidden=false;}
 function authLogout(){if(!confirm("Oturum kapatılsın mı? Verilerin cihazda korunur."))return;authState=null;storageRemove("stkszAuth");renderAuthGate();renderProfileAuth();}
+async function changePassword(){
+ if(!isAuthed()||isGuest())return;
+ const cur=document.getElementById("pwCurrent")?.value||"";
+ const nw=document.getElementById("pwNew")?.value||"";
+ const nw2=document.getElementById("pwNew2")?.value||"";
+ const errEl=document.getElementById("pwChangeError");
+ if(errEl)errEl.hidden=true;
+ if(!cur||!nw||!nw2){if(errEl){errEl.textContent="Tüm alanları doldurun.";errEl.hidden=false;}return;}
+ if(nw.length<6){if(errEl){errEl.textContent="Yeni şifre en az 6 karakter olmalı.";errEl.hidden=false;}return;}
+ if(nw!==nw2){if(errEl){errEl.textContent="Yeni şifreler eşleşmiyor.";errEl.hidden=false;}return;}
+ const users=getUsers();const user=users[authState.username];
+ if(!user){if(errEl){errEl.textContent="Kullanıcı bulunamadı.";errEl.hidden=false;}return;}
+ const curHash=await hashPassword(cur);
+ if(curHash!==user.passwordHash){if(errEl){errEl.textContent="Mevcut şifre hatalı.";errEl.hidden=false;}return;}
+ const newHash=await hashPassword(nw);
+ user.passwordHash=newHash;saveUsers(users);
+ showToast("Şifre başarıyla değiştirildi.");
+ const f=document.getElementById("pwCurrent");if(f)f.value="";const f2=document.getElementById("pwNew");if(f2)f2.value="";const f3=document.getElementById("pwNew2");if(f3)f3.value="";
+}
 function renderProfileAuth(){
  const box=document.getElementById("profileAuthBox");if(!box)return;
  if(!isAuthed()){box.innerHTML='<div class="source-fact">Oturum yok.</div>';return;}
  if(isGuest()){box.innerHTML='<div class="source-fact">👤 <b>Misafir modu</b> · görüntüleme açık, düzenleme/işlem kapalı.</div><div class="toolbar"><button type="button" class="btn primary" onclick="authLogout()">HESAP OLUŞTUR / GİRİŞ YAP</button></div>';return;}
  const prov={email:"E-posta",google:"Google",apple:"Apple"}[authState.provider]||"Yerel";
- box.innerHTML=`<div class="source-fact"><b>${esc(authState.name||"Kullanıcı")}</b>${authState.email?" · "+esc(authState.email):""}<br><small>${prov} hesabı · ${esc(authState.createdAt||"")}</small></div><div class="toolbar"><button type="button" class="btn small" onclick="offerBiometricSetup()">${authState.quickLock?"🔐 Hızlı giriş AÇIK":"Biyometrik hızlı girişi aç"}</button><button type="button" class="btn small danger" onclick="authLogout()">Çıkış yap</button></div>`;
+ const isLocal=authState.provider==="password"||authState.provider==="google"||authState.provider==="apple";
+ box.innerHTML=`<div class="source-fact"><b>${esc(authState.name||"Kullanıcı")}</b>${authState.email?" · "+esc(authState.email):""}<br><small>${prov} hesabı · ${esc(authState.createdAt||"")}</small></div><div class="toolbar"><button type="button" class="btn small" onclick="offerBiometricSetup()">${authState.quickLock?"🔐 Hızlı giriş AÇIK":"Biyometrik hızlı girişi aç"}</button><button type="button" class="btn small danger" onclick="authLogout()">Çıkış yap</button></div>${isLocal?`<div class="profile-pw-change"><b style="font-size:11px;color:#D9A96A;letter-spacing:.5px">ŞİFRE DEĞİŞTİR</b><input id="pwCurrent" type="password" placeholder="Mevcut şifre" autocomplete="current-password"><input id="pwNew" type="password" placeholder="Yeni şifre (min 6 karakter)" autocomplete="new-password"><input id="pwNew2" type="password" placeholder="Yeni şifre (tekrar)" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();changePassword();}"><button type="button" class="btn small primary" onclick="changePassword()">Şifreyi Güncelle</button><div id="pwChangeError" class="auth-error" hidden></div></div>`:''}`;
 }
 /* misafir koruması: yazma fonksiyonlarını sarmala (davranış: kibar engel; mimari değişmedi) */
 (function guardGuest(){
