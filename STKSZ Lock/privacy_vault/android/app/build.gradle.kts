@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -12,10 +14,18 @@ plugins {
 // sahte production key ÜRETİLMEZ). key.properties .gitignore ile korunur; alanlar:
 //   storeFile=release-key.jks  (key.properties ile AYNI dizin: android/)
 //   storePassword=...  keyPassword=...  keyAlias=...
-val keystoreProperties = java.util.Properties()
+// KGP 2.4 / AGP 9 script derlemesinde govdede "java.util." cozumlenmedigi icin
+// ustte acik import kullanildi; use{}/?.let{} lambda'ları da tip cikarimi hatasi
+// verdiginden lambdasiz try-finally + acik null kontrolu tercih edildi.
+val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.isFile) {
-    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+    val stream = keystorePropertiesFile.inputStream()
+    try {
+        keystoreProperties.load(stream)
+    } finally {
+        stream.close()
+    }
 }
 
 android {
@@ -47,8 +57,10 @@ android {
         // Yalnızca key.properties gerçekten varsa doldurulur (yukarıdaki blok).
         create("release") {
             if (keystorePropertiesFile.isFile) {
-                storeFile = keystoreProperties.getProperty("storeFile")
-                    ?.let { keystorePropertiesFile.parentFile.resolve(it) }
+                val storeRel: String? = keystoreProperties.getProperty("storeFile")
+                if (storeRel != null) {
+                    storeFile = keystorePropertiesFile.parentFile.resolve(storeRel)
+                }
                 storePassword = keystoreProperties.getProperty("storePassword")
                 keyAlias = keystoreProperties.getProperty("keyAlias")
                 keyPassword = keystoreProperties.getProperty("keyPassword")
