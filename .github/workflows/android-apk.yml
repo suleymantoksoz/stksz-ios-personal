@@ -51,12 +51,12 @@ jobs:
           cache: npm
           cache-dependency-path: "STKSZ Capital/package-lock.json"
 
-      # ── 4) Java 21 Temurin ──
-      - name: Setup Java 21 (Temurin)
+      # ── 4) Java 17 Temurin ──
+      - name: Setup Java 17 (Temurin)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
 
       # ── 5) Android SDK ──
       - name: Setup Android SDK
@@ -83,7 +83,12 @@ jobs:
           chmod +x "$SRC/gradlew" 2>/dev/null || true
           ls -la "$SRC/android/gradlew"
 
-      # ── 10) Gradle build ──
+      # ── 10) Gradle clean ──
+      - name: Gradle clean
+        working-directory: STKSZ Capital/android
+        run: ./gradlew clean --no-daemon
+
+      # ── 11) Gradle build ──
       - name: Build debug APK
         id: gradle-build
         working-directory: STKSZ Capital/android
