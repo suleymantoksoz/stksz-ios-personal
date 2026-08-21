@@ -1,0 +1,126 @@
+name: Build STKSZ Lock Android (APK)
+
+# STKSZ LOCK — İZOLE WORKFLOW (ANDROID)
+# Yalnızca 'STKSZ Lock/**' değişikliklerinde veya manuel tetiklemede çalışır.
+# STKSZ Capital'in workflow'larıyla HİÇBİR bağı yoktur; o dosyalara dokunulmaz.
+#
+# NOT: Bu proje FLUTTER projesidir — Capacitor/Ionic komutları KULLANILMAZ.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "STKSZ Lock/**"
+      - ".github/workflows/stksz-lock-android.yml"
+
+jobs:
+  build-android-apk:
+    name: STKSZ Lock APK (debug + release)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      # ── 1) Checkout ──
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── 2) Proje yapisi kontrol (Flutter bekleniyor — Capacitor DEGIL) ──
+      - name: Verify project structure
+        run: |
+          if [ ! -d "STKSZ Lock/privacy_vault" ]; then
+            echo "::error::'STKSZ Lock/privacy_vault' bulunamadi!"
+            exit 1
+          fi
+          cd "STKSZ Lock/privacy_vault"
+          for f in pubspec.yaml lib/main.dart android/app/build.gradle.kts android/build.gradle.kts; do
+            if [ ! -e "$f" ]; then
+              echo "::error::Eksik dosya: $f"
+              exit 1
+            fi
+          done
+          echo "Flutter proje yapisi OK."
+
+      # ── 3) Java 17 (Android Gradle) ──
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # ── 4) Flutter kurulumu ──
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      # ── 5) Bağımlılıklar + analiz + testler ──
+      - name: Flutter pub get
+        working-directory: STKSZ Lock/privacy_vault
+        run: flutter pub get
+
+      - name: Flutter analyze
+        working-directory: STKSZ Lock/privacy_vault
+        run: flutter analyze --no-fatal-infos
+
+      - name: Flutter test
+        working-directory: STKSZ Lock/privacy_vault
+        run: flutter test
+
+      # ── 6) Release signing (opsiyonel — GitHub Secrets) ──
+      # Gerçek keystore ASLA repoya girmez (.gitignore). Secrets yoksa release
+      # APK debug anahtarıyla imzalanır (kurulabilir; mağaza için değildir).
+      - name: Prepare release keystore (if secrets exist)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        if: ${{ env.KEYSTORE_B64 != '' }}
+        working-directory: STKSZ Lock/privacy_vault
+        run: |
+          echo "$KEYSTORE_B64" | base64 --decode > android/release-key.jks
+          cat > android/key.properties <<EOF
+          storeFile=release-key.jks
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          EOF
+          chmod 600 android/key.properties android/release-key.jks
+
+      # ── 7) APK derlemeleri ──
+      - name: Build debug APK
+        working-directory: STKSZ Lock/privacy_vault
+        run: flutter build apk --debug
+
+      - name: Build release APK
+        working-directory: STKSZ Lock/privacy_vault
+        run: flutter build apk --release
+
+      # ── 8) Artifact yukle ──
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: STKSZ-Lock-Android-Debug-APK
+          path: "STKSZ Lock/privacy_vault/build/app/outputs/flutter-apk/app-debug.apk"
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: STKSZ-Lock-Android-Release-APK
+          path: "STKSZ Lock/privacy_vault/build/app/outputs/flutter-apk/app-release.apk"
+          if-no-files-found: error
+          retention-days: 14
+
+      # ── 9) Kullanim notu ──
+      - name: Usage note
+        run: |
+          echo "==============================================="
+          echo "  STKSZ Lock Android APK hazir!"
+          echo "==============================================="
+          echo ""
+          echo "  Indirme: Actions -> Bu run -> Artifacts"
+          echo "  - STKSZ-Lock-Android-Debug-APK"
+          echo "  - STKSZ-Lock-Android-Release-APK"
+          echo "==============================================="

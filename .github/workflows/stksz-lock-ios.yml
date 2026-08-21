@@ -1,0 +1,147 @@
+name: Build STKSZ Lock iOS (Unsigned)
+
+# STKSZ LOCK — İZOLE WORKFLOW
+# Bu workflow YALNIZCA 'STKSZ Lock/**' altındaki değişikliklerde veya manuel
+# tetiklemede çalışır. STKSZ Capital'in workflow'larıyla (ios-build.yml,
+# android-apk.yml, ios-unsigned.yml, deploy-pages.yml) HİÇBİR bağı yoktur;
+# o dosyalara dokunulmaz.
+#
+# NOT: Bu proje FLUTTER projesidir — Capacitor/Ionic komutları KULLANILMAZ.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "STKSZ Lock/**"
+      - ".github/workflows/stksz-lock-ios.yml"
+
+jobs:
+  build-ios-unsigned:
+    name: STKSZ Lock unsigned IPA (Flutter)
+    runs-on: macos-14
+    timeout-minutes: 45
+
+    env:
+      PROJECT_DIR: STKSZ Lock/privacy_vault
+      BUILD_DIR: ${{ github.workspace }}/lock-build-output
+
+    steps:
+      # ── 1) Checkout ──
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── 2) Proje yapisi kontrol (Flutter bekleniyor — Capacitor DEGIL) ──
+      - name: Verify project structure
+        run: |
+          echo "=== Repo root ==="
+          ls -la
+          echo ""
+          echo "=== STKSZ Lock ==="
+          ls -la "STKSZ Lock/"
+          echo ""
+          if [ ! -d "$PROJECT_DIR" ]; then
+            echo "::error::'$PROJECT_DIR' klasoru bulunamadi!"
+            exit 1
+          fi
+          cd "$PROJECT_DIR"
+          for f in pubspec.yaml lib/main.dart ios/Runner.xcworkspace/contents.xcworkspacedata ios/Runner.xcodeproj/project.pbxproj ios/Podfile; do
+            if [ ! -e "$f" ]; then
+              echo "::error::Eksik dosya: $f"
+              exit 1
+            fi
+          done
+          echo "Flutter proje yapisi OK."
+
+      # ── 3) Flutter kurulumu (CI'daki sürümle birebir) ──
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      # ── 4) Bağımlılıklar ──
+      - name: Flutter pub get
+        working-directory: STKSZ Lock/privacy_vault
+        run: flutter pub get
+
+      # ── 5) Statik analiz + testler (0 hata şartı) ──
+      - name: Flutter analyze
+        working-directory: STKSZ Lock/privacy_vault
+        run: flutter analyze --no-fatal-infos
+
+      - name: Flutter test
+        working-directory: STKSZ Lock/privacy_vault
+        run: flutter test
+
+      # ── 6) CocoaPods: temiz kurulum (Flutter projesi — npx cap YOK) ──
+      - name: Clean & install CocoaPods
+        working-directory: STKSZ Lock/privacy_vault/ios
+        run: |
+          pod cache clean --all || true
+          rm -rf Pods Podfile.lock
+          pod install --repo-update
+
+      # ── 7) İmzasız iOS derlemesi (xcodebuild arka uçlu) ──
+      - name: Build unsigned iOS app
+        working-directory: STKSZ Lock/privacy_vault
+        env:
+          CODE_SIGNING_ALLOWED: "NO"
+          CODE_SIGNING_REQUIRED: "NO"
+        run: |
+          flutter build ios --release --no-codesign \
+            --build-name="1.0.$GITHUB_RUN_NUMBER"
+
+      # ── 8) Runner.app -> imzasız .ipa paketle ──
+      - name: Package unsigned IPA
+        run: |
+          APP_DIR="$PROJECT_DIR/build/ios/iphoneos/Runner.app"
+          if [ ! -d "$APP_DIR" ]; then
+            echo "::error::Runner.app bulunamadi! Mevcut icerik:"
+            ls -la "$PROJECT_DIR/build/ios/iphoneos/" || true
+            exit 1
+          fi
+
+          mkdir -p "$BUILD_DIR"
+          cd "$BUILD_DIR"
+          rm -rf Payload STKSZ-Lock-iOS-Unsigned.ipa
+          mkdir Payload
+          cp -R "$APP_DIR" Payload/Runner.app
+          xattr -cr Payload || true
+          find Payload -name ".DS_Store" -delete || true
+
+          echo "=== Info.plist kontrol ==="
+          plutil -lint Payload/Runner.app/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" Payload/Runner.app/Info.plist 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Print MinimumOSVersion" Payload/Runner.app/Info.plist 2>/dev/null || true
+
+          echo ""
+          echo "=== IPA olusturuluyor (imzasiz) ==="
+          zip -r -X STKSZ-Lock-iOS-Unsigned.ipa Payload
+          unzip -t STKSZ-Lock-iOS-Unsigned.ipa > /dev/null && echo "ZIP dogrulama: OK"
+          ls -lh STKSZ-Lock-iOS-Unsigned.ipa
+
+      # ── 9) Artifact yukle ──
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: STKSZ-Lock-iOS-Unsigned
+          path: lock-build-output/STKSZ-Lock-iOS-Unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      # ── 10) Kullanim notu ──
+      - name: Usage note
+        run: |
+          echo "==============================================="
+          echo "  STKSZ Lock Unsigned IPA hazir!"
+          echo "==============================================="
+          echo ""
+          echo "  Indirme: Actions -> Bu run -> Artifacts"
+          echo "  Artifact adi: STKSZ-Lock-iOS-Unsigned"
+          echo ""
+          echo "  ONEMLI: Indirdigin .zip dosyasini once acin,"
+          echo "  icinden cikan STKSZ-Lock-iOS-Unsigned.ipa"
+          echo "  dosyasini AltStore/Sideloadly ile kurun."
+          echo "==============================================="
