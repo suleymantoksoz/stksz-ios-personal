@@ -429,15 +429,16 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSettingsHub')"><span><b>AYARLAR</b><small>Görünüm, hava, güvenlik ve bildirim</small></span><i>→</i></button></div>
       <div class="menu-nav-card ai-nav-card"><button type="button" class="menu-nav-trigger" onclick="openStkszAi()"><span><b>🤖 STKSZ AI</b><small>Portföy yorumu, haber özeti ve soru-cevap</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar, veri kaynakları ve bağlantı testleri</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="closeUnifiedMenu();showPage('status')"><span><b>PİYASA DURUMU</b><small>BIST özeti, STKSZ CORE · SCORE ve risk (Durum sayfası)</small></span><i>→</i></button></div>
+
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuVirtualWallet')"><span><b>🧪 SANAL CÜZDAN</b><small>Simülasyon · gerçek para değildir</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuDataManagement')"><span><b>VERİ YÖNETİMİ</b><small>Yedek, geri yükleme ve CSV</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAbout')"><span><b>HAKKINDA</b><small>STKSZ veri ve güvenlik ilkeleri</small></span><i>→</i></button></div>
+      <div class="menu-nav-card menu-logout-card"><button type="button" class="menu-nav-trigger" onclick="authLogout()"><span><b>🚪 ÇIKIŞ YAP</b><small>Oturumu kapat ve çıkış ekranına dön</small></span><i>→</i></button></div>
     </div>
   </div>
 
   <section class="menu-view menu-subpage" id="menuProfile" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>PROFİL</h2></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>PROFİL</h2></div>
     <div id="profileAuthBox" class="menu-form-card"></div><button type="button" class="btn primary btn-save-action" onclick="saveProfileAndClose()">KAYDET</button></div>
     <div class="menu-form-card profile-page-card">
       <div class="profile-photo-zone"><button type="button" class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePhotoInput').click()" aria-label="Profil fotoğrafı seç"><span>＋</span></button><button type="button" class="btn small" onclick="document.getElementById('profilePhotoInput').click()">PROFİL FOTOĞRAFI YÜKLE</button><input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden onchange="handleProfilePhoto(this.files[0])"></div>
@@ -466,27 +467,27 @@
   </section>
 
   <section class="menu-view menu-subpage" id="menuTheme" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>TEMA</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>TEMA</h2></div><span></span></div>
     <div class="menu-form-card theme-panel-card"><div class="theme-switch-row"><div><b>Koyu / Açık Tema</b><small id="themeToggleLabel">Koyu tema</small></div><label class="theme-switch"><input id="themeToggle" type="checkbox" onchange="toggleThemeSwitch(this.checked)" aria-label="Açık temayı etkinleştir"><span class="theme-slider"></span></label></div><p class="help">Switch kapalıyken koyu, açıkken açık tema uygulamanın bütün sayfalarına uygulanır ve yerel olarak saklanır.</p></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuActivityPanel" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>İŞLEM GEÇMİŞİ</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>İŞLEM GEÇMİŞİ</h2></div><span></span></div>
     <div class="menu-form-card"><div id="menuActivity" class="menu-activity"></div></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuGoals" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>HEDEFLERİM</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveGoalsAndClose()">KAYDET</button></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>HEDEFLERİM</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveGoalsAndClose()">KAYDET</button></div>
     <div class="menu-form-card"><div class="field"><label for="menuGoal">Yerel hedef notu</label><textarea id="menuGoal" class="menu-notes" placeholder="Hedeflerinizi yazın"></textarea></div></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuTools" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>ARAÇLAR VE NOTLAR</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveToolsAndClose()">KAYDET</button></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>ARAÇLAR VE NOTLAR</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveToolsAndClose()">KAYDET</button></div>
     <div class="menu-form-card"><div class="menu-list"><button type="button" class="menu-action" onclick="showPage('opportunities')"><span>Halka Arz Takvimi</span><span>→</span></button><button type="button" class="menu-action" onclick="openNewTransaction()"><span>Yeni İşlem Ekle</span><span>＋</span></button><button type="button" class="menu-action" onclick="openCashEditor()"><span>Nakit Güncelle</span><span>₺</span></button><label class="help" for="menuNotes">Notlarım</label><textarea id="menuNotes" class="menu-notes" placeholder="Yalnızca bu tarayıcıda saklanır"></textarea></div></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuSettingsHub" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>AYARLAR</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>AYARLAR</h2></div><span></span></div>
     <div class="menu-card-grid sub-menu-grid">
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAppearance')"><span><b>GÖRÜNÜM</b><small>Kompakt kart aralıkları</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuWeather')"><span><b>HAVA DURUMU</b><small>Konum ve güncelleme</small></span><i>→</i></button></div>
@@ -497,7 +498,7 @@
   </section>
 
   <section class="menu-view menu-subpage" id="menuApiKeys" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>API YÖNETİMİ</h2></div><button type="button" class="btn primary btn-save-action" data-admin-only onclick="saveApiKeys()">KAYDET</button></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>API YÖNETİMİ</h2></div><button type="button" class="btn primary btn-save-action" data-admin-only onclick="saveApiKeys()">KAYDET</button></div>
     <!-- v118 (1. ADIM): normal kullanıcı API yönetimini GÖREMEZ — yalnız bağlantı durumu.
          Asıl yetki backend'dedir (admin uçları x-stksz-admin-token ister); buradaki gizleme kullanıcı deneyimidir. -->
     <div class="menu-form-card" data-non-admin-note>
@@ -589,11 +590,11 @@
       </div>
 
       <div class="api-key-block" data-api-card="stksz_ai">
-        <div class="api-key-head"><b>🤖 STKSZ AI</b><small>Yapay zekâ yorum motoru</small><span class="api-key-state" id="apiKeyStateAi">KAYITLI DEĞİL</span></div>
-        <div class="field"><label for="aiBackendUrlInput">🔐 AI Backend URL · ÖNERİLEN (anahtar cihazda tutulmaz)</label><input id="aiBackendUrlInput" type="url" autocomplete="off" spellcheck="false" placeholder="https://stksz-ai.onrender.com" onchange="saveAiBackendUrl(this.value)"></div><p class="help">Backend girilirse STKSZ AI anahtarı YALNIZCA sunucuda (environment secret) durur; uygulamada, APK/IPA içinde, git'te ve loglarda BULUNMAZ. Kurulum: repo'daki <b>server/stksz-ai-server.js</b> dosyasını Render/Railway'e ücretsiz yükle, sunucu secret'ını panelden gir. Aşağıdaki anahtar alanı yalnız backend kurulamayan durumlar için yedektir.</p><div class="field"><label for="aiEngineSelect">Motor</label><select id="aiEngineSelect" onchange="saveAiEngine(this.value)"><option value="gemini">STKSZ AI · önerilen</option><option value="openai">STKSZ AI · yedek</option></select></div>
+        <div class="api-key-head"><b>🔑 Gemini API Key</b><small>Yapay zekâ yorum motoru</small><span class="api-key-state" id="apiKeyStateAi">KAYITLI DEĞİL</span></div>
+        <div class="field"><label for="aiBackendUrlInput">🔐 AI Backend URL · ÖNERİLEN (anahtar cihazda tutulmaz)</label><input id="aiBackendUrlInput" type="url" autocomplete="off" spellcheck="false" placeholder="https://stksz-ai.onrender.com" onchange="saveAiBackendUrl(this.value)"></div><p class="help">Backend girilirse STKSZ AI anahtarı YALNIZCA sunucuda (environment secret) durur; uygulamada, APK/IPA içinde, git'te ve loglarda BULUNMAZ. Kurulum: repo'daki <b>server/stksz-ai-server.js</b> dosyasını Render/Railway'e ücretsiz yükle, sunucu secret'ını panelden gir. Aşağıdaki anahtar alanı yalnız backend kurulamayan durumlar için yedektir.</p><div class="field"><label for="aiEngineSelect">Motor</label><select id="aiEngineSelect" onchange="saveAiEngine(this.value)"><option value="gemini">Gemini · önerilen</option><option value="openai">OpenAI · yedek</option></select></div>
         <div class="field api-key-field">
           <div class="api-key-input-row">
-            <input id="apiKeyAiInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AI API anahtarını buraya yapıştır">
+            <input id="apiKeyAiInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Gemini API anahtarını buraya yapıştır">
             <button type="button" class="icon-btn api-key-eye" onclick="toggleApiKeyVisibility('apiKeyAiInput',this)" aria-label="Anahtarı göster/gizle">👁</button>
           </div>
         </div>
@@ -648,24 +649,24 @@
   </section>
 
   <section class="menu-view menu-subpage" id="menuAppearance" data-menu-parent="menuSettingsHub" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>AYARLAR</small><h2>GÖRÜNÜM</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveAppearanceAndClose()">KAYDET</button></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>AYARLAR</small><h2>GÖRÜNÜM</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveAppearanceAndClose()">KAYDET</button></div>
     <div class="menu-form-card"><label class="check-row"><input id="compactMode" type="checkbox"> Daha sıkı kart aralıkları kullan.</label></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuWeather" data-menu-parent="menuSettingsHub" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>AYARLAR</small><h2>HAVA DURUMU</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>AYARLAR</small><h2>HAVA DURUMU</h2></div><span></span></div>
     <div class="menu-form-card"><div class="field"><label for="weatherLocationInput">Konum</label><input id="weatherLocationInput" placeholder="Konum ara: Karaman"></div><div class="toolbar"><button type="button" class="btn small" onclick="searchWeatherLocation()">Konumu Değiştir</button><button type="button" class="btn small" onclick="useDeviceWeatherLocation()">Cihaz Konumu</button><button type="button" class="btn small" onclick="fetchWeather(true)">Havayı Güncelle</button></div><div id="weatherSettingsStatus" class="source-fact">Hava durumu: VERİ YOK</div><div class="toolbar"><button type="button" class="btn primary" onclick="testProviderConnection('weather')">Open-Meteo Bağlantısını Test Et</button></div><div id="weatherProviderTestStatus" class="provider-test-state">Test edilmedi.</div></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuSecurity" data-menu-parent="menuSettingsHub" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>AYARLAR</small><h2>GÜVENLİK / BİYOMETRİK</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>AYARLAR</small><h2>GÜVENLİK / BİYOMETRİK</h2></div><span></span></div>
     <div class="menu-form-card"><div id="menuSecurityState" class="source-fact">Cihaz biyometrik doğrulama desteği kontrol ediliyor.</div><p class="help">ENR hassas verileri yalnızca desteklenen güvenli bağlamda cihaz biyometrik doğrulamasıyla gösterilir. PIN fallback kullanılmaz.</p><button type="button" class="btn small" onclick="refreshMenuSecurityState()">Güvenlik Durumunu Kontrol Et</button></div>
   </section>
 
 
 
   <section class="menu-view menu-subpage" id="menuNotifications" data-menu-parent="menuSettingsHub" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>AYARLAR</small><h2>BİLDİRİMLER</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveNotificationsAndClose()">KAYDET</button></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>AYARLAR</small><h2>BİLDİRİMLER</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveNotificationsAndClose()">KAYDET</button></div>
     <div class="menu-form-card" id="notificationSettings"><div class="notification-grid"><div class="notification-row"><span>Tarayıcı / Mobil Bildirim</span><div><button type="button" class="btn small" onclick="requestBrowserNotifications()">İzin / Test</button><div class="notification-state" id="browserNotificationState">Kontrol ediliyor</div></div></div><label class="check-row"><input id="notifyPrice" type="checkbox"> Fiyat Alarmı</label><label class="check-row"><input id="notifyKap" type="checkbox"> KAP Haberleri</label><label class="check-row"><input id="notifyIpo" type="checkbox"> Halka Arz</label><label class="check-row"><input id="notifyDaily" type="checkbox"> Günlük Özet</label></div></div>
 
     <div class="menu-form-card api-key-block" id="telegramSettings">
@@ -691,30 +692,30 @@
   </section>
 
   <section class="menu-view menu-subpage" id="menuMarketData" data-menu-parent="menuApiKeys" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>API YÖNETİMİ</small><h2>PİYASA VERİLERİ</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveMarketDataAndClose()">KAYDET</button></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>API YÖNETİMİ</small><h2>PİYASA VERİLERİ</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveMarketDataAndClose()">KAYDET</button></div>
     <div class="menu-form-card"><div class="field"><label for="providerSelect">Market provider tercihi</label><select id="providerSelect"><option value="bist_market_chain">Otomatik · en iyi kaynak</option><option value="twelve_data">Twelve Data</option><option value="yahoo_bist_eod">Yahoo Finance · gün sonu</option><option value="local">Yalnızca yerel kayıt</option></select></div><div class="source-fact"><b>API anahtarı:</b> Menü → API Yönetimi bölümünden bir kez girilir, bu cihazda kalıcı saklanır.</div><div class="toolbar"><button type="button" class="btn small" onclick="openMenuPanel('menuApiKeys')">API YÖNETİMİNİ AÇ</button></div><label class="check-row"><input id="autoUpdate" type="checkbox"> Uygun olduğunda fiyatları otomatik güncelle.</label><div class="provider-facts"><div>Borsa: <b>Borsa İstanbul</b></div><div>Güncellik: <b id="marketFreshnessState">Gün sonu</b></div></div><div class="toolbar"><button type="button" class="btn primary" onclick="testProviderConnection('market')">Bağlantıyı Test Et</button><button type="button" class="btn" data-refresh-market onclick="refreshMarket(true)">Fiyatları Yenile</button></div><div id="marketProviderTestStatus" class="provider-test-state">Bağlantı test edilmedi.</div><p class="help">Gün sonu verisi hiçbir zaman canlı veri olarak etiketlenmez.</p></div>
   </section>
   <section class="menu-view menu-subpage" id="menuNewsSources" data-menu-parent="menuApiKeys" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>API YÖNETİMİ</small><h2>HABER KAYNAKLARI</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveNewsSourceAndClose()">KAYDET</button></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>API YÖNETİMİ</small><h2>HABER KAYNAKLARI</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveNewsSourceAndClose()">KAYDET</button></div>
     <div class="menu-form-card"><div class="field"><label>MARKETAUX_API_KEY · Sunucu secret</label><div class="secret-state-row"><input id="marketauxKeyState" type="password" readonly placeholder="API BAĞLI DEĞİL"><button type="button" class="btn small" onclick="toggleProviderSecretState('news')">Göster/Gizle</button></div></div><div class="provider-facts"><div>Provider: <b>Marketaux</b></div><div>Secret konumu: <b>MARKETAUX_API_KEY</b></div></div><div class="toolbar"><button type="button" class="btn primary" onclick="testProviderConnection('news')">Bağlantıyı Test Et</button></div><div id="newsProviderTestStatus" class="provider-test-state">API anahtarı bekleniyor.</div><p class="help">Anahtar frontend'e veya HTML kaynağına yazılmaz. Provider bağlı değilse sahte haber üretilmez; yalnızca doğrulanmış kaynak dizini kullanılır.</p></div>
   </section>
   <section class="menu-view menu-subpage" id="menuSourceAccuracy" data-menu-parent="menuApiKeys" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>API YÖNETİMİ</small><h2>KAYNAK DOĞRULUĞU</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>API YÖNETİMİ</small><h2>KAYNAK DOĞRULUĞU</h2></div><span></span></div>
     <div class="menu-form-card"><div class="source-fact"><b>Son başarılı piyasa verisi:</b> <span id="settingsLastSuccess">Henüz yok</span></div><div class="source-fact"><b>Aktif piyasa kaynağı:</b> <span id="settingsMarketSource">API bağlı değil</span></div><div class="source-fact" id="storageState">localStorage kontrol ediliyor.</div><div class="provider-status-grid"><div><span>Piyasa zinciri</span><b id="providerStatusMarket">HENÜZ BAĞLANMADI</b></div><div><span>BIST / Twelve Data</span><b id="providerStatusBist">KISITLI</b></div><div><span>Fallback</span><b id="providerStatusFallback">TEST EDİLMEDİ</b></div><div><span>Haber</span><b id="providerStatusNews">API bağlı değil</b></div><div><span>Hava</span><b id="providerStatusWeather">Open-Meteo</b></div><div><span>Döviz / Altın</span><b id="providerStatusFx">API bağlı değil</b></div></div><div class="source-fact"><b>Fiyat verisi:</b> Güncellik durumu (gün sonu / gecikmeli / canlı) her zaman açıkça etiketlenir.</div><div class="source-fact"><b>Haberler:</b> Yalnızca gerçek yayıncı bağlantıları gösterilir; sahte haber üretilmez.</div><div class="toolbar"><a class="btn btn-link" href="https://www.kap.org.tr/tr/" target="_blank" rel="noopener noreferrer">KAP.org.tr →</a></div></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuOcrSettings" data-menu-parent="menuApiKeys" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>API YÖNETİMİ</small><h2>GÖRSEL / OCR</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>API YÖNETİMİ</small><h2>GÖRSEL / OCR</h2></div><span></span></div>
     <div class="menu-form-card"><p class="help">JPG/PNG görseli, Portföy sayfasındaki kaynak tespiti ve kullanıcı onayı olmadan hiçbir kaydı değiştirmez.</p><button type="button" class="btn blue" onclick="openDataUpload()">GÖRSEL YÜKLE / GÜNCELLE</button></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuFxData" data-menu-parent="menuApiKeys" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>API YÖNETİMİ</small><h2>DÖVİZ / ALTIN</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>API YÖNETİMİ</small><h2>DÖVİZ / ALTIN</h2></div><span></span></div>
     <div class="menu-form-card"><div class="provider-facts"><div>USD/TRY: <b id="fxUsdTry">VERİ YOK</b></div><div>EUR/TRY: <b id="fxEurTry">VERİ YOK</b></div><div>Ons Altın (USD): <b id="fxOnsUsd">VERİ YOK</b></div><div>Gram Altın (TL): <b id="fxGramTry">VERİ YOK</b></div></div><p class="help">Kaynak: open.er-api.com (günlük referans kuru) + gold-api.com (canlıya yakın ons). Ücretsizdir, anahtar gerektirmez. Gram altın hesaplanan değerdir; kuyumcu fiyatlarından sapabilir.</p><div class="toolbar"><button type="button" class="btn primary" onclick="refreshFxPanel()">Verileri Güncelle</button></div><div id="fxProviderTestStatus" class="provider-test-state">Panel açıldığında otomatik güncellenir.</div></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuVirtualWallet" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>🧪 SANAL CÜZDAN</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>🧪 SANAL CÜZDAN</h2></div><span></span></div>
     <div class="account-switch" role="tablist" aria-label="Hesap tipi">
       <button type="button" class="account-tab active" id="accTabVirtual" role="tab" aria-selected="true" onclick="setAccountView('virtual')">🧪 SANAL CÜZDAN<small>Simülasyon · MockBrokerAdapter</small></button>
       <button type="button" class="account-tab" id="accTabReal" role="tab" aria-selected="false" onclick="setAccountView('real')">🏦 GERÇEK HESAP<small id="accRealState">BAĞLI DEĞİL</small></button>
@@ -812,7 +813,7 @@
   </section>
 
   <section class="menu-view menu-subpage" id="menuAbout" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>HAKKINDA</h2></div><span></span></div>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>HAKKINDA</h2></div><span></span></div>
     <div class="menu-form-card"><h3>STKSZ Komuta Merkezi</h3><p class="help">Öncelik sırası: veri doğruluğu, kullanıcı onayı, risk kontrolü ve analiz. Veri yoksa veri üretilmez. ENR verileri Midas toplamı, skor, risk ve raporlardan ayrı tutulur.</p><div class="source-fact">Sürüm: <span id="menuBuildInfo">v1</span> <small id="menuBuildDetail" style="opacity:.45"></small></div><div class="toolbar"><a class="btn btn-link" href="legal/privacy.html">Gizlilik Politikası</a><a class="btn btn-link" href="legal/support.html">Destek</a></div></div>
   </section>
 </section>
