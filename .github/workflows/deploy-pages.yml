@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["www/**"]
+    paths: ["STKSZ Capital/www/**"]
 
 permissions:
   contents: read
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Publish www/ to GitHub Pages
+    name: Publish STKSZ Capital/www/ to GitHub Pages
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -29,10 +29,10 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload www/ as Pages artifact
+      - name: Upload STKSZ Capital/www/ as Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: www
+          path: STKSZ Capital/www
 
       - name: Deploy to GitHub Pages
         id: deployment

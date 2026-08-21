@@ -4,13 +4,16 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["www/**", "android/**", "package.json", "capacitor.config.json", ".github/workflows/android-apk.yml"]
+    paths: ["STKSZ Capital/www/**", "STKSZ Capital/android/**", "STKSZ Capital/package.json", "STKSZ Capital/capacitor.config.json", ".github/workflows/android-apk.yml"]
 
 jobs:
   build-android:
     name: Build STKSZ debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: STKSZ Capital
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,9 +22,9 @@ jobs:
         run: |
           eksik=0
           for f in package.json package-lock.json capacitor.config.json www/index.html android/gradlew android/app/build.gradle; do
-            if [ ! -e "$f" ]; then echo "::error::EKSIK DOSYA: $f — stksz-github-repo.zip icerigini repo KOKUNE cikardigindan emin ol."; eksik=1; fi
+            if [ ! -e "$f" ]; then echo "::error::EKSIK DOSYA: $f — STKSZ Capital iceriginde olmali."; eksik=1; fi
           done
-          if [ $eksik -eq 1 ]; then echo "Repo kok dizini:"; ls -la; exit 1; fi
+          if [ $eksik -eq 1 ]; then echo "STKSZ Capital dizini icerigi:"; ls -la; exit 1; fi
           echo "Tum on kosullar tamam."
 
       - name: Setup Node.js 22
@@ -29,6 +32,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: "STKSZ Capital/package-lock.json"
 
       - name: Setup Java 17 (Temurin)
         uses: actions/setup-java@v4
@@ -46,7 +50,7 @@ jobs:
         run: npx cap sync android
 
       - name: Build debug APK
-        working-directory: android
+        working-directory: STKSZ Capital/android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
@@ -55,6 +59,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: STKSZ Capital/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14

@@ -4,13 +4,16 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["www/**", "ios/**", "package.json", "capacitor.config.json", ".github/workflows/ios-unsigned.yml"]
+    paths: ["STKSZ Capital/www/**", "STKSZ Capital/ios/**", "STKSZ Capital/package.json", "STKSZ Capital/capacitor.config.json", ".github/workflows/ios-unsigned.yml"]
 
 jobs:
   build-ios:
     name: Build STKSZ unsigned IPA
     runs-on: macos-latest
     timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: STKSZ Capital
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,10 +22,10 @@ jobs:
         run: |
           eksik=0
           for f in package.json package-lock.json capacitor.config.json www/index.html ios/App/Podfile ios/App/App.xcworkspace/contents.xcworkspacedata; do
-            if [ ! -e "$f" ]; then echo "::error::EKSIK DOSYA: $f — stksz-github-repo.zip icerigini repo KOKUNE cikardigindan emin ol."; eksik=1; fi
+            if [ ! -e "$f" ]; then echo "::error::EKSIK DOSYA: $f — STKSZ Capital iceriginde olmali."; eksik=1; fi
           done
           if [ $eksik -eq 1 ]; then
-            echo "Repo kok dizini icerigi:"; ls -la
+            echo "STKSZ Capital dizini icerigi:"; ls -la
             exit 1
           fi
           echo "Tum on kosullar tamam."
@@ -32,6 +35,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: "STKSZ Capital/package-lock.json"
 
       - name: Install dependencies
         run: npm ci || npm install --no-fund --no-audit
@@ -40,11 +44,11 @@ jobs:
         run: npx cap sync ios
 
       - name: CocoaPods install
-        working-directory: ios/App
+        working-directory: STKSZ Capital/ios/App
         run: pod install
 
       - name: Build unsigned archive with xcodebuild
-        working-directory: ios/App
+        working-directory: STKSZ Capital/ios/App
         run: |
           xcodebuild archive \
             -workspace App.xcworkspace \
@@ -58,28 +62,15 @@ jobs:
             DEVELOPMENT_TEAM=""
 
       - name: Package .app into STKSZ.ipa (standart iOS dizilimi)
-        working-directory: ios/App/build
+        working-directory: STKSZ Capital/ios/App/build
         run: |
-          # Temiz baslangic
           rm -rf Payload STKSZ.ipa
-
-          # 1) Payload klasoru olustur
           mkdir Payload
-
-          # 2) .app derleme ciktisini Payload/App.app altina kopyala
           cp -R App.xcarchive/Products/Applications/App.app Payload/App.app
-
-          # macOS artiklarini temizle (zip icine sizmasin)
           xattr -cr Payload || true
           find Payload -name ".DS_Store" -delete || true
-
-          # Info.plist gecerli mi? (yalnizca dogrulama - format degistirilmez)
           plutil -lint Payload/App.app/Info.plist
-
-          # 3) Kok dizinden standart paketleme: zip -r STKSZ.ipa Payload
           zip -r -X STKSZ.ipa Payload
-
-          # Dogrulama: IPA kokunde Payload/App.app olmali
           unzip -t STKSZ.ipa > /dev/null && echo "ZIP butunlugu OK"
           unzip -l STKSZ.ipa | head -10
           ls -la STKSZ.ipa
@@ -98,6 +89,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-ipa
-          path: ios/App/build/STKSZ.ipa
+          path: STKSZ Capital/ios/App/build/STKSZ.ipa
           if-no-files-found: error
           retention-days: 14
