@@ -121,6 +121,15 @@ class FileVaultService extends StateNotifier<List<DecryptedVaultFile>> {
   // Yardımcılar: isim/MIME/tür
   // ---------------------------------------------------------------------
 
+  /// Hem '/' hem '\' ayracını anlayan platform-bağımsız basename.
+  /// Kaynak yollar karışık ayraçlı gelebilir (ör. Windows'ta '\dir/ad.jpg');
+  /// yalnızca [Platform.pathSeparator]'a bölmek son segmenti bozardı.
+  static String _baseName(String p) {
+    final norm = p.replaceAll('\\', '/');
+    final i = norm.lastIndexOf('/');
+    return i < 0 ? norm : norm.substring(i + 1);
+  }
+
   /// Gerçek ad asla dosya yolu olarak kullanılmaz; yine de metadata'yı temiz tutarız
   /// (path traversal, kontrol karakteri, aşırı uzunluk temizliği).
   static String sanitizeName(String raw) {
@@ -363,7 +372,7 @@ class FileVaultService extends StateNotifier<List<DecryptedVaultFile>> {
     final src = File(path);
     if (!await src.exists()) throw const VaultMalformed('kaynak dosya yok');
     final len = await src.length();
-    final base = name ?? path.split(Platform.pathSeparator).last;
+    final base = name ?? _baseName(path);
     final imported = await importStream(
       name: base,
       mime: mime,

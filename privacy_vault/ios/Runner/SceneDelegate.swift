@@ -34,8 +34,17 @@ class SceneDelegate: FlutterSceneDelegate {
         hideShield()
     }
 
+    private func mainWindow() -> UIWindow? {
+        if let w = window { return w }
+        // iOS 15+ : kullanımdan kalkan UIApplication.shared.windows yerine
+        // bağlı sahnelerdeki keyWindow aranır.
+        return UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+            .first
+    }
+
     private func showShield() {
-        guard privacyShield == nil, let window = window ?? UIApplication.shared.windows.first else { return }
+        guard privacyShield == nil, let window = mainWindow() else { return }
         let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
         blur.frame = window.bounds
         blur.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -63,7 +72,7 @@ class SceneDelegate: FlutterSceneDelegate {
 
     // ---------- native kanal ----------
     private func setupNativeChannel() {
-        guard let controller = window?.rootViewController as? FlutterViewController else { return }
+        guard let controller = mainWindow()?.rootViewController as? FlutterViewController else { return }
         let channel = FlutterMethodChannel(
             name: "privacy_vault/native",
             binaryMessenger: controller.binaryMessenger)

@@ -254,7 +254,8 @@ void main() {
       // testDir altında vault/ dışına hiçbir dosya yazılmamış olmalı
       await for (final ent in dir.list(recursive: true)) {
         if (ent is File) {
-          final rel = ent.path.substring(dir.path.length + 1);
+          // Windows'ta '\' döner; her iki ayraç da normalize edilir
+          final rel = ent.path.substring(dir.path.length + 1).replaceAll('\\', '/');
           expect(rel.startsWith('vault/'), isTrue,
               reason: 'vault dışına yazma: $rel');
           // kullanıcı adı SADECE şifreli metadata'da; dosya adı id tabanlı

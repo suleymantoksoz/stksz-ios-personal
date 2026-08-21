@@ -26,60 +26,74 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName).setMethodCallHandler { call, result ->
-            when (call.method) {
-                "getInstalledApps" -> result.success(installedApps())
-                "getAppIcon" -> {
-                    val pkg = call.argument<String>("package")
-                    result.success(if (pkg != null) appIcon(pkg) else null)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName).setMethodCallHandler { call, rawResult ->
+            // Çift yanıt koruması: success sonrası gelen bir hata ikinci reply
+            // denemesiyle IllegalStateException üretmesin.
+            val result = object : MethodChannel.Result {
+                private var done = false
+                override fun success(o: Any?) { if (!done) { done = true; rawResult.success(o) } }
+                override fun error(code: String, msg: String?, details: Any?) { if (!done) { done = true; rawResult.error(code, msg, details) } }
+                override fun notImplemented() { if (!done) { done = true; rawResult.notImplemented() } }
+            }
+            // Tüm dağıtım try-catch içinde: herhangi bir native hata Dart'a
+            // PlatformException olarak döner (asla çökmez, future askıda kalmaz).
+            try {
+                when (call.method) {
+                    "getInstalledApps" -> result.success(installedApps())
+                    "getAppIcon" -> {
+                        val pkg = call.argument<String>("package")
+                        result.success(if (pkg != null) appIcon(pkg) else null)
+                    }
+                    "syncLockState" -> {
+                        @Suppress("UNCHECKED_CAST")
+                        val args = (call.arguments as? Map<String, Any?>) ?: emptyMap()
+                        LockPrefs.saveSync(this, args)
+                        result.success(true)
+                    }
+                    "setFlagSecure" -> {
+                        val enabled = call.argument<Boolean>("enabled") ?: false
+                        setFlagSecure(enabled)
+                        result.success(true)
+                    }
+                    "isAccessibilityEnabled" -> result.success(isServiceEnabled(
+                        "enabled_accessibility_services",
+                        "$packageName/.LockAccessibilityService",
+                    ))
+                    "canDrawOverlays" -> result.success(Settings.canDrawOverlays(this))
+                    "isNotificationListenerEnabled" -> result.success(isServiceEnabled(
+                        "enabled_notification_listeners",
+                        "$packageName/.NotificationGuardService",
+                    ))
+                    "openAccessibilitySettings" -> { openIntent(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)); result.success(true) }
+                    "openOverlaySettings" -> {
+                        openIntent(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+                        result.success(true)
+                    }
+                    "openNotificationListenerSettings" -> {
+                        openIntent(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)); result.success(true)
+                    }
+                    "openAppNotificationSettings" -> {
+                        val pkg = call.argument<String>("package") ?: packageName
+                        val i = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                            .putExtra(Settings.EXTRA_APP_PACKAGE, pkg)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        openIntent(i)
+                        result.success(true)
+                    }
+                    "drainNativeEvents" -> result.success(LockPrefs.drainEvents(this))
+                    // ---------- FAZ 10: başlatıcı kimliği (activity-alias) ----------
+                    "setLauncherIdentity" -> {
+                        val id = call.argument<String>("id") ?: "default"
+                        result.success(setLauncherIdentity(id))
+                    }
+                    // ---------- FAZ 10: kaldırmaya karşı koruma (Device Admin) ----------
+                    "isDeviceAdminActive" -> result.success(isDeviceAdminActive())
+                    "requestDeviceAdmin" -> { requestDeviceAdmin(); result.success(true) }
+                    "removeDeviceAdmin" -> { removeDeviceAdmin(); result.success(true) }
+                    else -> result.notImplemented()
                 }
-                "syncLockState" -> {
-                    @Suppress("UNCHECKED_CAST")
-                    val args = (call.arguments as? Map<String, Any?>) ?: emptyMap()
-                    LockPrefs.saveSync(this, args)
-                    result.success(true)
-                }
-                "setFlagSecure" -> {
-                    val enabled = call.argument<Boolean>("enabled") ?: false
-                    setFlagSecure(enabled)
-                    result.success(true)
-                }
-                "isAccessibilityEnabled" -> result.success(isServiceEnabled(
-                    "enabled_accessibility_services",
-                    "$packageName/.LockAccessibilityService",
-                ))
-                "canDrawOverlays" -> result.success(Settings.canDrawOverlays(this))
-                "isNotificationListenerEnabled" -> result.success(isServiceEnabled(
-                    "enabled_notification_listeners",
-                    "$packageName/.NotificationGuardService",
-                ))
-                "openAccessibilitySettings" -> { openIntent(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)); result.success(true) }
-                "openOverlaySettings" -> {
-                    openIntent(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
-                    result.success(true)
-                }
-                "openNotificationListenerSettings" -> {
-                    openIntent(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)); result.success(true)
-                }
-                "openAppNotificationSettings" -> {
-                    val pkg = call.argument<String>("package") ?: packageName
-                    val i = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                        .putExtra(Settings.EXTRA_APP_PACKAGE, pkg)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    openIntent(i)
-                    result.success(true)
-                }
-                "drainNativeEvents" -> result.success(LockPrefs.drainEvents(this))
-                // ---------- FAZ 10: başlatıcı kimliği (activity-alias) ----------
-                "setLauncherIdentity" -> {
-                    val id = call.argument<String>("id") ?: "default"
-                    result.success(setLauncherIdentity(id))
-                }
-                // ---------- FAZ 10: kaldırmaya karşı koruma (Device Admin) ----------
-                "isDeviceAdminActive" -> result.success(isDeviceAdminActive())
-                "requestDeviceAdmin" -> { requestDeviceAdmin(); result.success(true) }
-                "removeDeviceAdmin" -> { removeDeviceAdmin(); result.success(true) }
-                else -> result.notImplemented()
+            } catch (e: Exception) {
+                result.error("NATIVE_ERROR", e.message ?: "native işlem başarısız", null)
             }
         }
     }

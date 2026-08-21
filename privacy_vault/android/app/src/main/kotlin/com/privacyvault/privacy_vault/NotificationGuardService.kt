@@ -7,6 +7,7 @@ import android.content.Context
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import java.util.concurrent.Executors
 
 /**
  * Bildirim gizliliği (FAZ 10 — seviyeli politika):
@@ -18,6 +19,10 @@ import android.service.notification.StatusBarNotification
  * Yalnızca kullanıcının verdiği bildirim erişimi izniyle çalışır.
  * Dürüstlük: OS, uygulama İÇİNDEKİ bildirim üretimini engellemez; kaldırılan
  * bildirim hedef uygulamada ulaştığı gibi durur — yalnızca gölgede gösterilmez.
+ *
+ * Sertleştirme: SharedPreferences/JSON okuma-yazma ve NotificationManager
+ * çağrıları ana iş parçacığından ÇIKARILDI (tek iş parçacıklı yürütücü).
+ * Bildirim fırtınalarında ANR/blokaj riski kalmaz; olaylar sırayla işlenir.
  */
 class NotificationGuardService : NotificationListenerService() {
 
@@ -26,22 +31,33 @@ class NotificationGuardService : NotificationListenerService() {
         private const val MASK_NOTIF_ID = 73101
     }
 
+    // Sıralı, tek arka plan yürütücüsü: prefs okuma/yazma + iptal/postalama burada.
+    private val executor = Executors.newSingleThreadExecutor()
+
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         val pkg = sbn?.packageName ?: return
         if (pkg == packageName) return
+        val key = sbn.key ?: return
         val mode = LockPrefs.notifModeFor(this, pkg)
         if (mode == 0) return
         // Kilidi açık bir oturum varsa (tempUnlock) dokunma.
         if (LockPrefs.isTempUnlocked(this, pkg)) return
-        try {
-            cancelNotification(sbn.key)
-            if (mode == 1) {
-                postMasked(pkg)
-                LockPrefs.appendEvent(this, "notifMasked", pkg)
-            } else {
-                LockPrefs.appendEvent(this, "notifHidden", pkg)
-            }
-        } catch (e: Exception) { /* sistem reddedebilir */ }
+        executor.execute {
+            try {
+                cancelNotification(key)
+                if (mode == 1) {
+                    postMasked(pkg)
+                    LockPrefs.appendEvent(this, "notifMasked", pkg)
+                } else {
+                    LockPrefs.appendEvent(this, "notifHidden", pkg)
+                }
+            } catch (e: Exception) { /* sistem reddedebilir */ }
+        }
+    }
+
+    override fun onDestroy() {
+        executor.shutdown()
+        super.onDestroy()
     }
 
     private fun postMasked(pkg: String) {

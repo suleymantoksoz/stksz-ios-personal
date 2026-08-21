@@ -11,15 +11,19 @@ import javax.crypto.spec.PBEKeySpec
  */
 object HashUtil {
     fun verify(secret: String, saltB64: String, expectedB64: String, iterations: Int): Boolean {
+        // Bellek hijyeni: parola char dizisi doğrulama bitince SIFIRLANIR;
+        // PBEKeySpec iç kopyaları heap'te açık metin bırakmaz.
+        val salt = Base64.decode(saltB64, Base64.NO_WRAP)
+        val spec = PBEKeySpec(secret.toCharArray(), salt, iterations, 256)
         return try {
-            val salt = Base64.decode(saltB64, Base64.NO_WRAP)
-            val spec = PBEKeySpec(secret.toCharArray(), salt, iterations, 256)
             val skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
             val actual = skf.generateSecret(spec).encoded
             val expected = Base64.decode(expectedB64, Base64.NO_WRAP)
             MessageDigest.isEqual(actual, expected)
         } catch (e: Exception) {
             false
+        } finally {
+            spec.clearPassword()
         }
     }
 }
