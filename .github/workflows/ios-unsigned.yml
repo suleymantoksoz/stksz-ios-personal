@@ -4,91 +4,176 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["STKSZ Capital/www/**", "STKSZ Capital/ios/**", "STKSZ Capital/package.json", "STKSZ Capital/capacitor.config.json", ".github/workflows/ios-unsigned.yml"]
+    paths:
+      - "STKSZ Capital/www/**"
+      - "STKSZ Capital/ios/**"
+      - "STKSZ Capital/package.json"
+      - "STKSZ Capital/capacitor.config.json"
+      - ".github/workflows/ios-unsigned.yml"
 
 jobs:
   build-ios:
     name: Build STKSZ unsigned IPA
-    runs-on: macos-latest
+    runs-on: macos-14
     timeout-minutes: 45
-    defaults:
-      run:
-        working-directory: STKSZ Capital
+
+    env:
+      PROJECT_DIR: STKSZ Capital
+      IOS_DIR: STKSZ Capital/ios/App
+      BUILD_DIR: ${{ github.workspace }}/build-output
+
     steps:
+      # ── 1) Checkout ──
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: On kontrol - repo yapisi dogru mu?
+      # ── 2) Proje yapisi kontrol ──
+      - name: Verify project structure
         run: |
-          eksik=0
-          for f in package.json package-lock.json capacitor.config.json www/index.html ios/App/Podfile ios/App/App.xcworkspace/contents.xcworkspacedata; do
-            if [ ! -e "$f" ]; then echo "::error::EKSIK DOSYA: $f — STKSZ Capital iceriginde olmali."; eksik=1; fi
+          echo "=== Repo root ==="
+          ls -la
+          echo ""
+          echo "=== STKSZ Capital ==="
+          ls -la "$PROJECT_DIR/"
+          echo ""
+          echo "=== iOS dizin ==="
+          ls -la "$IOS_DIR/"
+          echo ""
+          cd "$PROJECT_DIR"
+          for f in package.json capacitor.config.json www/index.html ios/App/Podfile ios/App/App.xcworkspace/contents.xcworkspacedata; do
+            if [ ! -e "$f" ]; then
+              echo "::error::Eksik dosya: $f"
+              exit 1
+            fi
           done
-          if [ $eksik -eq 1 ]; then
-            echo "STKSZ Capital dizini icerigi:"; ls -la
-            exit 1
-          fi
-          echo "Tum on kosullar tamam."
+          echo "Tum dosyalar mevcut."
 
-      - name: Setup Node.js 22
+      # ── 3) Node.js ──
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: "STKSZ Capital/package-lock.json"
 
-      - name: Install dependencies
+      # ── 4) npm install ──
+      - name: Install npm dependencies
+        working-directory: STKSZ Capital
         run: npm ci || npm install --no-fund --no-audit
 
-      - name: Capacitor sync iOS (www -> ios/App/App/public)
+      # ── 5) Capacitor sync ──
+      - name: Capacitor sync ios
+        working-directory: STKSZ Capital
         run: npx cap sync ios
 
-      - name: CocoaPods install
-        working-directory: STKSZ Capital/ios/App
-        run: pod install
-
-      - name: Build unsigned archive with xcodebuild
+      # ── 6) CocoaPods ──
+      - name: Install CocoaPods
         working-directory: STKSZ Capital/ios/App
         run: |
+          pod install --repo-update
+          echo "=== Podfile.lock ==="
+          cat Podfile.lock | head -30
+          echo ""
+          echo "=== Pods dizini ==="
+          ls -la Pods/ | head -10
+
+      # ── 7) Build dizini hazirla ──
+      - name: Prepare build directory
+        run: mkdir -p "$BUILD_DIR"
+
+      # ── 8) xcodebuild archive (IMZASIZ) ──
+      - name: Build unsigned archive
+        working-directory: STKSZ Capital/ios/App
+        run: |
+          echo "=== Xcode surumu ==="
+          xcodebuild -version
+          xcodebuild -showsdks | head -5
+          echo ""
+
           xcodebuild archive \
             -workspace App.xcworkspace \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath "$PWD/build/App.xcarchive" \
+            -archivePath "$BUILD_DIR/App.xcarchive" \
+            -destination "generic/platform=iOS" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            DEVELOPMENT_TEAM=""
+            CODE_SIGN_IDENTITY="-" \
+            PROVISIONING_PROFILE="" \
+            DEVELOPMENT_TEAM="" \
+            ENABLE_BITCODE=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            ONLY_ACTIVE_ARCH=NO \
+            CLEAN_BUILD=YES
 
-      - name: Package .app into STKSZ.ipa (standart iOS dizilimi)
-        working-directory: STKSZ Capital/ios/App/build
+      # ── 9) .app -> .ipa paketle ──
+      - name: Package unsigned IPA
         run: |
+          APP_DIR="$BUILD_DIR/App.xcarchive/Products/Applications"
+          echo "=== Archive icerigi ==="
+          find "$BUILD_DIR/App.xcarchive" -maxdepth 3 -type d
+          echo ""
+
+          if [ ! -d "$APP_DIR/App.app" ]; then
+            echo "::error::App.app bulunamadi! Mevcut icerik:"
+            ls -laR "$BUILD_DIR/App.xcarchive/Products/"
+            exit 1
+          fi
+
+          cd "$BUILD_DIR"
           rm -rf Payload STKSZ.ipa
           mkdir Payload
-          cp -R App.xcarchive/Products/Applications/App.app Payload/App.app
+          cp -R "$APP_DIR/App.app" Payload/App.app
           xattr -cr Payload || true
           find Payload -name ".DS_Store" -delete || true
-          plutil -lint Payload/App.app/Info.plist
+
+          echo "=== Info.plist kontrol ==="
+          plutil -lint Payload/App.app/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" Payload/App.app/Info.plist 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Print CFBundleShortVersionString" Payload/App.app/Info.plist 2>/dev/null || true
+          /usr/libexec/PlistBuddy -c "Print CFBundleVersion" Payload/App.app/Info.plist 2>/dev/null || true
+
+          echo ""
+          echo "=== IPA olusturuluyor ==="
           zip -r -X STKSZ.ipa Payload
-          unzip -t STKSZ.ipa > /dev/null && echo "ZIP butunlugu OK"
-          unzip -l STKSZ.ipa | head -10
-          ls -la STKSZ.ipa
 
-      - name: Kullanim notu
-        run: |
-          echo "=============================================================="
-          echo "ONEMLI - AltStore 3840 hatasinin yaygin nedeni:"
-          echo "GitHub Artifacts, IPA'yi bir ZIP icinde indirir."
-          echo "Indirdiginiz STKSZ-ipa.zip dosyasini ONCE ACIN,"
-          echo "icinden cikan STKSZ.ipa dosyasini AltStore'a verin."
-          echo "Dis zip'i .ipa diye yuklerseniz 3840 hatasi alirsiniz!"
-          echo "=============================================================="
+          echo ""
+          echo "=== ZIP butunlugu ==="
+          unzip -t STKSZ.ipa > /dev/null && echo "ZIP dogrulama: OK"
 
-      - name: Upload IPA artifact
+          echo ""
+          echo "=== IPA boyutu ==="
+          ls -lh STKSZ.ipa
+
+          echo ""
+          echo "=== IPA icerigi (ilk 15 satir) ==="
+          unzip -l STKSZ.ipa | head -15
+
+      # ── 10) Artifact yukle ──
+      - name: Upload unsigned IPA
         uses: actions/upload-artifact@v4
         with:
-          name: STKSZ-ipa
-          path: STKSZ Capital/ios/App/build/STKSZ.ipa
+          name: STKSZ-unsigned-ipa-${{ github.run_number }}
+          path: build-output/STKSZ.ipa
           if-no-files-found: error
           retention-days: 14
+
+      # ── 11) Kullanim notu ──
+      - name: Usage note
+        run: |
+          echo "==============================================="
+          echo "  STKSZ Unsigned IPA hazir!"
+          echo "==============================================="
+          echo ""
+          echo "  Indirme: Actions → Bu run → Artifacts"
+          echo "  Dosya:   STKSZ-unsigned-ipa-{run}.zip"
+          echo ""
+          echo "  ONEMLI: Indirdiginiz .zip dosyasini Once acin,"
+          echo "  icinden cikan STKSZ.ipa dosyasini kullanin."
+          echo "  Zip'i dogrudan AltStore'a yuklerseniz hata alirsiniz!"
+          echo ""
+          echo "  Alternatif: Transporter uygulamasi ile"
+          echo "  App Store Connect'e yukleyebilirsiniz."
+          echo "==============================================="
