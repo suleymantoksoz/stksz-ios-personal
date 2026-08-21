@@ -383,11 +383,19 @@
   <div class="section-title">FIRSAT KARTLARI</div>
   <div id="opportunityCards" class="opportunity-list"><div class="empty-state">VERİ YOK</div></div>
 
-  <div class="section-title">HALKA ARZ TAKVİMİ</div>
-  <div class="card">
-    <div id="ipoCalendar"><div class="empty-state">Veri kaynağı güncellenemedi.</div></div>
-    <p class="help">Yapılandırılmış ve doğrulanmış halka arz verisi bağlı değilse şirket, lot veya nakit tahmini gösterilmez.</p>
-    <div class="toolbar"><a class="btn btn-link" href="https://spk.gov.tr/spk-bultenleri/2026-yili-spk-bultenleri" target="_blank" rel="noopener noreferrer">SPK Bültenleri →</a><a class="btn btn-link" href="https://www.kap.org.tr/tr/" target="_blank" rel="noopener noreferrer">KAP →</a></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,rgba(208,144,78,.18),rgba(140,82,32,.06));border-bottom:1px solid rgba(184,115,51,.4)">
+      <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:var(--copper-grad);box-shadow:0 3px 10px rgba(184,115,51,.35);font-size:17px;flex:none">📅</span>
+      <div style="min-width:0;flex:1">
+        <b style="display:block;font-size:13px;letter-spacing:1px">HALKA ARZ TAKVİMİ</b>
+        <small style="color:var(--muted)">SPK bülteni ve KAP duyurularından doğrulanmış kayıtlar</small>
+      </div>
+    </div>
+    <div style="padding:14px">
+      <div id="ipoCalendar"><div class="empty-state"><b>Doğrulanmış halka arz kaydı yok.</b><br>Sayfa açıldığında haber taraması otomatik çalışır; kayıt geldiğinde şirket, tarih, talep durumu, tahmini lot ve gerekli nakit burada listelenir. Güncel duyurular için aşağıdaki SPK ve KAP bağlantılarını kullanabilirsiniz.</div></div>
+      <p class="help" style="margin:10px 0 0">Yalnızca yapılandırılmış ve doğrulanmış halka arz verisi gösterilir; şirket, lot veya nakit tahmini üretilmez.</p>
+      <div class="toolbar" style="margin:12px 0 0"><a class="btn btn-link" href="https://spk.gov.tr/spk-bultenleri/2026-yili-spk-bultenleri" target="_blank" rel="noopener noreferrer">SPK Bültenleri →</a><a class="btn btn-link" href="https://www.kap.org.tr/tr/" target="_blank" rel="noopener noreferrer">KAP →</a></div>
+    </div>
   </div>
 
   <div class="section-title">NAKİT PLANI · YALNIZCA MİDAS</div>
@@ -418,13 +426,10 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuProfile')"><span><b>PROFİL</b><small>Kullanıcı bilgileri ve profil fotoğrafı</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuTheme')"><span><b>TEMA</b><small>Koyu veya açık görünüm</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuActivityPanel')"><span><b>İŞLEM GEÇMİŞİ</b><small>Varlık ve emir kayıtları</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuGoals')"><span><b>HEDEFLERİM</b><small>Yerel yatırım hedefleri</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuTools')"><span><b>ARAÇLAR VE NOTLAR</b><small>İşlem, nakit ve not araçları</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSettingsHub')"><span><b>AYARLAR</b><small>Görünüm, hava, güvenlik ve bildirim</small></span><i>→</i></button></div>
       <div class="menu-nav-card ai-nav-card"><button type="button" class="menu-nav-trigger" onclick="openStkszAi()"><span><b>🤖 STKSZ AI</b><small>Portföy yorumu, haber özeti ve soru-cevap</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar, veri kaynakları ve bağlantı testleri</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="closeUnifiedMenu();showPage('status')"><span><b>PİYASA DURUMU</b><small>BIST özeti, STKSZ CORE · SCORE ve risk (Durum sayfası)</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="closeUnifiedMenu();showPage('opportunities')"><span><b>HALKA ARZ &amp; FIRSATLAR</b><small>Halka arz takvimi ve fırsat kartları (Fırsatlar sayfası)</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuVirtualWallet')"><span><b>🧪 SANAL CÜZDAN</b><small>Simülasyon · gerçek para değildir</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuDataManagement')"><span><b>VERİ YÖNETİMİ</b><small>Yedek, geri yükleme ve CSV</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAbout')"><span><b>HAKKINDA</b><small>STKSZ veri ve güvenlik ilkeleri</small></span><i>→</i></button></div>
@@ -769,21 +774,41 @@
   </section>
 
   <section class="menu-view menu-subpage" id="menuDataManagement" data-menu-parent="menuHome" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">KAPAT</button><div><small>MENÜ</small><h2>VERİ YÖNETİMİ</h2></div>
-    <div class="section-title">📡 CİHAZLAR ARASI SENKRON (iOS ↔ Android)</div>
-    <div class="menu-form-card">
-      <p class="help">Portföy, sanal cüzdan, işlem geçmişi, favoriler, takip listesi, ayarlar ve AI geçmişi merkezi hesabında birleşir; iPhone'da yaptığın işlem Android'de görünür. <b>ENR verilerin ve API anahtarların ASLA buluta gönderilmez.</b> Sunucu: AI Backend URL (aynı sunucu).</p>
-      <div class="source-fact" id="syncStateLine">Senkron: bağlı değil.</div>
-      <div class="toolbar">
-        <button type="button" class="btn primary" onclick="syncCreateAccount()">YENİ SENKRON HESABI OLUŞTUR</button>
-        <button type="button" class="btn" onclick="syncManualNow()">ŞİMDİ SENKRONLA</button>
+    <div style="position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:18px;background:var(--copper-grad);border:1px solid rgba(208,144,78,.55);box-shadow:0 10px 24px rgba(140,82,32,.35),inset 0 1px 0 rgba(255,255,255,.22)">
+      <button type="button" class="btn btn-close-action" onclick="closeMenuPanel()" style="flex:0 0 auto;margin:0;background:rgba(30,20,12,.35);border-color:rgba(255,255,255,.4);color:#FFF">KAPAT</button>
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span aria-hidden="true" style="display:grid;place-items:center;width:40px;height:40px;flex:0 0 auto;border-radius:13px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);font-size:19px;line-height:1">🔄</span>
+        <div style="min-width:0">
+          <h2 style="margin:0;font-size:14px;font-weight:800;letter-spacing:.7px;color:#FFF;line-height:1.25;text-shadow:0 1px 2px rgba(60,35,10,.4)">CİHAZLAR ARASI SENKRON</h2>
+          <small style="display:block;margin-top:3px;color:rgba(255,255,255,.88);font-size:10px;font-weight:700;letter-spacing:.5px">iOS ↔ Android</small>
+        </div>
       </div>
-      <div class="field"><label for="syncPairInput">Diğer cihazdan eşleştirme kodu</label><input id="syncPairInput" autocomplete="off" spellcheck="false" placeholder="stksz-xxxxx.token"></div>
-      <div class="toolbar"><button type="button" class="btn small" onclick="syncPairDevice()">BU CİHAZI EŞLEŞTİR</button><button type="button" class="btn small danger" onclick="syncUnlink()">BAĞLANTIYI KES</button></div>
-      <div class="source-fact" id="syncPairCodeBox" hidden></div>
     </div>
-<span></span></div>
-    <div class="menu-form-card"><div class="menu-list"><button type="button" class="menu-action" onclick="downloadBackup()"><span>Yedek Al</span><span>↓</span></button><button type="button" class="menu-action" onclick="document.getElementById('backupFile').click()"><span>Yedeği Yükle</span><span>↑</span></button><input id="backupFile" type="file" accept="application/json,.json" hidden onchange="restoreBackup(this.files[0])"><button type="button" class="menu-action" onclick="exportMidasCsv()"><span>CSV Olarak İndir</span><span>↓</span></button><button type="button" class="btn red" onclick="resetData()">Tüm Yerel Veriyi Sıfırla</button></div></div>
+    <p style="margin:16px 2px 0;padding:0;color:var(--muted);font-size:11.5px;line-height:1.7">Portföy, sanal cüzdan, işlem geçmişi, favoriler, takip listesi, ayarlar ve AI geçmişi merkezi hesabında birleşir; iPhone'da yaptığın işlem Android'de görünür. <b style="color:var(--copper)">ENR verilerin ve API anahtarların ASLA buluta gönderilmez.</b> Sunucu: AI Backend URL (aynı sunucu).</p>
+    <div class="source-fact" id="syncStateLine" style="margin-top:14px;padding:12px 14px;border:1px solid rgba(184,115,51,.35);border-left:4px solid var(--copper);border-radius:12px;background:rgba(184,115,51,.08);font-size:11.5px;line-height:1.55">Senkron: bağlı değil.</div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+      <button type="button" class="btn primary" onclick="syncCreateAccount()" style="width:100%;min-height:48px;font-size:10px">YENİ HESAP OLUŞTUR</button>
+      <button type="button" class="btn" onclick="syncManualNow()" style="width:100%;min-height:48px;font-size:10px">ŞİMDİ SENKRONLA</button>
+    </div>
+    <div class="field" style="margin-top:18px">
+      <label for="syncPairInput" style="display:block;margin-bottom:7px;font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--muted)">DİĞER CİHAZDAN EŞLEŞTİRME KODU</label>
+      <input id="syncPairInput" autocomplete="off" spellcheck="false" placeholder="stksz-xxxxx.token" style="width:100%;min-width:0;padding:13px 14px;font-size:12px;border-radius:12px">
+    </div>
+    <div style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+      <button type="button" class="btn primary" onclick="syncPairDevice()" style="width:100%;min-height:46px;font-size:10px">EŞLEŞTİR</button>
+      <button type="button" class="btn danger" onclick="syncUnlink()" style="width:100%;min-height:46px;font-size:10px">BAĞLANTIYI KES</button>
+    </div>
+    <div class="source-fact" id="syncPairCodeBox" hidden style="margin-top:14px;padding:13px 14px;border:1px dashed rgba(184,115,51,.5);border-radius:12px;background:rgba(184,115,51,.07);font-size:11.5px;line-height:1.6"></div>
+    <div style="margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--panel)">
+      <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 13px;font-size:11px;font-weight:800;letter-spacing:1px;color:var(--copper)"><span aria-hidden="true" style="font-size:14px">💾</span>YEDEK &amp; VERİ YÖNETİMİ</h3>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+        <button type="button" class="btn" onclick="downloadBackup()" style="width:100%;min-height:46px;font-size:10px">↓ YEDEK AL</button>
+        <button type="button" class="btn" onclick="document.getElementById('backupFile').click()" style="width:100%;min-height:46px;font-size:10px">↑ YEDEĞİ YÜKLE</button>
+        <button type="button" class="btn" onclick="exportMidasCsv()" style="width:100%;min-height:46px;font-size:10px">↓ CSV OLARAK İNDİR</button>
+        <button type="button" class="btn red" onclick="resetData()" style="width:100%;min-height:46px;font-size:10px">TÜM VERİYİ SIFIRLA</button>
+      </div>
+      <input id="backupFile" type="file" accept="application/json,.json" hidden onchange="restoreBackup(this.files[0])">
+    </div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuAbout" data-menu-parent="menuHome" hidden>
@@ -794,12 +819,12 @@
 </main>
 
 <nav class="nav" aria-label="Ana navigasyon">
-  <button type="button" class="active" data-page="home" aria-current="page" aria-controls="page-home" onclick="showPage('home',this)"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg></span><span class="nav-label">Ana Sayfa</span></button>
-  <button type="button" data-page="portfolio" aria-controls="page-portfolio" onclick="showPage('portfolio',this)"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9V3Z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15V3.5Z"/></svg></span><span class="nav-label">Portföy</span></button>
-  <button type="button" data-page="news" aria-controls="page-news" onclick="showPage('news',this)"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v14H5a1 1 0 0 1-1-1V5Z"/><path d="M17 8h2a1 1 0 0 1 1 1v9a1.5 1.5 0 0 1-1.5 1.5H6.5"/><path d="M7.5 8h6M7.5 11.5h6M7.5 15h4"/></svg></span><span class="nav-label">Haberler</span></button>
+  <button type="button" class="active" data-page="home" aria-current="page" aria-controls="page-home" onclick="showPage('home',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span><span class="nav-label">Ana Sayfa</span></button>
+  <button type="button" data-page="portfolio" aria-controls="page-portfolio" onclick="showPage('portfolio',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span><span class="nav-label">Portföy</span></button>
+  <button type="button" data-page="news" aria-controls="page-news" onclick="showPage('news',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg></span><span class="nav-label">Haberler</span></button>
+  <button type="button" data-page="status" aria-controls="page-status" onclick="showPage('status',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span><span class="nav-label">Durum</span></button>
+  <button type="button" data-page="opportunities" aria-controls="page-opportunities" onclick="showPage('opportunities',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span><span class="nav-label">Fırsatlar</span></button>
   <button type="button" class="nav-ai-btn" onclick="openStkszAi()" aria-label="STKSZ AI asistanını aç" title="STKSZ AI"><span class="nav-ai-ring" aria-hidden="true"></span><span class="nav-ai-core"><b>STKSZ</b><b>AI</b></span></button>
-  <button type="button" data-page="status" aria-controls="page-status" onclick="showPage('status',this)"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4 12 2.5-6h5"/></svg></span><span class="nav-label">Durum</span></button>
-  <button type="button" data-page="opportunities" aria-controls="page-opportunities" onclick="showPage('opportunities',this)"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></span><span class="nav-label">Fırsatlar</span></button>
 </nav>
 
 <div class="modal asset-manual-modal" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manualAssetTitle">
@@ -1751,7 +1776,7 @@ async function refreshAssetDiscovery(query){
  const rows=await marketDiscoveryViewModel.load(symbols,{refresh:false});if(request!==discoveryRequestId)return;rows.forEach(row=>discoveryMarketRows.set(row.symbol,row));renderAssetExplorer();
 }
 function scheduleAssetDiscovery(){clearTimeout(discoveryTimer);const value=document.getElementById("assetSearch")?.value||"";renderAssetExplorer();discoveryTimer=setTimeout(()=>refreshAssetDiscovery(value).catch(()=>{}),280);}
-function chartSvg(asset){const rows=Array.isArray(asset.history)?[...asset.history].reverse().map(row=>finite(row.close)).filter(value=>value!==null):[];if(rows.length<2)return '<div class="empty-state">GRAFİK VERİSİ YOK</div>';const min=Math.min(...rows),max=Math.max(...rows),range=max-min||1,points=rows.map((value,index)=>`${20+index*(560/(rows.length-1))},${155-(value-min)/range*125}`).join(" ");return `<svg viewBox="0 0 600 180" role="img" aria-label="Doğrulanmış kapanış grafiği"><defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#00df78" stop-opacity=".28"/><stop offset="1" stop-color="#00df78" stop-opacity="0"/></linearGradient></defs><polyline points="${points}" fill="none" stroke="#00df78" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polygon points="20,170 ${points} 580,170" fill="url(#chartFill)"/></svg>`;}
+function chartSvg(asset){const rows=Array.isArray(asset.history)?[...asset.history].reverse().map(row=>finite(row.close)).filter(value=>value!==null):[];if(rows.length<2)return '<div class="empty-state">GRAFİK VERİSİ YOK</div>';const min=Math.min(...rows),max=Math.max(...rows),range=max-min||1,points=rows.map((value,index)=>`${20+index*(560/(rows.length-1))},${155-(value-min)/range*125}`).join(" ");return `<svg viewBox="0 0 600 180" role="img" aria-label="Doğrulanmış kapanış grafiği"><defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D0904E" stop-opacity=".28"/><stop offset="1" stop-color="#D0904E" stop-opacity="0"/></linearGradient></defs><polyline points="${points}" fill="none" stroke="#D0904E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polygon points="20,170 ${points} 580,170" fill="url(#chartFill)"/></svg>`;}
 function openAssetDetail(index){const item=currentAssetResults[Number(index)];if(!item)return;const page=document.getElementById("assetDetailPage"),body=document.getElementById("assetDetailBody");if(!page||!body)return;let name="",symbol="",kind="Varlık",fields=[],chart='<div class="empty-state">GRAFİK VERİSİ YOK</div>';
  if(item.kind==="asset"){const asset=item.asset,latest=asset.history?.[0]||{},previous=asset.history?.[1]||{},unrealized=assetUnrealized(asset);name=asset.name||"Varlık adı verisi yok";symbol=asset.s;kind=asset.type;fields=[["Güncel fiyat",moneyOrNoData(asset.p)],["Açılış",moneyOrNoData(asset.open??latest.open)],["Önceki kapanış",moneyOrNoData(asset.previousClose??previous.close)],["Piyasa değişimi",finite(asset.marketChangePct)===null?"VERİ YOK":pct(asset.marketChangePct)],["Günlük yüksek",moneyOrNoData(asset.high??latest.high)],["Günlük düşük",moneyOrNoData(asset.low??latest.low)],["İşlem hacmi",valueOrNoData(finite(asset.volume),countFmt)],["Portföydeki adet",valueOrNoData(finite(asset.q),fmt)],["Ortalama maliyet",moneyOrNoData(asset.avgCost)],["Portföy değeri",moneyOrNoData(asset.v)],["Kâr/Zarar",unrealized===null?"VERİ YOK":signedMoney(unrealized)],["Midas günlük K/Z",asset.dailyVerified?signedMoneyOrNoData(asset.d):"VERİ YOK"],["Veri kaynağı",asset.source||"API bağlı değil"],["Güncellik",PROVIDERS.freshnessLabel?PROVIDERS.freshnessLabel(asset.marketFreshness):asset.marketFreshness||"VERİ YOK"]];chart=chartSvg(asset);
  }else if(item.kind==="ipo"){const ipo=item.item;name=ipo.company||"Halka Arz";symbol=ipo.symbol||"—";kind="Halka Arz";fields=[["Tarih",ipo.date||"VERİ YOK"],["Talep durumu",ipo.status||"VERİ YOK"],["Tahmini lot",valueOrNoData(finite(ipo.estimatedLots),fmt)],["Gerekli nakit",moneyOrNoData(ipo.requiredCash)],["Risk/not",ipo.note||"VERİ YOK"],["Kaynak",ipo.source||data.ipoCalendar?.source||"VERİ YOK"]];

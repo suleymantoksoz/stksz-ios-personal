@@ -1,7 +1,7 @@
 :root{
   --bg:#050607;--panel:#0b0f11;--panel2:#0f1417;--line:#1d252a;
-  --text:#f4f7f8;--muted:#89949a;--green:#00df78;--red:#ff4d4d;
-  --yellow:#e7b51e;--blue:#4b9cff;--accent:#00df78;
+  --text:#f4f7f8;--muted:#89949a;--green:#D0904E;--red:#ff4d4d;--positive:#00df78;
+  --yellow:#e7b51e;--blue:#4b9cff;--accent:#D0904E;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
@@ -2706,3 +2706,123 @@ body[data-theme="light"] .header{border-bottom-color:#cbd6d0!important}
 body[data-theme="light"] .portfolio-value-amount{color:#2C1A0A;text-shadow:none}
 body[data-theme="light"] .portfolio-score-panel{border-left-color:#e0d5c8}
 body[data-theme="light"] .portfolio-score-value{color:#8C5220;text-shadow:none}
+
+/* ═══════════════════════════════════════════════════════════════════
+   v122 — KAPSALI BAKIR TEMIZLIGI: tüm UI chrome yeşilden bakıra
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* --- NAV BAR --- */
+body:not([data-theme="light"]) .nav button.active{color:#D0904E;background:rgba(208,144,78,.08);border-color:rgba(208,144,78,.2)}
+body:not([data-theme="light"]) .nav button.active .nav-icon{color:#D0904E;text-shadow:0 0 8px rgba(208,144,78,.3)}
+body:not([data-theme="light"]) .nav button.active::after{background:#D0904E;box-shadow:0 0 6px rgba(208,144,78,.5)}
+
+/* --- SECTION TITLE BAR --- */
+body:not([data-theme="light"]) .section-title::before{background:#D0904E;box-shadow:0 0 6px rgba(208,144,78,.35)}
+
+/* --- HEADER BADGE --- */
+body:not([data-theme="light"]) .header-page-badge{color:#D0904E;background:rgba(208,144,78,.08);border-color:rgba(208,144,78,.28)}
+
+/* --- HEADER DATA STATUS --- */
+body:not([data-theme="light"]) .header-data-status.ok{border-color:#8C5220;color:#D0904E}
+
+/* --- BUTTON PRIMARY --- */
+body:not([data-theme="light"]) .btn.primary{background:linear-gradient(135deg,#E2A968,#B87333 45%,#6E3F17);border-color:rgba(208,144,78,.55);color:#FFF;box-shadow:0 8px 20px rgba(140,82,32,.4),inset 0 2px 3px rgba(255,255,255,.3)}
+
+/* --- PORTFOLIO CASH ICON --- */
+body:not([data-theme="light"]) .portfolio-cash-icon{color:#D0904E;border-color:#8C5220;background:#1a1310;box-shadow:0 0 12px rgba(208,144,78,.08)}
+
+/* --- PORTFOLIO SCORE PANEL RESPONSIVE --- */
+@media(max-width:350px){.portfolio-score-panel{border-top-color:rgba(208,144,78,.15)}}
+
+/* --- SECTION NUMBER --- */
+body:not([data-theme="light"]) .section-number{color:#D0904E}
+
+/* --- CLOCK DIGITAL TIME --- */
+body:not([data-theme="light"]) .command-clock-v2 .command-digital-time{color:#D0904E;text-shadow:0 0 10px rgba(208,144,78,.25)}
+
+/* --- NEWS CONNECTED BADGE --- */
+body:not([data-theme="light"]) .news-connection-state[data-state="ok"]{border-color:#8C5220;color:#D0904E}
+
+/* --- API KEY ACTIVE BADGE --- */
+body:not([data-theme="light"]) .api-key-state[data-state="ok"]{border-color:#8C5220;color:#D0904E;background:rgba(208,144,78,.06)}
+
+/* --- ACCOUNT TAB ACTIVE --- */
+body:not([data-theme="light"]) .account-tab.active{border-color:rgba(208,144,78,.55);background:rgba(208,144,78,.08);color:#E3BC84}
+
+/* --- AI CONN BADGE --- */
+body:not([data-theme="light"]) .ai-conn-badge[data-state="on"]{color:#D0904E;border-color:rgba(208,144,78,.5);background:rgba(208,144,78,.08);box-shadow:0 0 12px rgba(208,144,78,.12)}
+
+/* --- CARD BG REMOVE GREEN TINT --- */
+body:not([data-theme="light"]) .card{--card-bg:linear-gradient(150deg,#0f1215,#0a0d10);--card-line:#1d2228;--card-line-strong:#8C5220}
+
+/* --- RISK CARD --- */
+body:not([data-theme="light"]) .risk-card{background:var(--panel);border-color:var(--line)}
+
+/* --- SECTION COLLAPSE BTN --- */
+body:not([data-theme="light"]) .section-collapse-btn{color:#D0904E}
+
+/* --- MENU NAV TRIGGER --- */
+body:not([data-theme="light"]) .menu-nav-trigger i{color:#D0904E}
+
+/* --- CHART TOOL ACTIVE --- */
+body:not([data-theme="light"]) .chart-toolbar-v2 .chart-tool.active{color:#D0904E}
+
+/* --- ENR DAILY VALUE --- */
+body:not([data-theme="light"]) .enr-daily .v{color:#D0904E}
+
+/* --- VW BALANCE TOTAL --- */
+body:not([data-theme="light"]) .vw-balance-total{color:#D0904E}
+
+/* --- EDIT BUTTONS --- */
+body:not([data-theme="light"]) .pl-edit-btn{color:#D0904E}
+
+/* --- THEME SWITCH --- */
+body:not([data-theme="light"]) .theme-switch input:checked+.theme-slider:before{background:#D0904E}
+body:not([data-theme="light"]) .theme-switch input:focus-visible+.theme-slider{outline-color:#D0904E}
+
+/* --- SELECT/INPUT ACCENT --- */
+select:focus-visible,input[type="checkbox"]:checked,input[type="radio"]:checked{accent-color:#D0904E}
+
+/* --- LAYOUT EDIT MODE --- */
+body.layout-edit .page-edit-toggle{border-color:#D0904E;background:#D0904E}
+
+/* --- LIGHT THEME: UI CHROME OVERRIDE --- */
+body[data-theme="light"] .nav button.active{color:#8C5220;border-color:rgba(140,82,32,.3)}
+body[data-theme="light"] .section-title::before{background:#8C5220}
+body[data-theme="light"] .header-page-badge{color:#8C5220;border-color:rgba(140,82,32,.2)}
+body[data-theme="light"] .header-data-status.ok{border-color:#cbd6d0;color:#8C5220}
+body[data-theme="light"] .btn.primary{background:linear-gradient(135deg,#D0904E,#8C5220);color:#FFF}
+body[data-theme="light"] .section-number{color:#8C5220}
+body[data-theme="light"] .section-collapse-btn{color:#8C5220}
+body[data-theme="light"] .pl-edit-btn{color:#8C5220}
+body[data-theme="light"] .account-tab.active{border-color:rgba(140,82,32,.4);background:rgba(140,82,32,.06);color:#8C5220}
+body[data-theme="light"] .ai-conn-badge[data-state="on"]{color:#8C5220;border-color:rgba(140,82,32,.3)}
+body[data-theme="light"] .news-connection-state[data-state="ok"]{border-color:#cbd6d0;color:#8C5220}
+body[data-theme="light"] .api-key-state[data-state="ok"]{border-color:#cbd6d0;color:#8C5220}
+body[data-theme="light"] .theme-switch input:checked+.theme-slider:before{background:#8C5220}
+body[data-theme="light"] .portfolio-cash-icon{color:#8C5220;border-color:#cbd6d0;background:#faf5ee}
+body[data-theme="light"] .card{background:#fff;border-color:#d3ded7}
+body[data-theme="light"] .risk-card{background:#f8f9fa;border-color:#e2e8e4}
+
+/* --- NAV AI BUTTON: kept copper by default --- */
+
+/* ---绿 POSITIVE K/Z INDICATORS: kept green (universal finance convention) --- */
+.news-dot.positive{background:#00df78!important;color:#00df78!important}
+.day-summary-dot.positive{background:#00df78!important}
+.day-summary-row b.positive{color:#00df78!important}
+.result-card.positive:before{background:#00df78!important;box-shadow:0 0 8px rgba(0,223,120,.4)!important}
+.asset-chip-signal.buy{color:#00df78!important;border-color:#087647!important}
+.score-num{color:#00df78!important}
+.live{color:#00df78!important}
+.confidence.certain{color:#00df78!important}
+.status-grade.good{color:#00df78!important}
+.risk-dot.low{background:#00df78!important}
+.risk-fill.low{background:#00df78!important}
+.portfolio-overview .daily-chip{color:#00df78!important}
+.portfolio-overview .daily-chip.positive{color:#00df78!important}
+body:not([data-theme="light"]) .portfolio-overview .daily-chip.positive{color:#00df78!important}
+body:not([data-theme="light"]) .result-card.positive:before{background:#00df78!important}
+body:not([data-theme="light"]) .day-summary-dot.positive{background:#00df78!important}
+body:not([data-theme="light"]) .asset-chip-signal.buy{color:#00df78!important}
+body:not([data-theme="light"]) .bist-provider-meta b[data-source-state="connected"]{color:#00df78!important}
+body:not([data-theme="light"]) .confidence.certain{color:#00df78!important}
