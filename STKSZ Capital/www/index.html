@@ -3095,16 +3095,7 @@ function renderAuthGate(){
 }
 function authRegister(provider){
  const label={google:"Google",apple:"Apple"}[provider]||provider;
- const username=provider+"_user_"+Date.now().toString(36);
- (async()=>{
-  const users=getUsers();
-  const h=await hashPassword("temp1234");
-  users[username]={passwordHash:h,displayName:label+" Kullanıcısı",provider,email:"",createdAt:nowTr()};
-  saveUsers(users);
-  authState={mode:"account",provider,username,email:"",name:label+" Kullanıcısı",createdAt:nowTr(),quickLock:false};
-  authPersist();renderAuthGate();renderProfileAuth();
-  showToast(label+" ile giriş yapıldı. Geçici şifre: temp1234 · Profil → Şifre değiştir ile kalıcı şifre belirleyebilirsin.");
- })();
+ showToast(label+" ile giriş için OAuth yapılandırması gerekli (Client ID / Services ID). Şu anda \"Kullanıcı ile devam et\" seçeneğiyle giriş yapın.");
 }
 async function authLoginWithPassword(){
  if(!authReady){showToast("Sistem yükleniyor, lütfen bekleyin...");return;}
