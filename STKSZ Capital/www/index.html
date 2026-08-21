@@ -2512,15 +2512,55 @@ function filterCryptoList(){
  const q=document.getElementById("cryptoSearchInput")?.value||"";
  renderCryptoList(q);
 }
-/* ---- Alt Bar Reklam Alanı ---- */
+/* ---- Alt Bar Reklam Alanı (Google AdMob) ---- */
+const ADMOB_BANNER_ID="ca-app-pub-4377559428015852/9827923519";
 let showAds=true;
+let admobInitialized=false;
+let admobBannerVisible=false;
+async function initAdMob(){
+ if(admobInitialized)return;
+ try{
+  const {AdMob}=Capacitor.Plugins;
+  if(!AdMob)return;
+  await AdMob.trackingAuthorizationStatus();
+  await AdMob.initialize({initializeForTesting:false});
+  admobInitialized=true;
+ }catch(e){admobInitialized=false;}
+}
+async function showAdMobBanner(){
+ if(!showAds)return;
+ if(!admobInitialized){await initAdMob();}
+ if(!admobInitialized)return;
+ try{
+  const {AdMob}=Capacitor.Plugins;
+  await AdMob.showBanner({
+   adId:ADMOB_BANNER_ID,
+   adSize:"ADAPTIVE_BANNER",
+   position:"bottom",
+   isTesting:false
+  });
+  admobBannerVisible=true;
+  document.body.classList.add("admob-active");
+ }catch(e){admobBannerVisible=false;}
+}
+async function hideAdMobBanner(){
+ try{
+  const {AdMob}=Capacitor.Plugins;
+  if(admobBannerVisible){await AdMob.hideBanner();admobBannerVisible=false;}
+  document.body.classList.remove("admob-active");
+ }catch(e){}
+}
 function updateAdBanner(){
  const eng=window.STKSZAIEngine;
  const hasAnyBadge=eng?.entitlements?.badges()?.some(b=>["STKSZ_PRO","STKSZ_ELITE"].includes(b.id));
  showAds=!hasAnyBadge&&authState?.mode!=="guest";
+ /* Web/PWA fallback banner */
  const banner=document.getElementById("adBanner");
  if(banner)banner.hidden=!showAds;
  if(!showAds&&banner)banner.remove();
+ /* Native AdMob banner (Capacitor) */
+ if(showAds){setTimeout(()=>showAdMobBanner(),800);}
+ else{hideAdMobBanner();}
 }
 /* ---- STKSZ EDİTÖR Menü Erişimi ---- */
 function openStkszEditorFromMenu(){
@@ -4485,7 +4525,7 @@ const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMe
    else lastAutoRefreshAt=Number.isFinite(lastSuccess)?lastSuccess:Date.now();
   }
  }catch(error){}
-ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{updateHeaderInvestorChip();}catch(e){}try{updateAdBanner();}catch(e){}try{renderCurrencyPanel();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
+ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{updateHeaderInvestorChip();}catch(e){}try{updateAdBanner();}catch(e){}try{initAdMob();}catch(e){}try{renderCurrencyPanel();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
 </script>
 </body>
 </html>

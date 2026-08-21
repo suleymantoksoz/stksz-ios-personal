@@ -3120,3 +3120,13 @@ body[data-theme="light"] .ad-banner-upgrade{border-color:rgba(140,82,32,.3);colo
 .menu-nav-card[data-elite-locked] .menu-nav-trigger{opacity:.7}
 .menu-nav-card[data-elite-locked] .menu-nav-trigger i{color:#8a7e72}
 .menu-nav-card[data-elite-locked] .menu-nav-trigger small{color:#8a7e72}
+
+/* === AdMob Banner Integration === */
+body.admob-active{padding-bottom:calc(var(--fixed-nav-height,64px) + 60px + env(safe-area-inset-bottom,0px))!important}
+body.admob-active .nav{bottom:60px!important}
+body.admob-active .ad-banner{display:none!important}
+body.admob-active .pwa-install-banner{bottom:calc(60px + var(--fixed-nav-height,64px) + env(safe-area-inset-bottom,0px))!important}
+@media(max-width:700px){
+ body.admob-active{padding-bottom:calc(var(--fixed-nav-height,58px) + 54px + env(safe-area-inset-bottom,0px))!important}
+ body.admob-active .nav{bottom:54px!important}
+}
