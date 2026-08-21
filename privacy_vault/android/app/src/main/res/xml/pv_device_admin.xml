@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FAZ 10: hiçbir ek politika talep edilmez — yalnızca admin varlığı
+     kaldırma eylemini sistem düzeyinde geri alınabilir şekilde bloke eder. -->
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android" />

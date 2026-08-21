@@ -1,0 +1,145 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Kilit motoru için gereken izinler. QUERY_ALL_PACKAGES: yalnızca cihazda
+         kurulu uygulamaları kategori listesiyle gösterebilmek için. -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- FAZ 9 — Şifreli medya kasası: galeri okuma + kontrollü silme.
+         Android 13+: hedeflenmiş medya izinleri; eski sürümlerde genel depolama.
+         Dosya seçici (SAF) ek izin GEREKTİRMEZ. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+
+    <application
+        android:label="Privacy Vault"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- FAZ 10 — Başlatıcı kimliği (activity-alias): seçilen kimlik native
+             kanalla etkinleştirilir; ana bileşen o sırada kapatılır. Hepsi
+             MainActivity'yi hedefler — sahte/sağlık dışı davranış yoktur. -->
+        <activity-alias
+            android:name=".AliasCalculator"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/alias_calculator"
+            android:icon="@drawable/ic_alias_calc">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AliasNotes"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/alias_notes"
+            android:icon="@drawable/ic_alias_notes">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AliasClock"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/alias_clock"
+            android:icon="@drawable/ic_alias_clock">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".AliasWeather"
+            android:targetActivity=".MainActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:label="@string/alias_weather"
+            android:icon="@drawable/ic_alias_weather">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- FAZ 10 — Kaldırmaya karşı opsiyonel koruma (resmi Device Admin API'si) -->
+        <receiver
+            android:name=".PvDeviceAdminReceiver"
+            android:exported="true"
+            android:label="@string/admin_label"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/pv_device_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Native kilit ekranı: kilitli uygulamanın üzerinde doğrulama UI'ı -->
+        <activity
+            android:name=".LockOverlayActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:taskAffinity=".lockoverlay"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:theme="@style/LockOverlayTheme" />
+
+        <!-- Ana koruma motoru: ön plan uygulaması algılama -->
+        <service
+            android:name=".LockAccessibilityService"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/pv_accessibility" />
+        </service>
+
+        <!-- Bildirim gizliliği: gizli işaretli uygulamaların bildirimlerini engeller -->
+        <service
+            android:name=".NotificationGuardService"
+            android:exported="false"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+</manifest>

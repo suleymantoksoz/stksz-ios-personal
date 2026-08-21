@@ -1,0 +1,31 @@
+name: privacy_vault
+description: "Privacy Vault — app lock, hidden vault, decoy identity (Android + iOS)."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  flutter_secure_storage: ^9.2.4
+  local_auth: ^2.3.0
+  crypto: ^3.0.6
+  cryptography: ^2.7.0
+  shared_preferences: ^2.3.2
+  path_provider: ^2.1.4
+  # FAZ 9 — şifreli foto/dosya kasası
+  photo_manager: ^3.7.0   # galeri erişimi + kontrollü orijinal silme (sistem onaylı)
+  file_picker: ^8.1.0     # belge seçici (SAF / iOS Files)
+  share_plus: ^10.0.0     # dışa aktarım: hedefi kullanıcı seçer (paylaşım menüsü)
+  video_player: ^2.9.0    # kasa içi video oynatma (uygulama-içi geçici kopyadan)
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,99 @@
+name: Build Privacy Vault
+
+# Bu projeyi GitHub'a push et → Actions sekmesinden APK'yı artifact olarak indir.
+# (Ücretsiz runner'larda 7 GB RAM var; sandbox kısıtı yok.)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  android:
+    name: Android APK (debug + release)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0" # FAZ 13'te doğrulanan sürümle birebir (tekrarlanabilir build)
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+        working-directory: privacy_vault # repo kökündeyse bu satırı sil
+
+      - run: flutter analyze --no-fatal-infos
+        working-directory: privacy_vault
+
+      - run: flutter test
+        working-directory: privacy_vault
+
+      # ---------- Release signing (opsiyonel — GitHub Secrets üzerinden) ----------
+      # Gerçek keystore ASLA repoya girmez (.gitignore + bu adım). Production
+      # imzası için: Settings → Secrets and variables → Actions altına ekle:
+      #   ANDROID_KEYSTORE_BASE64   = keytool ile ürettiğiniz .jks'in base64 metni
+      #   ANDROID_KEYSTORE_PASSWORD = keystore parolası
+      #   ANDROID_KEY_PASSWORD      = anahtar parolası
+      #   ANDROID_KEY_ALIAS         = anahtar adı (ör. privacyvault)
+      # Secrets YOKSA bu adım atlanır ve release APK debug anahtarıyla imzalanır
+      # (kurulup test edilebilir; mağaza dağıtımı için değildir). Sahte key
+      # ÜRETİLMEZ — signing hazırlığı android/app/build.gradle.kts içindedir.
+      - name: Release keystore hazırla (secrets tanımlıysa)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        if: ${{ env.KEYSTORE_B64 != '' }}
+        working-directory: privacy_vault
+        run: |
+          echo "$KEYSTORE_B64" | base64 --decode > android/release-key.jks
+          cat > android/key.properties <<EOF
+          storeFile=release-key.jks
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          EOF
+          chmod 600 android/key.properties android/release-key.jks
+
+      - run: flutter build apk --debug
+        working-directory: privacy_vault
+
+      - run: flutter build apk --release
+        working-directory: privacy_vault
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: privacy-vault-debug-apk
+          path: privacy_vault/build/app/outputs/flutter-apk/app-debug.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: privacy-vault-release-apk
+          path: privacy_vault/build/app/outputs/flutter-apk/app-release.apk
+
+  ios:
+    name: iOS derleme doğrulaması (imzasız)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.0"
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+        working-directory: privacy_vault
+
+      # Kod imzalama gerektiren adım Developer hesabı olmadan çalışmaz;
+      # bu iş akışı iOS tarafının DERLENDİĞİNİ doğrular (hata yakalama).
+      - run: flutter build ios --no-codesign
+        working-directory: privacy_vault
+
+      # AltStore'a kurulabilir imzalı .ipa için: Developer hesabı + cert eklendikten sonra
+      # `flutter build ipa --export-options-plist=ExportOptions.plist` adımı açılır.

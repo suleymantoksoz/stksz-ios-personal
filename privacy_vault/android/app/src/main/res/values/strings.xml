@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_desc">Privacy Vault kilit motoru — kilitlediğiniz uygulamalar açıldığında doğrulama ekranı gösterir. İçerik okumaz.</string>
+    <!-- FAZ 10 — başlatıcı kimliği etiketleri -->
+    <string name="alias_calculator">Hesap Makinesi</string>
+    <string name="alias_notes">Hızlı Notlar</string>
+    <string name="alias_clock">Saat</string>
+    <string name="alias_weather">Hava Durumu</string>
+    <string name="admin_label">Privacy Vault kaldırma koruması</string>
+</resources>
