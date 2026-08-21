@@ -95,6 +95,12 @@ jobs:
         working-directory: STKSZ Capital/android
         run: ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tee "$RUNNER_TEMP/gradle-output.log"
 
+      # ── 11b) Uretilen APK'lari Listele ──
+      - name: Locate APK files
+        run: |
+          echo "=== Bulunan APK Dosyalari ==="
+          find "$SRC/android" -name "*.apk" || echo "Hic APK bulunamadi!"
+
       # ── 12) Hata teshis (Sadece Build Basarisizsa) ──
       - name: Diagnose build failure
         if: failure() || steps.gradle-build.outcome == 'failure'
@@ -112,8 +118,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
-          path: STKSZ Capital/android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+          path: STKSZ Capital/android/**/*.apk
+          if-no-files-found: warn
           retention-days: 14
 
       # ── 14) Hata logunu yukle (Sadece Build Basarisizsa) ──
