@@ -77,10 +77,10 @@ jobs:
           echo "=== pbxproj deployment targets ==="
           grep "IPHONEOS_DEPLOYMENT_TARGET" "$SRC/ios/App/App.xcodeproj/project.pbxproj" | head -5
           echo ""
-          # 14.0 veya daha yuksek olmali
+          # 15.0 veya daha yuksek olmali
           VER=$(grep -oP "platform :ios, '\K[0-9.]+" "$SRC/ios/App/Podfile")
-          if [ -z "$VER" ] || [ "$(echo "$VER < 14.0" | bc)" = "1" ]; then
-            echo "::error::Podfile deployment target $VER — 14.0+ gerekli (AdMob icin)"
+          if [ -z "$VER" ] || [ "$(echo "$VER < 15.0" | bc)" = "1" ]; then
+            echo "::error::Podfile deployment target $VER — 15.0+ gerekli (AdMob icin)"
             exit 1
           fi
           echo "Deployment target: $VER — OK"
