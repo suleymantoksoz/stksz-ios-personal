@@ -63,10 +63,10 @@ jobs:
         working-directory: STKSZ Capital
         run: npm ci || npm install --no-fund --no-audit
 
-      # ── 5) Capacitor sync ──
-      - name: Capacitor sync ios
+      # ── 5) Capacitor: yalnizca web varliklarini kopyala (Podfile'a dokunma) ──
+      - name: Capacitor copy ios
         working-directory: STKSZ Capital
-        run: npx cap sync ios
+        run: npx cap copy ios
 
       # ── 5b) Deployment target kontrol ──
       - name: Verify deployment target
@@ -75,7 +75,7 @@ jobs:
           grep "platform :ios" "$SRC/ios/App/Podfile"
           echo ""
           echo "=== pbxproj deployment targets ==="
-          grep "IPHONEOS_DEPLOYMENT_TARGET" "$SRC/ios/App/App.xcodeproj/project.pbxproj" | head -5
+          grep "IPHONEOS_DEPLOYMENT_TARGET" "$SRC/ios/App/App.xcproj/project.pbxproj" | head -5
           echo ""
           # 15.0 veya daha yuksek olmali
           VER=$(grep -oP "platform :ios, '\K[0-9.]+" "$SRC/ios/App/Podfile")
@@ -85,12 +85,17 @@ jobs:
           fi
           echo "Deployment target: $VER — OK"
 
-      # ── 6) CocoaPods ──
-      - name: CocoaPods install
+      # ── 6) Temiz kurulum: pod cache + eski dosyalari sil ──
+      - name: Clean CocoaPods cache
         working-directory: STKSZ Capital/ios/App
         run: |
           pod cache clean --all
-          pod install --repo-update
+          rm -rf Pods Podfile.lock
+
+      # ── 7) CocoaPods install ──
+      - name: CocoaPods install
+        working-directory: STKSZ Capital/ios/App
+        run: pod install --repo-update
 
       # ── 7) Xcode bilgisi ──
       - name: Xcode info
