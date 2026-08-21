@@ -87,6 +87,7 @@ jobs:
       - name: Gradle clean
         working-directory: STKSZ Capital/android
         run: ./gradlew clean --no-daemon
+        continue-on-error: true
 
       # ── 11) Gradle build ──
       - name: Build debug APK
@@ -95,30 +96,17 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all --info 2>&1 | tee "$RUNNER_TEMP/gradle-output.log"
         continue-on-error: true
 
-      # ── 10b) Build basarisizsa hata detayini gosterr ──
+      # ── 12) Hata analizi ──
       - name: Diagnose build failure
-        if: steps.gradle-build.outcome == 'failure'
+        if: always() && steps.gradle-build.outcome == 'failure'
         run: |
-          echo "==============================================="
-          echo "  GRADLE BUILD BASARISIZ — HATA ANALIZI"
-          echo "==============================================="
-          echo ""
+          echo "=== GRADLE BUILD BASARISIZ ==="
           LOG="$RUNNER_TEMP/gradle-output.log"
           if [ -f "$LOG" ]; then
-            echo "=== 'Caused by:' satirlari ==="
-            grep -n "Caused by:" "$LOG" | tail -20
-            echo ""
-            echo "=== 'FAILURE' satiri ve ustu (son 50 satir) ==="
-            grep -n "FAILURE\|BUILD FAILED\|Could not\|error:" "$LOG" | tail -20
-            echo ""
-            echo "=== build.gradle dosyasi ==="
-            cat app/build.gradle | head -40
-            echo ""
-            echo "=== gradle.properties ==="
-            cat gradle.properties 2>/dev/null || echo "(dosya yok)"
-            echo ""
-            echo "=== local.properties ==="
-            cat local.properties 2>/dev/null || echo "(dosya yok)"
+            echo "=== Caused by satirlari ==="
+            grep -C 3 "Caused by:" "$LOG" || true
+            echo "=== Son 100 satir ==="
+            tail -n 100 "$LOG"
           fi
           exit 1
 
@@ -132,9 +120,9 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      # ── 12) Hata logunu artifact olarak yukle ──
+      # ── 13) Hata logunu artifact olarak yukle ──
       - name: Upload build log on failure
-        if: steps.gradle-build.outcome == 'failure'
+        if: always() && steps.gradle-build.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-gradle-build-log
