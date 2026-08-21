@@ -4,57 +4,85 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["STKSZ Capital/www/**", "STKSZ Capital/android/**", "STKSZ Capital/package.json", "STKSZ Capital/capacitor.config.json", ".github/workflows/android-apk.yml"]
+    paths:
+      - "STKSZ Capital/www/**"
+      - "STKSZ Capital/android/**"
+      - "STKSZ Capital/package.json"
+      - "STKSZ Capital/capacitor.config.json"
+      - ".github/workflows/android-apk.yml"
 
 jobs:
   build-android:
     name: Build STKSZ debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    defaults:
-      run:
-        working-directory: STKSZ Capital
+
+    env:
+      SRC: STKSZ Capital
+
     steps:
+      # ── 1) Checkout ──
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: On kontrol - repo yapisi dogru mu?
+      # ── 2) Proje yapisi kontrol ──
+      - name: Verify project structure
         run: |
-          eksik=0
-          for f in package.json package-lock.json capacitor.config.json www/index.html android/gradlew android/app/build.gradle; do
-            if [ ! -e "$f" ]; then echo "::error::EKSIK DOSYA: $f — STKSZ Capital iceriginde olmali."; eksik=1; fi
+          echo "=== Repo root ==="
+          ls -la
+          echo ""
+          echo "=== STKSZ Capital ==="
+          ls -la "$SRC/"
+          echo ""
+          cd "$SRC"
+          for f in package.json capacitor.config.json www/index.html android/gradlew android/app/build.gradle; do
+            if [ ! -e "$f" ]; then
+              echo "::error::Eksik: $SRC/$f"
+              exit 1
+            fi
           done
-          if [ $eksik -eq 1 ]; then echo "STKSZ Capital dizini icerigi:"; ls -la; exit 1; fi
-          echo "Tum on kosullar tamam."
+          echo "Tum dosyalar tamam."
 
-      - name: Setup Node.js 22
+      # ── 3) Node.js ──
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: "STKSZ Capital/package-lock.json"
 
+      # ── 4) Java 17 Temurin ──
       - name: Setup Java 17 (Temurin)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
+      # ── 5) Android SDK ──
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      # ── 6) npm install ──
       - name: Install dependencies
+        working-directory: STKSZ Capital
         run: npm ci || npm install --no-fund --no-audit
 
-      - name: Capacitor sync Android
+      # ── 7) Capacitor sync ──
+      - name: Capacitor sync android
+        working-directory: STKSZ Capital
         run: npx cap sync android
 
+      # ── 8) Gradle izni ──
+      - name: Grant gradlew execute permission
+        working-directory: STKSZ Capital/android
+        run: chmod +x gradlew
+
+      # ── 9) Gradle build ──
       - name: Build debug APK
         working-directory: STKSZ Capital/android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
+      # ── 10) APK yukle ──
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
