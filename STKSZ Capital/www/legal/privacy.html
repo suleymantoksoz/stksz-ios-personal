@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050607">
-<title>Gizlilik Politikası · STKSZ</title>
+<title>Gizlilik Politikasi · STKSZ</title>
 <style>
 :root{--bg:#050607;--panel:#0b0f11;--line:#1d252a;--text:#f4f7f8;--muted:#89949a;--green:#00df78}
 *{box-sizing:border-box}
@@ -16,22 +16,96 @@ h2{font-size:15px;letter-spacing:1.5px;color:#aeb8bc;margin-top:26px}
 p,li{color:var(--muted);line-height:1.65;font-size:14px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-top:14px}
 a.back{display:inline-block;margin-bottom:18px;color:var(--green);text-decoration:none;font-weight:800;font-size:13px}
+code{background:#0f1417;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:12px}
 </style>
 </head>
 <body>
 <main>
 <a class="back" href="../index.html">← STKSZ Komuta Merkezi</a>
-<h1><span>STKSZ</span> · Gizlilik Politikası</h1>
+<h1><span>STKSZ</span> · Gizlilik Politikasi</h1>
+<p style="color:#89949a;font-size:12px">Son guncelleme: 21 Agustos 2026</p>
+
 <div class="card">
-<h2>VERİ SAKLAMA</h2>
-<p>STKSZ yerel öncelikli (local-first) bir uygulamadır. Portföy verileriniz, ayarlarınız ve tercihleriniz yalnızca cihazınızın yerel depolamasında (localStorage / Cache Storage) tutulur; hiçbir sunucuya yüklenmez.</p>
-<h2>ÜÇÜNCÜ TARAF VERİ SAĞLAYICILAR</h2>
-<p>Piyasa fiyatları, döviz kurları ve haber başlıkları, yalnızca görüntüleme amacıyla üçüncü taraf veri sağlayıcı API'lerinden çekilir. Bu isteklerde kişisel veri gönderilmez.</p>
-<h2>ÇEREZLER VE TAKİP</h2>
-<p>Uygulama analitik, reklam veya izleme çerezi kullanmaz.</p>
-<h2>VERİ SİLME</h2>
-<p>Tarayıcı/uygulama verilerini temizlediğinizde tüm yerel kayıtlar kalıcı olarak silinir.</p>
+<h2>1. GENEL BAKIS</h2>
+<p>STKSZ Capital ("Uygulama"), Borsa Istanbul (BIST) portfoy yonetimi ve piyasa takibi icin gelistirilmis yerel oncelikli (local-first) bir finans uygulamasidir. Gizlilik politikamiz, Uygulamayi kullandiginizda hangi verilerin toplandigini, nasil kullanildigini ve ne kadar korundugunu aciklar.</p>
 </div>
+
+<div class="card">
+<h2>2. TOPLANAN VERILER</h2>
+<p><b>Uygulama icinde uretilen veriler (yerel depolama):</b></p>
+<ul>
+  <li>Portfoy verileri (hisse senetleri, miktarlar, maliyet degerleri)</li>
+  <li>Sanal cuzdan islemleri ve bakiye gecmisi</li>
+  <li>Kullanici profil bilgileri (ad, yatirimci profili, profil fotografi)</li>
+  <li>Tercihler (para birimi, tema, bildirim ayarlari)</li>
+  <li>Yatirimci seviye testi cevaplari ve sonuclari</li>
+  <li>Rozet ve yetkilendirme kayitlari</li>
+  <li>STKSZ AI sohbet gecmisi</li>
+  <li>API anahtarlari (yalnizca bu cihazda saklanir)</li>
+</ul>
+<p><b>Ucuncu taraf verileri (harici API'lerden goruntuleme amacli):</b></p>
+<ul>
+  <li>BIST piyasa verileri (Twelve Data, BiQuote, apinoktam)</li>
+  <li>Doviz kurlari ve altin fiyatlari (serbest piyasa kaynaklari)</li>
+  <li>Haber basliklari ve ozetleri (Google News RSS, Marketaux)</li>
+  <li>Hava durumu (Open-Meteo)</li>
+  <li>Kripto para fiyatlari (Binance API)</li>
+</ul>
+<p>Bu isteklerde kisisel veri gonderilmez; yalnizca goruntuleme icin kamuya acik veri cekilir.</p>
+</div>
+
+<div class="card">
+<h2>3. VERI SAKLAMA VE GUVENLIK</h2>
+<p>Tum kullanic verileri yalnizca cihazinizin yerel depolamasinda (localStorage / Cache Storage) tutulur. Verileriniz hicbir sunucuya yuklenmez, ucuncu taraflarla paylasilmaz veya disari aktarilmaz.</p>
+<p>Opsiyonel senkronizasyon ozelligi kullanildiginda, veriler yalnizca kullanicinin kendi sunucusunda (kendi backend URL'si) depolanir. Bu sunucu yapilandirmasi kullanici tarafindan yonetilir.</p>
+<p>ENR (Ekstra Neutral Rapor) hassas verileri cihaz biyometrik dogrulamasi (Face ID / parmak izi) ile korunur. Biyometrik veri uygulama disinda saklanmaz veya paylasilmaz.</p>
+</div>
+
+<div class="card">
+<h2>4. UCUNCU TARAF HIZMETLER</h2>
+<p><b>Google AdMob:</b> Uygulama reklam gosterimi icin Google AdMob kullanir. AdMob, reklam kisillestirmek icin cihaz tanimlayicilari (IDFA/AAID) toplayabilir. Kullanici iOS 14+ uygulamalarda App Tracking Transparency (ATT) izni ile bilgilendirilir ve rizasi alinir. AdMob'un kendi gizlilik politikasi icin <a href="https://policies.google.com/technologies/ads" style="color:var(--green)">Google Reklam Politikalari</a> sayfasina bakiniz.</p>
+<p><b>Google Gemini API:</b> STKSZ AI ozelligi, kullanici tarafindan yapilandirilan Google Gemini API ile calisir. Sohbet icerigi, yalnizca kullanici istegiyle islenir ve kalici olarak saklanmaz. API anahtari yalnizca cihazinizda saklanir.</p>
+<p><b>Veri Saglayicilar:</b> Twelve Data, BiQuote, apinoktam, Marketaux, Google News RSS, Open-Meteo, Binance. Bu saglayicilara kisisel veri gonderilmez.</p>
+</div>
+
+<div class="card">
+<h2>5. BIYOMETRIK DOGRULAMA</h2>
+<p>Uygulama, Face ID (iOS) veya parmak izi (Android) gibi cihaz biyometrik dogrulama ozelliklerini ENR verilerinin guvenli gosterimi icin kullanir. Biyometrik veri yalnizca cihaz isletim sistemi tarafindan islenir; uygulama bu verilere erisemez, saklayamaz veya paylasamaz.</p>
+</div>
+
+<div class="card">
+<h2>6. REKLAM VE IZLEME</h2>
+<p>Uygulama icerisinde Google AdMob uzerinden reklam gosterilir. AdMob, kullanici deneyimini kisisellestirmek amaciyla cihaz tanimlayicilari kullanabilir. iOS 14 ve uzeri cihazlarda, AdMob initializasyonundan once App Tracking Transparency (ATT) rizasi istenir. Kullanici izin vermedigi takdirde kisiselles reklam gosterilmez.</p>
+<p>Uygulama baska herhangi bir analitik, izleme veya reklam agi kullanmaz.</p>
+</div>
+
+<div class="card">
+<h2>7. COCUKLARIN GIZLIGI</h2>
+<p>Uygulama 13 yas altindaki cocuklara yonelik degildir. 13 yas altindaki kullanicilara ait kisisel veri bilerek toplanmaz.</p>
+</div>
+
+<div class="card">
+<h2>8. VERI PAYLASIMI</h2>
+<p>Kisisel verileriniz ucuncu taraflarla paylasilmaz, satilmaz veya kiralanmaz. Yalnizca kullanici tarafindan acikca yapilandirilmis olan (ornegin kendi sunucusuna senkronizasyon) durumlarda veriler kullanici denetiminde aktarilabilir.</p>
+</div>
+
+<div class="card">
+<h2>9. VERI SILME</h2>
+<p>Tum verileriniz cihazinizda saklandigindan, uygulamayi sildiginizde veya tarayici verilerinizi temizlediginizde tum kayitlar kalici olarak silinir. Uygulama icindeki "Veri Yonetimi" bolumunden de tek tek veya toplu olarak veri silebilirsiniz.</p>
+</div>
+
+<div class="card">
+<h2>10. POLITIKA DEGISIKLIKLERI</h2>
+<p>Bu gizlilik politikasi gerekli goruldugunce guncellenebilir. Guncellemeler uygulama icinde veya App Store sayfasinda duyurulur. Politikanin en guncel surumunu bu sayfadan kontrol edebilirsiniz.</p>
+</div>
+
+<div class="card">
+<h2>11. ILETISIM</h2>
+<p>Gizlilik politikamizla ilgili sorulariniz icin:</p>
+<p>E-posta: <code>stksz-capital@outlook.com</code></p>
+<p>GitHub: <code>github.com/suleymantoksoz/stksz-ios-personal</code></p>
+</div>
+
 </main>
 </body>
 </html>
