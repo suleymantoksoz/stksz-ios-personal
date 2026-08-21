@@ -71,7 +71,12 @@ jobs:
       - name: Ensure www directory exists
         run: mkdir -p "$SRC/www"
 
-      # ── 8) Capacitor sync ──
+      # ── 8a) Capacitor copy ──
+      - name: Capacitor copy
+        working-directory: STKSZ Capital
+        run: npx cap copy android
+
+      # ── 8b) Capacitor sync ──
       - name: Capacitor sync android
         working-directory: STKSZ Capital
         run: npx cap sync android
@@ -98,8 +103,10 @@ jobs:
       # ── 11b) Uretilen APK'lari Listele ──
       - name: Locate APK files
         run: |
-          echo "=== Bulunan APK Dosyalari ==="
-          find "$SRC/android" -name "*.apk" || echo "Hic APK bulunamadi!"
+          echo "=== Android Dizinindeki Tum APK'lar ==="
+          find "$SRC/android" -name "*.apk" || true
+          echo "=== Tum Repodaki APK'lar ==="
+          find . -name "*.apk" || true
 
       # ── 12) Hata teshis (Sadece Build Basarisizsa) ──
       - name: Diagnose build failure
@@ -118,7 +125,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
-          path: STKSZ Capital/android/**/*.apk
+          path: "**/outputs/apk/**/*.apk"
           if-no-files-found: warn
           retention-days: 14
 
