@@ -57,9 +57,10 @@
 <header class="header">
   <div class="brand-shell logo-shell"><img class="brand-logo-original" src="assets/icons/stksz-logo.png" alt="STKSZ Komuta Merkezi" width="936" height="707" decoding="async" fetchpriority="high"></div>
   <!-- v119 (2. ADIM): AI butonu alt navigasyon merkezine taşındı -->
-  <div class="header-side header-side-v2">
+   <div class="header-side header-side-v2">
     <div class="header-status-row">
       <div id="status" class="header-data-status" aria-live="polite">Veri: Yerel kayıt · Son: Henüz yok</div>
+      <div id="headerInvestorChip" class="header-investor-chip" hidden aria-label="Yatırımcı rozeti"></div>
       <button type="button" id="headerRefreshBtn" class="hbtn header-refresh-btn" onclick="manualRefreshAll()" aria-label="Verileri yenile" title="Verileri yenile"><svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"/><path d="M20.5 3.5v4.6h-4.6"/></svg></button>
     </div>
     <div class="header-actions header-actions-v2">
@@ -433,6 +434,8 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuVirtualWallet')"><span><b>🧪 SANAL CÜZDAN</b><small>Simülasyon · gerçek para değildir</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuDataManagement')"><span><b>VERİ YÖNETİMİ</b><small>Yedek, geri yükleme ve CSV</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAbout')"><span><b>HAKKINDA</b><small>STKSZ veri ve güvenlik ilkeleri</small></span><i>→</i></button></div>
+      <div class="menu-nav-card menu-telegram-card" data-telegram-only hidden><button type="button" class="menu-nav-trigger" onclick="openTelegramBot()"><span><b>🤖 TELEGRAM BOT</b><small>Otomatik bildirim ve sinyal botu</small></span><i>→</i></button></div>
+      <div class="menu-nav-card menu-telegram-locked" data-telegram-locked hidden><button type="button" class="menu-nav-trigger" onclick="showToast('Telegram Bot erişimi için 100₺ Premium Rozet edinin veya Admin olun.')"><span><b>🔒 TELEGRAM BOT</b><small>100₺ Premium Rozet ile erişilebilir</small></span><i>🔒</i></button></div>
       <div class="menu-nav-card menu-logout-card"><button type="button" class="menu-nav-trigger" onclick="authLogout()"><span><b>🚪 ÇIKIŞ YAP</b><small>Oturumu kapat ve çıkış ekranına dön</small></span><i>→</i></button></div>
     </div>
   </div>
@@ -445,6 +448,8 @@
       <div class="field"><label for="profileName">Profil adı</label><input id="profileName" placeholder="Profil adı"></div>
       <div class="field"><label for="investorProfile">Yatırımcı profili</label><select id="investorProfile"><option value="">Yatırımcı profili seç</option><option value="Temkinli">Temkinli</option><option value="Dengeli">Dengeli</option><option value="Dinamik">Dinamik</option></select></div>
       <div id="profileBadgeRow" class="profile-badge-row"></div>
+      <div id="profileBadgeLevel" class="profile-badge-section"><div class="profile-badge-section-title">🛡️ UNVAN ROZETİ</div><div id="profileBadgeLevelContent" class="profile-badge-section-content"><span class="help">Yatırımcı testini yaparak unvan rozetini kazan.</span></div></div>
+      <div id="profileBadgePremium" class="profile-badge-section"><div class="profile-badge-section-title">⭐ AYRICALIK ROZETİ</div><div id="profileBadgePremiumContent" class="profile-badge-section-content"><span class="help">Satın alınan rozetler burada gösterilir.</span></div></div>
       <p class="help">Profil bilgileri ve fotoğraf yalnızca bu tarayıcının yerel kaydında tutulur.</p>
     </div>
 
@@ -463,6 +468,27 @@
       <div class="field"><label for="badgeCodeInput">Özel rozet kodun varsa gir</label><input id="badgeCodeInput" autocomplete="off" spellcheck="false" placeholder="STKSZ-XXXXXXXXXXXX"></div>
       <div class="toolbar"><button type="button" class="btn primary" onclick="redeemBadgeCode()">KODU KULLAN</button></div>
       <div id="badgeCodeStatus" class="provider-test-state">Kod doğrulaması sunucuda yapılır; kodlar uygulama içinde tutulmaz.</div>
+    </div>
+
+    <!-- v125: ROZET MAĞAZASI — satın alınabilir rozetler -->
+    <div class="menu-form-card" id="badgeShopCard">
+      <div class="section-title">ROZET MAĞAZASI</div>
+      <div class="badge-shop-grid">
+        <div class="badge-shop-item badge-shop-50" data-badge-id="STKSZ_PRO">
+          <div class="badge-shop-icon badge-neon-rgb">⚡</div>
+          <div class="badge-shop-info"><b>STKSZ PRO</b><small>AI Pro · Grafik Premium</small></div>
+          <div class="badge-shop-price">50 ₺</div>
+          <button type="button" class="btn small primary badge-buy-btn" onclick="purchaseBadge('STKSZ_PRO')">SATIN AL</button>
+          <div class="badge-shop-owned" hidden>✓ SAHİP OLUNAN</div>
+        </div>
+        <div class="badge-shop-item badge-shop-100" data-badge-id="STKSZ_ELITE">
+          <div class="badge-shop-icon badge-premium-gold">👑</div>
+          <div class="badge-shop-info"><b>STKSZ ELITE</b><small>Tüm ayrıcalıklar + Telegram Bot</small></div>
+          <div class="badge-shop-price">100 ₺</div>
+          <button type="button" class="btn small primary badge-buy-btn" onclick="purchaseBadge('STKSZ_ELITE')">SATIN AL</button>
+          <div class="badge-shop-owned" hidden>✓ SAHİP OLUNAN</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -815,6 +841,19 @@
   <section class="menu-view menu-subpage" id="menuAbout" data-menu-parent="menuHome" hidden>
     <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>HAKKINDA</h2></div><span></span></div>
     <div class="menu-form-card"><h3>STKSZ Komuta Merkezi</h3><p class="help">Öncelik sırası: veri doğruluğu, kullanıcı onayı, risk kontrolü ve analiz. Veri yoksa veri üretilmez. ENR verileri Midas toplamı, skor, risk ve raporlardan ayrı tutulur.</p><div class="source-fact">Sürüm: <span id="menuBuildInfo">v1</span> <small id="menuBuildDetail" style="opacity:.45"></small></div><div class="toolbar"><a class="btn btn-link" href="legal/privacy.html">Gizlilik Politikası</a><a class="btn btn-link" href="legal/support.html">Destek</a></div></div>
+  </section>
+
+  <section class="menu-view menu-subpage" id="menuTelegramBot" data-menu-parent="menuHome" hidden>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>TELEGRAM BOT</h2></div><span></span></div>
+    <div class="menu-form-card telegram-bot-panel">
+      <span class="tg-bot-icon">🤖</span>
+      <h3>STKSZ Telegram Bot</h3>
+      <p>Otomatik portföy bildirimleri, fiyat alarmları ve sinyal bildirimleri için Telegram botu. Bot yapılandırması ve token yönetimi yakında eklenecektir.</p>
+      <div class="source-fact" style="margin-top:16px">
+        <b>Durum:</b> Yakında aktif olacak<br>
+        <small>Bu özellik yalnızca 100₺ Premium Rozet veya Admin erişimi ile kullanılabilir.</small>
+      </div>
+    </div>
   </section>
 </section>
 </main>
@@ -2291,6 +2330,22 @@ function renderInvestorProfileUI(){
   eng.entitlements.badges().forEach(b=>{if(!badges.some(x=>x.id===b.id))badges.push({id:b.id,label:eng.BADGES[b.id].label,kind:eng.BADGES[b.id].kind});});
   row.innerHTML=badges.length?badges.map(b=>`<span class="profile-badge badge-${esc(b.id.toLowerCase())} badge-kind-${esc(b.kind)}">${esc(b.label)}</span>`).join(""):'<span class="help">Rozet yok — yatırımcı testini yaparak seviye rozetini kazan.</span>';
  }
+ /* Unvan Rozeti (level badge) */
+ const levelContent=document.getElementById("profileBadgeLevelContent");
+ if(levelContent){
+  if(level&&eng.BADGES[level.level]){
+   levelContent.innerHTML=`<span class="profile-badge badge-kind-level">${esc(eng.BADGES[level.level].label)}</span><small style="color:#8a7e72;font-size:8px;margin-left:4px">${esc(String(level.score))} puan</small>`;
+  }else{levelContent.innerHTML='<span class="help">Henüz test yapılmadı.</span>';}
+ }
+ /* Ayrıcalık Rozeti (premium badges) */
+ const premContent=document.getElementById("profileBadgePremiumContent");
+ if(premContent){
+  const premiums=eng.entitlements.badges().filter(b=>eng.BADGES[b.id]&&eng.BADGES[b.id].kind!=="level"&&eng.BADGES[b.id].kind!=="system");
+  if(premiums.length){premContent.innerHTML=premiums.map(b=>`<span class="profile-badge badge-kind-${esc(eng.BADGES[b.id].kind)}">${esc(eng.BADGES[b.id].label)}</span>`).join("");}
+  else{premContent.innerHTML='<span class="help">Henüz satın alınan rozet yok.</span>';}
+ }
+ updateHeaderInvestorChip();
+ updateBadgeShopUI();
  renderAdminPanelVisibility();
 }
 function startInvestorTest(){
@@ -2342,8 +2397,67 @@ function renderAdminPanelVisibility(){
   eng.entitlements.grant("ADMIN","system:auto");
  }
  const admin=eng.entitlements.isAdmin();
+ const hasElite=eng.entitlements.badges().some(b=>b.id==="STKSZ_ELITE");
+ const tgAccess=admin||hasElite;
  document.querySelectorAll("[data-admin-only]").forEach(el=>{el.hidden=!admin;});
  document.querySelectorAll("[data-non-admin-note]").forEach(el=>{el.hidden=admin;});
+ document.querySelectorAll("[data-telegram-only]").forEach(el=>{el.hidden=!tgAccess;});
+ document.querySelectorAll("[data-telegram-locked]").forEach(el=>{el.hidden=tgAccess;});
+ applyGuestMode();
+ try{updateHeaderInvestorChip();}catch(e){}
+}
+/* ---- Misafir modu: menü kartları üzerinde overlay + kilit ---- */
+function applyGuestMode(){
+ if(!isGuest()){document.querySelectorAll(".menu-nav-card.guest-blocked").forEach(el=>el.classList.remove("guest-blocked"));return;}
+ document.querySelectorAll("#menuMainCards .menu-nav-card").forEach(card=>{
+  if(card.classList.contains("menu-logout-card")){card.classList.remove("guest-blocked");return;}
+  card.classList.add("guest-blocked");
+  const btn=card.querySelector(".menu-nav-trigger");
+  if(btn){btn.onclick=function(e){e.preventDefault();e.stopPropagation();showToast("Tüm özellikleri kullanmak için giriş yapın.");return false;};}
+ });
+}
+/* ---- Satın alınabilir rozetler ---- */
+function purchaseBadge(badgeId){
+ const eng=window.STKSZAIEngine;if(!eng)return;
+ if(isGuest()){showToast("Satın alma için hesap gerekli. Menü → Profil'den giriş yapın.");return;}
+ const prices={STKSZ_PRO:"50 ₺",STKSZ_ELITE:"100 ₺"};
+ const names={STKSZ_PRO:"STKSZ PRO",STKSZ_ELITE:"STKSZ ELITE"};
+ if(!prices[badgeId]){showToast("Bilinmeyen rozet.");return;}
+ if(eng.entitlements.badges().some(b=>b.id===badgeId)){showToast(names[badgeId]+" rozetine zaten sahipsiniz.");return;}
+ if(!confirm(prices[badgeId]+" karşılığında "+names[badgeId]+" rozetini satın almak istediğinize emin misiniz?\n\nNot: Bu demo modudur. Gerçek ödeme entegrasyonu gerekir."))return;
+ eng.entitlements.grant(badgeId,"purchase:demo");
+ showToast("🎉 "+names[badgeId]+" rozeti başarıyla verildi!");
+ updateBadgeShopUI();
+ renderAdminPanelVisibility();
+ renderInvestorProfileUI();
+}
+function updateBadgeShopUI(){
+ const eng=window.STKSZAIEngine;if(!eng)return;
+ const owned=eng.entitlements.badges().map(b=>b.id);
+ document.querySelectorAll(".badge-shop-item").forEach(item=>{
+  const id=item.dataset.badgeId;
+  const buyBtn=item.querySelector(".badge-buy-btn");
+  const ownedDiv=item.querySelector(".badge-shop-owned");
+  if(owned.includes(id)){if(buyBtn)buyBtn.hidden=true;if(ownedDiv)ownedDiv.hidden=false;}
+ });
+}
+/* ---- Telegram Bot sayfası ---- */
+function openTelegramBot(){
+ const eng=window.STKSZAIEngine;if(!eng)return;
+ const admin=eng.entitlements.isAdmin();
+ const hasElite=eng.entitlements.badges().some(b=>b.id==="STKSZ_ELITE");
+ if(!admin&&!hasElite){showToast("Telegram Bot erişimi için 100₺ Premium Rozet edinin veya Admin olun.");return;}
+ openMenuPanel("menuTelegramBot");
+}
+/* ---- Header yatırımcı rozeti chip ---- */
+function updateHeaderInvestorChip(){
+ const eng=window.STKSZAIEngine;if(!eng)return;
+ const chip=document.getElementById("headerInvestorChip");if(!chip)return;
+ const level=eng.profile.investorLevel();
+ if(!level||!eng.BADGES[level.level]){chip.hidden=true;return;}
+ const icons={BRONZ:"🛡️",GUMUS:"🛡️",ALTIN:"🛡️"};
+ chip.hidden=false;
+ chip.innerHTML=`<span class="chip-icon">${icons[level.level]||"🛡️"}</span>${esc(level.title.split(" ")[0])}`;
 }
 /* Normal kullanıcıya yalnız BAĞLI / BAĞLI DEĞİL durumu gösterilir — anahtar/sağlayıcı detayı gösterilmez */
 async function refreshNonAdminStates(){
@@ -3076,7 +3190,7 @@ async function refreshAiConnBadge(){
 const AUTH_ENABLED=true;
 let authState=safeJson(storageGet("stkszAuth"),null);
 let authReady=false;
-const GUEST_BLOCKED_FNS=["openPlEditor","openCashEditor","openManual","openAddAsset","openNewTransaction","vwInit","vwExecute","vwTradeConfirm","aiApplyTradeProposal","aiApplyDividendProposal","saveProviderKey","syncCreateAccount","syncPairDevice","openVwTrade"];
+const GUEST_BLOCKED_FNS=["openPlEditor","openCashEditor","openManual","openAddAsset","openNewTransaction","vwInit","vwExecute","vwTradeConfirm","aiApplyTradeProposal","aiApplyDividendProposal","saveProviderKey","syncCreateAccount","syncPairDevice","openVwTrade","purchaseBadge","openTelegramBot"];
 function isGuest(){return authState?.mode==="guest";}
 function isAuthed(){return Boolean(authState&&(authState.mode==="account"||authState.mode==="guest"));}
 function authPersist(){storageSet("stkszAuth",JSON.stringify(authState));}
@@ -4224,7 +4338,7 @@ const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMe
    else lastAutoRefreshAt=Number.isFinite(lastSuccess)?lastSuccess:Date.now();
   }
  }catch(error){}
-ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
+ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{updateHeaderInvestorChip();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
 </script>
 </body>
 </html>

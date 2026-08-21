@@ -2987,3 +2987,68 @@ body:not([data-theme="light"]) .chart-fullscreen-btn:active{transform:scale(.95)
 /* Light theme: chart tools + buttons contrast */
 body[data-theme="light"] .chart-fullscreen-btn{background:#f5f0ea;color:#8C5220;border-color:#d4c5b0}
 body[data-theme="light"] .chart-fullscreen .chart-fullscreen-btn{background:#f0e8de;border-color:#B87333;color:#8C5220}
+
+/* === v125: YENİ ÖZELLİKLER === */
+
+/* Header investor badge chip */
+.header-investor-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border:1px solid rgba(184,115,51,.4);border-radius:20px;background:rgba(184,115,51,.1);color:#e2a968;font-size:9px;font-weight:800;letter-spacing:.5px;white-space:nowrap;flex:0 0 auto}
+.header-investor-chip .chip-icon{font-size:12px}
+body[data-theme="light"] .header-investor-chip{border-color:rgba(140,82,32,.3);background:rgba(140,82,32,.08);color:#8C5220}
+
+/* Guest mode overlay on menu cards */
+.menu-nav-card.guest-blocked{position:relative}
+.menu-nav-card.guest-blocked::after{content:"🔒";position:absolute;inset:0;display:grid;place-items:center;border-radius:14px;background:rgba(5,5,8,.75);backdrop-filter:blur(2px);color:#e2a968;font-size:22px;z-index:5;cursor:not-allowed}
+.menu-nav-card.guest-blocked.menu-logout-card::after{display:none}
+.menu-nav-card.guest-blocked.menu-logout-card{pointer-events:auto}
+
+/* Badge shop grid */
+.badge-shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.badge-shop-item{display:grid;gap:8px;padding:16px;border-radius:14px;text-align:center;position:relative;overflow:hidden}
+.badge-shop-info b{display:block;font-size:11px;letter-spacing:.5px;margin-top:4px}
+.badge-shop-info small{display:block;color:#8a7e72;font-size:8.5px;margin-top:3px}
+.badge-shop-price{font-size:18px;font-weight:900;letter-spacing:.5px}
+.badge-shop-owned{font-size:9px;font-weight:800;color:#D0904E;letter-spacing:.5px}
+.badge-buy-btn{width:100%}
+.badge-shop-owned[hidden]{display:none}
+
+/* 50 TL: RGB Neon badge */
+.badge-shop-50{border:1px solid #5a3e1e;background:linear-gradient(145deg,#0e0b08,#090706)}
+.badge-shop-50 .badge-shop-icon{width:48px;height:48px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:22px;position:relative}
+.badge-neon-rgb{animation:neon-rotate 3s linear infinite;border:2px solid transparent;border-image:linear-gradient(var(--neon-angle),#ff0040,#ff8800,#ffcc00,#00ff88,#0088ff,#8800ff,#ff0040) 1;border-radius:50%;background:rgba(0,0,0,.3)}
+.badge-shop-50 .badge-shop-price{color:#ff6b6b}
+@keyframes neon-rotate{0%{--neon-angle:0deg}100%{--neon-angle:360deg}}
+@property --neon-angle{syntax:"<angle>";initial-value:0deg;inherits:false}
+.badge-shop-50 .badge-shop-icon{border:3px solid #ff4060;box-shadow:0 0 12px rgba(255,64,96,.4),0 0 24px rgba(0,136,255,.3),0 0 36px rgba(255,204,0,.2);animation:neon-glow 2s ease-in-out infinite alternate}
+@keyframes neon-glow{0%{box-shadow:0 0 12px rgba(255,64,96,.5),0 0 24px rgba(0,136,255,.35),0 0 36px rgba(255,204,0,.25)}50%{box-shadow:0 0 16px rgba(0,255,136,.45),0 0 30px rgba(255,64,96,.3),0 0 40px rgba(0,136,255,.25)}100%{box-shadow:0 0 14px rgba(0,136,255,.5),0 0 28px rgba(255,204,0,.35),0 0 38px rgba(255,64,96,.25)}}
+
+/* 100 TL: Premium Gold badge */
+.badge-shop-100{border:1px solid #8C5220;background:linear-gradient(145deg,#1a1208,#140e07);box-shadow:inset 0 0 30px rgba(184,115,51,.06)}
+.badge-shop-100 .badge-shop-icon{width:48px;height:48px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:22px;border:3px solid #D0904E;background:linear-gradient(135deg,#1a1208,#0e0a06);box-shadow:0 0 20px rgba(208,144,78,.35),inset 0 0 12px rgba(208,144,78,.15)}
+.badge-shop-100 .badge-shop-price{color:#D0904E;text-shadow:0 0 8px rgba(208,144,78,.3)}
+.badge-shop-100 .badge-shop-owned{color:#D0904E}
+
+/* Telegram Bot locked card */
+.menu-telegram-locked .menu-nav-trigger{opacity:.7}
+.menu-telegram-locked .menu-nav-trigger i{color:#8a7e72}
+.menu-telegram-locked .menu-nav-trigger small{color:#8a7e72}
+
+/* Profile badge sections */
+.profile-badge-section{margin-top:12px;padding:12px;border:1px solid #2a2318;border-radius:12px;background:linear-gradient(145deg,#0e0b08,#090706)}
+.profile-badge-section-title{font-size:10px;font-weight:900;color:#D0904E;letter-spacing:.8px;margin-bottom:8px}
+.profile-badge-section-content{display:flex;flex-wrap:wrap;gap:6px}
+.profile-badge-section-content .help{margin:0}
+.profile-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:9px;font-weight:800;letter-spacing:.4px}
+.badge-kind-level{border:1px solid rgba(184,115,51,.3);background:rgba(184,115,51,.08);color:#e2a968}
+.badge-kind-premium{border:1px solid rgba(208,144,78,.4);background:linear-gradient(135deg,rgba(208,144,78,.12),rgba(140,82,32,.08));color:#D0904E;box-shadow:0 0 8px rgba(208,144,78,.1)}
+.badge-kind-system{border:1px solid rgba(75,156,255,.3);background:rgba(75,156,255,.08);color:#7db4ff}
+body[data-theme="light"] .profile-badge-section{background:#fff;border-color:#d4ddd7}
+body[data-theme="light"] .profile-badge{border-color:#d4c5b0}
+body[data-theme="light"] .badge-kind-level{background:rgba(140,82,32,.08);color:#8C5220;border-color:rgba(140,82,32,.25)}
+body[data-theme="light"] .badge-kind-premium{background:linear-gradient(135deg,rgba(140,82,32,.1),rgba(208,144,78,.06));color:#8C5220;border-color:rgba(140,82,32,.3)}
+body[data-theme="light"] .badge-kind-system{background:rgba(50,100,180,.08);color:#3264b4;border-color:rgba(50,100,180,.25)}
+
+/* Telegram Bot panel (subpage placeholder) */
+.telegram-bot-panel{padding:20px;text-align:center}
+.telegram-bot-panel .tg-bot-icon{font-size:48px;margin-bottom:12px;display:block}
+.telegram-bot-panel h3{margin:0 0 8px;font-size:14px;color:#D0904E;letter-spacing:.5px}
+.telegram-bot-panel p{color:#8a7e72;font-size:10px;line-height:1.5;max-width:320px;margin:0 auto}
