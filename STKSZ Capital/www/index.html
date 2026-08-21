@@ -440,6 +440,7 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSettingsHub')"><span><b>AYARLAR</b><small>Görünüm, hava, güvenlik ve bildirim</small></span><i>→</i></button></div>
       <div class="menu-nav-card ai-nav-card"><button type="button" class="menu-nav-trigger" onclick="openStkszAi()"><span><b>🤖 STKSZ AI</b><small>Portföy yorumu, haber özeti ve soru-cevap</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar, veri kaynakları ve bağlantı testleri</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuPromoCodes')"><span><b>🎁 PROMOSYON KODU</b><small>Hediye kodu oluştur ve yönet</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-elite-only hidden><button type="button" class="menu-nav-trigger" onclick="openStkszEditorFromMenu()"><span><b>✏️ STKSZ EDİTÖR</b><small>Kendi stratejini ve endikatörünü yaz</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-elite-locked hidden><button type="button" class="menu-nav-trigger" onclick="showToast('STKSZ Editör yalnızca Elite Trader (100₺) rozeti sahiplerine özeldir.')"><span><b>🔒 STKSZ EDİTÖR</b><small>100₺ Elite Trader rozeti ile erişilebilir</small></span><i>🔒</i></button></div>
 
@@ -702,6 +703,26 @@
 
     </div>
     </div><!-- /admin-only-wrap (v118) -->
+  </section>
+
+  <section class="menu-view menu-subpage" id="menuPromoCodes" data-menu-parent="menuHome" hidden>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>PROMOSYON KODU</h2></div><span></span></div>
+    <div class="menu-form-card" data-admin-only hidden>
+      <div class="section-title">KOD OLUŞTUR</div>
+      <div class="field"><label for="promoBadgeSelect">Rozet Seçimi</label><select id="promoBadgeSelect"><option value="STKSZ_PRO">STKSZ PRO · 50₺ Rozet</option><option value="STKSZ_ELITE">STKSZ ELITE · 100₺ Rozet</option><option value="GRAFIK_USTASI">GRAFİK USTASI</option><option value="STRATEJIST">STRATEJİST</option><option value="KRAL">KRAL YATIRIMCI</option></select></div>
+      <div class="field"><label for="promoTypeSelect">Kullanım Tipi</label><select id="promoTypeSelect" onchange="togglePromoDaysField()"><option value="permanent">Süresiz (Ömür Boyu)</option><option value="timed">Süreli (Deneme)</option></select></div>
+      <div class="field" id="promoDaysField" hidden><label for="promoDaysInput">Geçerlilik Süresi (Gün)</label><input id="promoDaysInput" type="number" min="1" max="365" value="29" placeholder="29"></div>
+      <div class="toolbar"><button type="button" class="btn primary" onclick="generatePromoCode()">KOD ÜRET</button></div>
+      <div id="promoGeneratedCode" class="provider-test-state" hidden></div>
+    </div>
+    <div class="menu-form-card" data-admin-only hidden>
+      <div class="section-title">ÜRETİLEN KODLAR</div>
+      <div id="promoCodeList" class="promo-code-list"><span class="help">Henüz kod üretilmedi.</span></div>
+    </div>
+    <div class="menu-form-card" data-non-admin-note>
+      <div class="section-title">SİSTEM DURUMU</div>
+      <div class="source-fact">Promosyon kodları yönetici tarafından yönetilir.</div>
+    </div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuAppearance" data-menu-parent="menuSettingsHub" hidden>
@@ -1487,7 +1508,7 @@ function setVisibleMenuView(id){document.querySelectorAll("#page-settings .menu-
 function showMenuHome(){menuPanelStack=[];pendingProfilePhoto="";setVisibleMenuView("menuHome");}
 function openUnifiedMenu(){const settings=document.getElementById("page-settings"),button=document.querySelector(".header-menu-btn");if(settings?.classList.contains("active")){closeUnifiedMenu();return;}const active=[...document.querySelectorAll(".page.active")].find(page=>page.id!=="page-settings");menuReturnPage=active?.id.replace("page-","")||"home";showPage("settings");showMenuHome();button?.setAttribute("aria-expanded","true");}
 function closeUnifiedMenu(){const target=document.getElementById("page-"+menuReturnPage)?menuReturnPage:"home";showMenuHome();showPage(target,document.querySelector(`.nav button[data-page="${target}"]`));document.querySelector(".header-menu-btn")?.setAttribute("aria-expanded","false");}
-function openMenuPanel(id){const target=document.getElementById(id);if(!target)return;const current=visibleMenuView();if(current&&current.id!==id)menuPanelStack.push(current.id);setVisibleMenuView(id);if(id==="menuActivityPanel")renderMenuActivity();if(id==="menuSecurity")refreshMenuSecurityState();if(id==="menuApiKeys"){renderApiKeysPanel();renderAdminPanelVisibility();refreshNonAdminStates();}if(id==="menuProfile")renderInvestorProfileUI();if(id==="menuFxData")refreshFxPanel();if(id==="menuVirtualWallet")renderVirtualWallet();if(id==="menuDataManagement")renderSyncState();if(id==="menuCurrency")renderCurrencyPanel();}
+function openMenuPanel(id){const target=document.getElementById(id);if(!target)return;const current=visibleMenuView();if(current&&current.id!==id)menuPanelStack.push(current.id);setVisibleMenuView(id);if(id==="menuActivityPanel")renderMenuActivity();if(id==="menuSecurity")refreshMenuSecurityState();if(id==="menuApiKeys"){renderApiKeysPanel();renderAdminPanelVisibility();refreshNonAdminStates();}if(id==="menuProfile")renderInvestorProfileUI();if(id==="menuFxData")refreshFxPanel();if(id==="menuVirtualWallet")renderVirtualWallet();if(id==="menuDataManagement")renderSyncState();if(id==="menuCurrency")renderCurrencyPanel();if(id==="menuPromoCodes")renderPromoCodeList();}
 function closeMenuPanel(){const current=visibleMenuView();if(current?.id==="menuProfile"){pendingProfilePhoto="";renderSettings();}const previous=menuPanelStack.pop()||"menuHome";setVisibleMenuView(previous);}
 function saveProfileAndClose(){saveProfile();closeMenuPanel();}
 function saveGoalsAndClose(){saveMenuNotes();closeMenuPanel();}
@@ -2378,12 +2399,12 @@ function renderInvestorProfileUI(){
  const startBtn=document.getElementById("investorTestStartBtn");if(startBtn)startBtn.textContent=level?"TESTİ YENİDEN YAP":"TESTİ BAŞLAT";
  /* rozet satırı: seviye rozeti + özel rozetler (adının altında) */
  const row=document.getElementById("profileBadgeRow");
- if(row){
-  const badges=[];
-  if(level&&eng.BADGES[level.level])badges.push({id:level.level,label:eng.BADGES[level.level].label,kind:"level"});
-  eng.entitlements.badges().forEach(b=>{if(!badges.some(x=>x.id===b.id))badges.push({id:b.id,label:eng.BADGES[b.id].label,kind:eng.BADGES[b.id].kind});});
-  row.innerHTML=badges.length?badges.map(b=>`<span class="profile-badge badge-${esc(b.id.toLowerCase())} badge-kind-${esc(b.kind)}">${esc(b.label)}</span>`).join(""):'<span class="help">Rozet yok — yatırımcı testini yaparak seviye rozetini kazan.</span>';
- }
+  if(row){
+   const badges=[];
+   if(level&&eng.BADGES[level.level])badges.push({id:level.level,label:eng.BADGES[level.level].label,kind:"level",daysLeft:null});
+   eng.entitlements.badges().forEach(b=>{if(!badges.some(x=>x.id===b.id))badges.push({id:b.id,label:eng.BADGES[b.id].label,kind:eng.BADGES[b.id].kind,daysLeft:eng.entitlements.badgeDaysLeft(b)});});
+   row.innerHTML=badges.length?badges.map(b=>{var lbl=esc(b.label);if(b.daysLeft!==null)lbl+=' <span class="promo-expiry-badge">⏳ '+b.daysLeft+' Gün</span>';return '<span class="profile-badge badge-'+esc(b.id.toLowerCase())+' badge-kind-'+esc(b.kind)+'">'+lbl+'</span>';}).join(""):'<span class="help">Rozet yok — yatırımcı testini yaparak seviye rozetini kazan.</span>';
+  }
  /* Unvan Rozeti (level badge) */
  const levelContent=document.getElementById("profileBadgeLevelContent");
  if(levelContent){
@@ -2391,13 +2412,18 @@ function renderInvestorProfileUI(){
    levelContent.innerHTML=`<span class="profile-badge badge-kind-level">${esc(eng.BADGES[level.level].label)}</span><small style="color:#8a7e72;font-size:8px;margin-left:4px">${esc(String(level.score))} puan</small>`;
   }else{levelContent.innerHTML='<span class="help">Henüz test yapılmadı.</span>';}
  }
- /* Ayrıcalık Rozeti (premium badges) */
- const premContent=document.getElementById("profileBadgePremiumContent");
- if(premContent){
-  const premiums=eng.entitlements.badges().filter(b=>eng.BADGES[b.id]&&eng.BADGES[b.id].kind!=="level"&&eng.BADGES[b.id].kind!=="system");
-  if(premiums.length){premContent.innerHTML=premiums.map(b=>`<span class="profile-badge badge-kind-${esc(eng.BADGES[b.id].kind)}">${esc(eng.BADGES[b.id].label)}</span>`).join("");}
-  else{premContent.innerHTML='<span class="help">Henüz satın alınan rozet yok.</span>';}
- }
+  /* Ayrıcalık Rozeti (premium badges) */
+  const premContent=document.getElementById("profileBadgePremiumContent");
+  if(premContent){
+   const premiums=eng.entitlements.badges().filter(b=>eng.BADGES[b.id]&&eng.BADGES[b.id].kind!=="level"&&eng.BADGES[b.id].kind!=="system");
+   if(premiums.length){premContent.innerHTML=premiums.map(b=>{
+    var label=esc(eng.BADGES[b.id].label);
+    var daysLeft=eng.entitlements.badgeDaysLeft(b);
+    if(daysLeft!==null){label+=' <span class="promo-expiry-badge">⏳ '+daysLeft+' Gün Kaldı</span>';}
+    return '<span class="profile-badge badge-kind-'+esc(eng.BADGES[b.id].kind)+'">'+label+'</span>';
+   }).join("");}
+   else{premContent.innerHTML='<span class="help">Henüz satın alınan rozet yok.</span>';}
+  }
  updateHeaderInvestorChip();
  updateBadgeShopUI();
  renderAdminPanelVisibility();
@@ -2428,19 +2454,17 @@ async function redeemBadgeCode(){
  const input=document.getElementById("badgeCodeInput"),status=document.getElementById("badgeCodeStatus");
  const code=String(input?.value||"").trim();
  if(!code){showToast("Önce rozet kodunu gir.");return;}
- const base=window.STKSZProviders?.stkszAiProvider?.backendUrl?.()||"";
- if(!base){if(status){status.textContent="⛔ Rozet kodu doğrulaması için STKSZ sunucu bağlantısı gerekli (yönetici yapılandırır).";status.className="provider-test-state error";}return;}
- if(status){status.textContent="Kod sunucuda doğrulanıyor…";status.className="provider-test-state";}
- try{
-  const res=await fetch(base+"/api/entitlement/redeem",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code})});
-  const payload=await res.json().catch(()=>({}));
-  if(!res.ok||payload.ok!==true)throw new Error(payload.error||"Kod doğrulanamadı.");
-  eng?.entitlements.grant(payload.badge,"code");
-  if(input)input.value="";
-  if(status){status.textContent=`✅ Rozet verildi: ${payload.badge}`;status.className="provider-test-state success";}
-  showToast("Yeni rozetin profiline eklendi: "+payload.badge);
-  renderInvestorProfileUI();
- }catch(error){if(status){status.textContent="⛔ "+String(error?.message||"Kod doğrulanamadı.");status.className="provider-test-state error";}}
+ if(!eng?.promo?.redeem){showToast("Promosyon sistemi hazır değil.");return;}
+ if(status){status.textContent="Kod doğrulanıyor…";status.className="provider-test-state";}
+ const result=eng.promo.redeem(code,authState?.username||"local");
+ if(!result.ok){if(status){status.textContent="⛔ "+result.error;status.className="provider-test-state error";}showToast(result.error);return;}
+ if(input)input.value="";
+ var msg="✅ "+eng.BADGES[result.badgeId]?.label+" rozeti verildi!";
+ if(result.type==="timed"&&result.days) msg+=" ("+result.days+" gün geçerli)";
+ if(status){status.textContent=msg;status.className="provider-test-state success";}
+ showToast(msg);
+ renderInvestorProfileUI();
+ renderPromoCodeList();
 }
 /* ---- PARA BİRİMİ SEÇİMİ ---- */
 const CURRENCY_SYMBOLS={TL:"₺",USD:"$",EUR:"€",SAR:"﷼"};
@@ -2626,7 +2650,37 @@ function updateBadgeShopUI(){
   const buyBtn=item.querySelector(".badge-buy-btn");
   const ownedDiv=item.querySelector(".badge-shop-owned");
   if(owned.includes(id)){if(buyBtn)buyBtn.hidden=true;if(ownedDiv)ownedDiv.hidden=false;}
- });
+  });
+}
+/* ---- Promosyon kodu oluşturucu (admin) ---- */
+function togglePromoDaysField(){
+ const sel=document.getElementById("promoTypeSelect"),field=document.getElementById("promoDaysField");
+ if(field)field.hidden=sel?.value!=="timed";
+}
+function generatePromoCode(){
+ const eng=window.STKSZAIEngine;if(!eng?.promo?.generate){showToast("Promosyon sistemi hazır değil.");return;}
+ const badgeId=document.getElementById("promoBadgeSelect")?.value;
+ const type=document.getElementById("promoTypeSelect")?.value||"permanent";
+ const days=Number(document.getElementById("promoDaysInput")?.value)||29;
+ const result=eng.promo.generate(badgeId,type,days);
+ if(!result.ok){showToast(result.error);return;}
+ const out=document.getElementById("promoGeneratedCode");
+ if(out){out.hidden=false;out.className="provider-test-state success";out.innerHTML="<b>Kod üretildi:</b><br><code style='font-size:14px;letter-spacing:1px;color:#D0904E'>"+esc(result.code)+"</code><br><small>"+esc(eng.BADGES[result.badgeId]?.label||result.badgeId)+(result.type==="timed"?" · "+result.days+" gün":" · Süresiz")+"</small>";}
+ showToast("Promosyon kodu üretildi: "+result.code);
+ renderPromoCodeList();
+}
+function renderPromoCodeList(){
+ const eng=window.STKSZAIEngine;if(!eng?.promo?.readAll)return;
+ const list=document.getElementById("promoCodeList");if(!list)return;
+ const codes=eng.promo.readAll();
+ if(!codes.length){list.innerHTML='<span class="help">Henüz kod üretilmedi.</span>';return;}
+ list.innerHTML=codes.slice().reverse().map(c=>{
+  const badgeLabel=eng.BADGES[c.badgeId]?.label||c.badgeId;
+  const typeLabel=c.type==="timed"?"Süreli · "+c.days+"g":"Süresiz";
+  const statusClass=c.used?"promo-code-used":"promo-code-active";
+  const statusLabel=c.used?"Kullanıldı ("+(c.usedBy||"?")+")":"Kullanılmamış";
+  return '<div class="promo-code-item '+statusClass+'"><div><b>'+esc(c.code)+'</b><br><small>'+esc(badgeLabel)+' · '+esc(typeLabel)+'</small></div><div><small>'+esc(statusLabel)+'</small>'+(c.usedAt?"<br><small>"+esc(c.usedAt.slice(0,10))+"</small>":"")+'</div></div>';
+ }).join("");
 }
 /* ---- Telegram Bot sayfası ---- */
 function openTelegramBot(){
@@ -4525,7 +4579,7 @@ const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMe
    else lastAutoRefreshAt=Number.isFinite(lastSuccess)?lastSuccess:Date.now();
   }
  }catch(error){}
-ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{updateHeaderInvestorChip();}catch(e){}try{updateAdBanner();}catch(e){}try{initAdMob();}catch(e){}try{renderCurrencyPanel();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
+ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{updateHeaderInvestorChip();}catch(e){}try{updateAdBanner();}catch(e){}try{initAdMob();}catch(e){}try{renderCurrencyPanel();}catch(e){}try{var eng=window.STKSZAIEngine;if(eng?.entitlements?.purgeExpired)eng.entitlements.purgeExpired();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
 </script>
 </body>
 </html>

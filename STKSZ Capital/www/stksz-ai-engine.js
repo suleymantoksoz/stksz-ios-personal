@@ -558,16 +558,19 @@
   });
 
   /* ---- entitlement deposu ---- */
+  var PROMO_CODES_KEY = 'stkszPromoCodes';
   function readEntitlements() {
     const ent = safeParse(readStorage('stkszEntitlements'), null);
     return ent && Array.isArray(ent.badges) ? ent : { badges: [] };
   }
   function writeEntitlements(ent) { writeStorage('stkszEntitlements', ent); }
-  function grantBadge(id, source) {
+  function grantBadge(id, source, expiresAt) {
     if (!BADGES[id]) return { ok: false, error: 'Bilinmeyen rozet: ' + id };
     const ent = readEntitlements();
     if (ent.badges.some(b => (b.id || b) === id)) return { ok: true, already: true };
-    ent.badges.push({ id, grantedAt: new Date().toISOString(), source: String(source || 'manual') });
+    var badge = { id: id, grantedAt: new Date().toISOString(), source: String(source || 'manual') };
+    if (expiresAt) badge.expiresAt = expiresAt;
+    ent.badges.push(badge);
     writeEntitlements(ent);
     return { ok: true };
   }
@@ -577,12 +580,82 @@
     writeEntitlements(ent);
     return { ok: true };
   }
-  function userBadges() { return readEntitlements().badges.map(b => (typeof b === 'string' ? { id: b } : b)).filter(b => BADGES[b.id]); }
+  function purgeExpiredBadges() {
+    var ent = readEntitlements();
+    var now = Date.now();
+    var removed = [];
+    ent.badges = ent.badges.filter(function (b) {
+      if (b.expiresAt && new Date(b.expiresAt).getTime() < now) { removed.push(b.id); return false; }
+      return true;
+    });
+    if (removed.length) writeEntitlements(ent);
+    return removed;
+  }
+  function userBadges() {
+    purgeExpiredBadges();
+    return readEntitlements().badges.map(b => (typeof b === 'string' ? { id: b } : b)).filter(b => BADGES[b.id]);
+  }
+  function userBadgesAll() {
+    purgeExpiredBadges();
+    return readEntitlements().badges.map(b => (typeof b === 'string' ? { id: b } : b)).filter(b => BADGES[b.id]);
+  }
+  function badgeDaysLeft(badge) {
+    if (!badge || !badge.expiresAt) return null;
+    var diff = new Date(badge.expiresAt).getTime() - Date.now();
+    if (diff <= 0) return 0;
+    return Math.ceil(diff / 86400000);
+  }
   function hasEntitlement(feature) {
     const level = safeParse(readStorage('stkszInvestorLevel'), null);
     const ids = userBadges().map(b => b.id);
     if (level && level.level && !ids.includes(level.level)) ids.push(level.level);
     return ids.some(id => (BADGES[id] ? BADGES[id].entitlements : []).includes(feature));
+  }
+
+  /* ---- promosyon kod deposu ---- */
+  function readPromoCodes() { return safeParse(readStorage(PROMO_CODES_KEY), []) || []; }
+  function writePromoCodes(arr) { writeStorage(PROMO_CODES_KEY, arr); }
+  function generatePromoCode(badgeId, type, days) {
+    if (!BADGES[badgeId]) return { ok: false, error: 'Bilinmeyen rozet.' };
+    var hex = '';
+    for (var i = 0; i < 6; i++) hex += '0123456789ABCDEF'.charAt(Math.floor(Math.random() * 16));
+    var code = 'STKSZ-PROMO-' + hex;
+    var promo = {
+      code: code, badgeId: badgeId,
+      type: type === 'timed' ? 'timed' : 'permanent',
+      days: type === 'timed' ? (Number(days) || 29) : null,
+      used: false, usedAt: null, usedBy: null,
+      createdAt: new Date().toISOString()
+    };
+    var list = readPromoCodes();
+    list.push(promo);
+    writePromoCodes(list);
+    return { ok: true, code: code, badgeId: badgeId, type: promo.type, days: promo.days };
+  }
+  function redeemPromoCode(code, userId) {
+    var raw = String(code || '').trim().toUpperCase();
+    if (!raw) return { ok: false, error: 'Kod boş.' };
+    var list = readPromoCodes();
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].code === raw && !list[i].used) { idx = i; break; }
+    }
+    if (idx === -1) return { ok: false, error: 'Geçersiz veya kullanılmış kod.' };
+    var promo = list[idx];
+    var expiresAt = null;
+    if (promo.type === 'timed' && promo.days) {
+      var d = new Date(); d.setDate(d.getDate() + promo.days);
+      expiresAt = d.toISOString();
+    }
+    var result = grantBadge(promo.badgeId, 'promo:' + promo.code, expiresAt);
+    if (!result.ok) return result;
+    if (result.already) return { ok: false, error: 'Bu rozete zaten sahipsiniz.' };
+    promo.used = true;
+    promo.usedAt = new Date().toISOString();
+    promo.usedBy = userId || 'local';
+    list[idx] = promo;
+    writePromoCodes(list);
+    return { ok: true, badgeId: promo.badgeId, type: promo.type, days: promo.days, expiresAt: expiresAt };
   }
 
   function saveInvestorLevel(total) {
@@ -599,7 +672,7 @@
 
   /* ================= DIŞA AÇILAN API ================= */
   const engine = {
-    version: 'v121',
+    version: 'v122',
     brand: 'STKSZ AI',
     MODULES, RULES, LEVELS, BADGES, INVESTOR_TEST,
     registerModel, activeModel,
@@ -608,7 +681,8 @@
     centralContext: centralIntelligenceContext,
     memory: { snapshot: memorySnapshot, context: memoryContext },
     profile: { saveInvestorLevel, investorLevel },
-    entitlements: { grant: grantBadge, revoke: revokeBadge, badges: userBadges, has: hasEntitlement, isAdmin },
+    entitlements: { grant: grantBadge, revoke: revokeBadge, badges: userBadges, has: hasEntitlement, isAdmin, badgeDaysLeft, purgeExpired: purgeExpiredBadges },
+    promo: { generate: generatePromoCode, redeem: redeemPromoCode, readAll: readPromoCodes },
     data: DataReaders,
     analysis: AnalysisTools,
     write: WriteTools,

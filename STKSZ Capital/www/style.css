@@ -3130,3 +3130,14 @@ body.admob-active .pwa-install-banner{bottom:calc(60px + var(--fixed-nav-height,
  body.admob-active{padding-bottom:calc(var(--fixed-nav-height,58px) + 54px + env(safe-area-inset-bottom,0px))!important}
  body.admob-active .nav{bottom:54px!important}
 }
+
+/* === Promosyon Kodu Sistemi === */
+.promo-expiry-badge{display:inline-block;font-size:8px;font-weight:700;color:#ff9800;background:rgba(255,152,0,.12);border:1px solid rgba(255,152,0,.25);border-radius:6px;padding:1px 5px;margin-left:4px;vertical-align:middle;letter-spacing:.3px;white-space:nowrap}
+.promo-code-list{display:flex;flex-direction:column;gap:8px}
+.promo-code-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid rgba(184,115,51,.2);background:rgba(14,11,8,.6);gap:8px}
+.promo-code-item b{color:#D0904E;font-size:11px;letter-spacing:.5px;word-break:break-all}
+.promo-code-item small{color:#8a7e72;font-size:9px}
+.promo-code-active{border-color:rgba(76,175,80,.3)}
+.promo-code-active b{color:#4CAF50}
+.promo-code-used{border-color:rgba(138,126,114,.15);opacity:.55}
+.promo-code-used b{color:#8a7e72;text-decoration:line-through}
