@@ -85,14 +85,54 @@ jobs:
 
       # ── 10) Gradle build ──
       - name: Build debug APK
+        id: gradle-build
         working-directory: STKSZ Capital/android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all
+        run: ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all --info 2>&1 | tee "$RUNNER_TEMP/gradle-output.log"
+        continue-on-error: true
+
+      # ── 10b) Build basarisizsa hata detayini gosterr ──
+      - name: Diagnose build failure
+        if: steps.gradle-build.outcome == 'failure'
+        run: |
+          echo "==============================================="
+          echo "  GRADLE BUILD BASARISIZ — HATA ANALIZI"
+          echo "==============================================="
+          echo ""
+          LOG="$RUNNER_TEMP/gradle-output.log"
+          if [ -f "$LOG" ]; then
+            echo "=== 'Caused by:' satirlari ==="
+            grep -n "Caused by:" "$LOG" | tail -20
+            echo ""
+            echo "=== 'FAILURE' satiri ve ustu (son 50 satir) ==="
+            grep -n "FAILURE\|BUILD FAILED\|Could not\|error:" "$LOG" | tail -20
+            echo ""
+            echo "=== build.gradle dosyasi ==="
+            cat app/build.gradle | head -40
+            echo ""
+            echo "=== gradle.properties ==="
+            cat gradle.properties 2>/dev/null || echo "(dosya yok)"
+            echo ""
+            echo "=== local.properties ==="
+            cat local.properties 2>/dev/null || echo "(dosya yok)"
+          fi
+          exit 1
 
       # ── 11) APK yukle ──
       - name: Upload APK artifact
+        if: steps.gradle-build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
           path: STKSZ Capital/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      # ── 12) Hata logunu artifact olarak yukle ──
+      - name: Upload build log on failure
+        if: steps.gradle-build.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: STKSZ-gradle-build-log
+          path: ${{ runner.temp }}/gradle-output.log
+          if-no-files-found: warn
+          retention-days: 7
