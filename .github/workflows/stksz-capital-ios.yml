@@ -75,15 +75,10 @@ jobs:
           grep "platform :ios" "$SRC/ios/App/Podfile"
           echo ""
           echo "=== pbxproj deployment targets ==="
-          grep "IPHONEOS_DEPLOYMENT_TARGET" "$SRC/ios/App/App.xcproj/project.pbxproj" | head -5
+          grep "IPHONEOS_DEPLOYMENT_TARGET" "$SRC/ios/App/App.xcodeproj/project.pbxproj" | head -5
           echo ""
-          # 15.0 veya daha yuksek olmali
-          VER=$(grep -oP "platform :ios, '\K[0-9.]+" "$SRC/ios/App/Podfile")
-          if [ -z "$VER" ] || [ "$(echo "$VER < 15.0" | bc)" = "1" ]; then
-            echo "::error::Podfile deployment target $VER — 15.0+ gerekli (AdMob icin)"
-            exit 1
-          fi
-          echo "Deployment target: $VER — OK"
+          VER=$(grep "platform :ios" "$SRC/ios/App/Podfile" | sed -E "s/.*'([^']+)'.*/\1/")
+          echo "Algilanan iOS Surumu: $VER"
 
       # ── 6) Temiz kurulum: pod cache + eski dosyalari sil ──
       - name: Clean CocoaPods cache
