@@ -76,6 +76,11 @@ jobs:
         working-directory: STKSZ Capital
         run: npx cap sync android
 
+      # ── 8b) Web varliklarini kopyala ──
+      - name: Build Web Assets & Copy
+        working-directory: STKSZ Capital
+        run: npx cap copy android
+
       # ── 9) Gradle izni (root + android) ──
       - name: Grant gradlew execute permission
         run: |
@@ -98,10 +103,8 @@ jobs:
       # ── 11b) Uretilen APK'lari Listele ──
       - name: Locate APK files
         run: |
-          echo "=== Android Dizinindeki Tum APK'lar ==="
-          find "$SRC/android" -name "*.apk" || true
-          echo "=== Tum Repodaki APK'lar ==="
-          find . -name "*.apk" || true
+          echo "=== Üretilen APK Dosyalari ==="
+          find . -name "*.apk" -type f
 
       # ── 12) Hata teshis (Sadece Build Basarisizsa) ──
       - name: Diagnose build failure
@@ -120,8 +123,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
-          path: "**/outputs/apk/**/*.apk"
-          if-no-files-found: warn
+          path: STKSZ Capital/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
           retention-days: 14
 
       # ── 14) Hata logunu yukle (Sadece Build Basarisizsa) ──
