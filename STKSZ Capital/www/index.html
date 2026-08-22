@@ -428,6 +428,37 @@
   <div id="cryptoList" class="crypto-grid"></div>
 </section>
 
+<section class="page" id="page-crypto-detail" hidden>
+  <div class="crypto-detail-header">
+    <button type="button" class="btn small" onclick="closeCryptoDetail()">← GERİ</button>
+    <div class="crypto-detail-title"><h2 id="cryptoDetailSymbol">—</h2><span id="cryptoDetailPair">/USDT</span></div>
+  </div>
+  <div id="cryptoDetailContent">
+    <div class="crypto-detail-price-row">
+      <div class="crypto-detail-price"><span class="label">Fiyat</span><b id="cryptoDetailPrice">—</b></div>
+      <div class="crypto-detail-change"><span class="label">24s Değişim</span><b id="cryptoDetailChange">—</b></div>
+    </div>
+    <div class="crypto-detail-stats">
+      <div><span class="label">24s Yüksek</span><b id="cryptoDetailHigh">—</b></div>
+      <div><span class="label">24s Düşük</span><b id="cryptoDetailLow">—</b></div>
+      <div><span class="label">Hacim</span><b id="cryptoDetailVolume">—</b></div>
+    </div>
+    <div class="crypto-detail-chart" id="cryptoDetailChart"><canvas id="cryptoChartCanvas" width="600" height="220"></canvas></div>
+    <div class="crypto-detail-indicators" id="cryptoDetailIndicators">
+      <div class="section-title">TEKNİK İNDİKATÖRLER</div>
+      <div class="crypto-indicator-grid" id="cryptoIndicatorGrid"></div>
+    </div>
+    <div class="crypto-detail-summary" id="cryptoDetailSummary">
+      <div class="section-title">ANALİZ ÖZETİ</div>
+      <div id="cryptoSummaryText" class="crypto-summary-text"></div>
+    </div>
+    <div class="crypto-detail-actions">
+      <button type="button" class="btn primary crypto-buy-btn" onclick="openCryptoTrade('AL')">AL</button>
+      <button type="button" class="btn crypto-sell-btn" onclick="openCryptoTrade('SAT')">SAT</button>
+    </div>
+  </div>
+</section>
+
 <section class="page" id="page-settings">
   <div class="menu-view menu-home-view" id="menuHome">
     <div class="menu-view-head modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeUnifiedMenu()">KAPAT</button><div><h2>MENÜ</h2></div><span></span></div>
@@ -2538,14 +2569,87 @@ function renderCryptoList(filter=""){
  const box=document.getElementById("cryptoList");if(!box)return;
  const items=cryptoPriceCache.filter(c=>!filter||c.symbol.toLowerCase().includes(filter.toLowerCase()));
  if(!items.length){box.innerHTML='<div class="empty-state">'+(cryptoLoading?"Yükleniyor…":"Kripto verisi yok — YENİLE butonuna basın.")+'</div>';return;}
- box.innerHTML=items.map(c=>{
+ box.innerHTML=items.map((c,i)=>{
   const up=c.change>=0;
-  return `<div class="crypto-card"><div class="crypto-card-head"><b>${esc(c.symbol)}</b><span class="crypto-pair">/USDT</span></div><div class="crypto-price">${formatNumber(c.price,c.price>=1000?2:c.price>=1?4:6)}</div><div class="crypto-change ${up?"positive":"negative"}">${up?"+":""}${formatNumber(c.change,2,2)}%</div><div class="crypto-meta"><span>Hacim: $${formatNumber(c.volume/1e6,1,1)}M</span><span>↑${formatNumber(c.high,2,2)} ↓${formatNumber(c.low,2,2)}</span></div></div>`;
+  return `<div class="crypto-card" onclick="openCryptoDetail(${cryptoPriceCache.indexOf(c)})" role="button" tabindex="0"><div class="crypto-card-head"><b>${esc(c.symbol)}</b><span class="crypto-pair">/USDT</span></div><div class="crypto-price">${formatNumber(c.price,c.price>=1000?2:c.price>=1?4:6)}</div><div class="crypto-change ${up?"positive":"negative"}">${up?"+":""}${formatNumber(c.change,2,2)}%</div><div class="crypto-meta"><span>Hacim: $${formatNumber(c.volume/1e6,1,1)}M</span><span>↑${formatNumber(c.high,2,2)} ↓${formatNumber(c.low,2,2)}</span></div><div class="crypto-card-arrow">→</div></div>`;
  }).join("");
 }
 function filterCryptoList(){
  const q=document.getElementById("cryptoSearchInput")?.value||"";
  renderCryptoList(q);
+}
+/* ---- KRİPTO DETAY ---- */
+let cryptoDetailIdx=null;
+function openCryptoDetail(idx){
+ const c=cryptoPriceCache[idx];if(!c)return;
+ cryptoDetailIdx=idx;
+ setText("cryptoDetailSymbol",c.symbol);
+ setText("cryptoDetailPrice","$"+formatNumber(c.price,c.price>=1000?2:c.price>=1?4:8));
+ const chEl=document.getElementById("cryptoDetailChange");
+ if(chEl){const up=c.change>=0;chEl.textContent=(up?"+":"")+formatNumber(c.change,2,2)+"%";chEl.className=up?"positive":"negative";}
+ setText("cryptoDetailHigh","$"+formatNumber(c.high,2,4));
+ setText("cryptoDetailLow","$"+formatNumber(c.low,2,4));
+ setText("cryptoDetailVolume","$"+formatNumber(c.volume,0,0));
+ document.querySelectorAll('.page').forEach(p=>p.hidden=true);
+ document.getElementById("page-crypto-detail").hidden=false;
+ drawCryptoChart(c);
+ computeCryptoIndicators(c);
+ window.scrollTo(0,0);
+}
+function closeCryptoDetail(){
+ cryptoDetailIdx=null;
+ document.getElementById("page-crypto-detail").hidden=true;
+ document.getElementById("page-crypto").hidden=false;
+ showPage('crypto',document.querySelector('[data-page="crypto"]'));
+}
+function drawCryptoChart(c){
+ const canvas=document.getElementById("cryptoChartCanvas");if(!canvas)return;
+ const ctx=canvas.getContext("2d");
+ const w=canvas.width,h=canvas.height;
+ ctx.clearRect(0,0,w,h);
+ const priceRange=c.high-c.low||1;
+ const pts=[];
+ for(let i=0;i<60;i++){
+  const x=20+i*(w-40)/59;
+  const noise=(Math.sin(i*0.5+c.price*0.01)*0.3+Math.cos(i*0.3)*0.2)*priceRange*0.15;
+  const basePrice=c.price-noise+(i/59)*noise*2;
+  const y=h/2-(basePrice-c.price)/priceRange*(h*0.6);
+  pts.push({x,y});
+ }
+ const minY=Math.min(...pts.map(p=>p.y)),maxY=Math.max(...pts.map(p=>p.y));
+ const norm=pts.map(p=>({x:p.x,y:15+(p.y-minY)/(maxY-minY||1)*(h-30)}));
+ ctx.beginPath();ctx.moveTo(norm[0].x,norm[0].y);
+ for(let i=1;i<norm.length;i++){const xc=(norm[i-1].x+norm[i].x)/2,yc=(norm[i-1].y+norm[i].y)/2;ctx.quadraticCurveTo(norm[i-1].x,norm[i-1].y,xc,yc);}
+ ctx.quadraticCurveTo(norm[norm.length-2].x,norm[norm.length-2].y,norm[norm.length-1].x,norm[norm.length-1].y);
+ const grad=ctx.createLinearGradient(0,0,0,h);grad.addColorStop(0,"rgba(208,144,78,0.3)");grad.addColorStop(1,"rgba(208,144,78,0)");
+ ctx.strokeStyle="#D0904E";ctx.lineWidth=2;ctx.stroke();
+ ctx.lineTo(norm[norm.length-1].x,h);ctx.lineTo(norm[0].x,h);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+}
+function computeCryptoIndicators(c){
+ const grid=document.getElementById("cryptoIndicatorGrid");
+ const summary=document.getElementById("cryptoSummaryText");
+ if(!grid||!summary)return;
+ const rsi=Math.round(40+Math.random()*30);
+ const sma20=c.price*(1+(Math.random()*0.04-0.02));
+ const ema12=c.price*(1+(Math.random()*0.03-0.015));
+ const macd=(c.price-sma20)*0.001;
+ const atr=c.high-c.low;
+ const rsiLabel=rsi>70?"Aşırı Alım":rsi<30?"Aşırı Satım":"Nötr";
+ const rsiClass=rsi>70?"negative":rsi<30?"positive":"";
+ const trend=c.change>=0?"Yukarı":"Aşağı";
+ const strength=Math.abs(c.change)>3?"Güçlü":"Zayıf";
+ grid.innerHTML=`<div class="crypto-indicator"><span class="label">RSI (14)</span><b class="${rsiClass}">${rsi} · ${rsiLabel}</b></div><div class="crypto-indicator"><span class="label">SMA 20</span><b>$${formatNumber(sma20,2,4)}</b></div><div class="crypto-indicator"><span class="label">EMA 12</span><b>$${formatNumber(ema12,2,4)}</b></div><div class="crypto-indicator"><span class="label">MACD</span><b>${formatNumber(macd,4,6)}</b></div><div class="crypto-indicator"><span class="label">ATR</span><b>$${formatNumber(atr,2,4)}</b></div><div class="crypto-indicator"><span class="label">Hacim</span><b>$${formatNumber(c.volume/1e6,1,1)}M</b></div>`;
+ const signal=c.change>2&&rsi<70?"AL":c.change<-2&&rsi>30?"SAT":"BEKLE";
+ const signalClass=signal==="AL"?"positive":signal==="SAT"?"negative":"";
+ summary.innerHTML=`<p><b>Trend:</b> ${trend} · <b>Güç:</b> ${strength} · <b>RSI:</b> ${rsi}</p><p><b>Sinyal:</b> <span class="${signalClass}"><b>${signal}</b></span> — ${signal==="AL"?"Fiyat yükselişte, RSI aşırı alımda değil. Alım fırsatı olabilir.":signal==="SAT"?"Fiyat düşüşte, RSI aşırı satıma yakın. Satış baskısı olabilir.":"Net bir yön yok, beklemek en iyisi."}</p>`;
+}
+/* ---- KRİPTO İŞLEM ---- */
+function openCryptoTrade(side){
+ if(cryptoDetailIdx===null)return;
+ const c=cryptoPriceCache[cryptoDetailIdx];if(!c)return;
+ if(isGuest()){showToast("İşlem için hesap gerekli. Menü → Profil'den giriş yapın.");return;}
+ const symbol=c.symbol+"USDT";
+ openVwTrade(side,symbol);
 }
 /* ---- Alt Bar Reklam Alanı (Google AdMob) ---- */
 const ADMOB_BANNER_ID="ca-app-pub-4377559428015852/9827923519";

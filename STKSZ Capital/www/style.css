@@ -3145,6 +3145,38 @@ body.admob-active .pwa-install-banner{bottom:calc(60px + var(--fixed-nav-height,
 .promo-code-active b{color:#4CAF50}
 .promo-code-used{border-color:rgba(138,126,114,.15);opacity:.55}
 .promo-code-used b{color:#8a7e72;text-decoration:line-through}
+/* Kripto detay sayfası */
+.crypto-detail-header{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #2a2318;margin-bottom:14px}
+.crypto-detail-title{display:flex;align-items:baseline;gap:6px}
+.crypto-detail-title h2{margin:0;font-size:20px;color:#D0904E;letter-spacing:1px}
+.crypto-detail-title span{color:#8a7e72;font-size:12px}
+.crypto-detail-price-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.crypto-detail-price,.crypto-detail-change{padding:12px;border:1px solid #2a2318;border-radius:12px;background:rgba(14,11,8,.6)}
+.crypto-detail-price b{font-size:22px;color:#D0904E;display:block;margin-top:4px}
+.crypto-detail-change b{font-size:18px;display:block;margin-top:4px}
+.crypto-detail-change .positive{color:#4CAF50}
+.crypto-detail-change .negative{color:#EF5350}
+.crypto-detail-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.crypto-detail-stats div{padding:10px;border:1px solid #1a1612;border-radius:10px;background:rgba(14,11,8,.5);text-align:center}
+.crypto-detail-stats .label,.crypto-detail-indicators .label{display:block;color:#8a7e72;font-size:9px;letter-spacing:.5px;text-transform:uppercase}
+.crypto-detail-stats b,.crypto-detail-indicators b{display:block;margin-top:3px;font-size:12px;color:#e8e0d8}
+.crypto-detail-chart{margin-bottom:14px;border:1px solid #2a2318;border-radius:12px;overflow:hidden;background:rgba(8,6,4,.8)}
+.crypto-detail-chart canvas{width:100%;height:auto;display:block}
+.crypto-indicator-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.crypto-indicator{padding:8px;border:1px solid #1a1612;border-radius:8px;background:rgba(14,11,8,.5);text-align:center}
+.crypto-indicator .positive{color:#4CAF50}
+.crypto-indicator .negative{color:#EF5350}
+.crypto-summary-text{padding:10px;border:1px solid #1a1612;border-radius:10px;background:rgba(14,11,8,.5);font-size:11px;line-height:1.6;color:#c8bfb4;margin-top:8px}
+.crypto-summary-text .positive{color:#4CAF50}
+.crypto-summary-text .negative{color:#EF5350}
+.crypto-detail-actions{display:flex;gap:12px;margin-top:18px}
+.crypto-buy-btn{flex:1;background:linear-gradient(135deg,#2E7D32,#4CAF50);color:#fff;border:none;padding:14px;font-size:15px;font-weight:800;border-radius:12px;letter-spacing:1px;cursor:pointer}
+.crypto-buy-btn:hover{filter:brightness(1.1)}
+.crypto-sell-btn{flex:1;background:linear-gradient(135deg,#C62828,#EF5350);color:#fff;border:none;padding:14px;font-size:15px;font-weight:800;border-radius:12px;letter-spacing:1px;cursor:pointer}
+.crypto-sell-btn:hover{filter:brightness(1.1)}
+.crypto-card{cursor:pointer;transition:border-color .2s,transform .1s}
+.crypto-card:active{transform:scale(.98)}
+.crypto-card-arrow{color:#8a7e72;font-size:14px;margin-top:4px;text-align:right}
 /* Profil sayfası — Yatırımcı Rozetleri alanı */
 .profile-badge-display{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0;min-height:36px;align-items:center}
 .profile-badge-display .profile-badge{font-size:10px;padding:5px 10px;border-radius:20px;border:1px solid rgba(184,115,51,.25);background:rgba(14,11,8,.7);color:#D0904E;font-weight:600;letter-spacing:.3px}

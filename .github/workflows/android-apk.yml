@@ -67,74 +67,44 @@ jobs:
         working-directory: STKSZ Capital
         run: npm ci || npm install --no-fund --no-audit
 
-      # ── 7) www dizinini garanti altina al ──
-      - name: Ensure www directory exists
-        run: mkdir -p "$SRC/www"
-
-      # ── 8) Capacitor sync ──
-      - name: Capacitor sync android
+      # ── 7) Capacitor sync + copy ──
+      - name: Capacitor sync & copy
         working-directory: STKSZ Capital
-        run: npx cap sync android
-
-      # ── 8b) Web varliklarini kopyala ──
-      - name: Build Web Assets & Copy
-        working-directory: STKSZ Capital
-        run: npx cap copy android
-
-      # ── 9) Gradle izni (root + android) ──
-      - name: Grant gradlew execute permission
         run: |
-          chmod +x "$SRC/android/gradlew"
-          chmod +x "$SRC/gradlew" 2>/dev/null || true
-          ls -la "$SRC/android/gradlew"
+          npx cap sync android
+          npx cap copy android
 
-      # ── 10) Gradle clean ──
-      - name: Gradle clean
+      # ── 8) Gradle izni ──
+      - name: Grant gradlew execute permission
         working-directory: STKSZ Capital/android
-        run: ./gradlew clean --no-daemon
-        continue-on-error: true
+        run: chmod +x gradlew
 
-      # ── 11) Gradle build ──
+      # ── 9) Gradle build ──
       - name: Build debug APK
         id: gradle-build
         working-directory: STKSZ Capital/android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tee "$RUNNER_TEMP/gradle-output.log"
+        run: ./gradlew assembleDebug --stacktrace
 
-      # ── 11b) Uretilen APK'lari Listele ──
-      - name: Locate APK files
+      # ── 10) APK konumunu dogrula ──
+      - name: Verify APK output
+        if: always()
         run: |
-          echo "=== Üretilen APK Dosyalari ==="
-          find . -name "*.apk" -type f
+          echo "=== APK ARAMA ==="
+          find "$SRC/android/app/build/outputs" -name "*.apk" -type f 2>/dev/null || echo "APK bulunamadi"
+          echo "=== TUM *.apk DOSYALARI ==="
+          find "$SRC" -name "*.apk" -type f 2>/dev/null || echo "Hic APK yok"
 
-      # ── 12) Hata teshis (Sadece Build Basarisizsa) ──
-      - name: Diagnose build failure
-        if: failure() || steps.gradle-build.outcome == 'failure'
-        run: |
-          echo "=== GRADLE BUILD BASARISIZ ==="
-          LOG="$RUNNER_TEMP/gradle-output.log"
-          if [ -f "$LOG" ]; then
-            grep -C 3 "Caused by:" "$LOG" || true
-            tail -n 100 "$LOG"
-          fi
-
-      # ── 12.5) APK Dosya Konumunu Bul ──
-      - name: Find Built APK File
-        run: |
-          echo "=== APK ARAMA BASLIYOR ==="
-          find . -name "*.apk" -type f
-          echo "=== ARAMA BITTI ==="
-
-      # ── 13) APK yukle ──
+      # ── 11) APK yukle ──
       - name: Upload APK artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
-          path: "**/*.apk"
+          path: STKSZ Capital/android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
           retention-days: 14
 
-      # ── 14) Hata logunu yukle (Sadece Build Basarisizsa) ──
+      # ── 12) Hata logunu yukle ──
       - name: Upload build log on failure
         if: failure() || steps.gradle-build.outcome == 'failure'
         uses: actions/upload-artifact@v4
