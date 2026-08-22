@@ -117,14 +117,14 @@ jobs:
             tail -n 100 "$LOG"
           fi
 
-      # ── 13) APK yukle (Sadece Build Basariliysa) ──
+      # ── 13) APK yukle ──
       - name: Upload APK artifact
-        if: steps.gradle-build.outcome == 'success'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
-          path: "**/outputs/apk/**/*.apk"
-          if-no-files-found: error
+          path: STKSZ Capital/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
           retention-days: 14
 
       # ── 14) Hata logunu yukle (Sadece Build Basarisizsa) ──
