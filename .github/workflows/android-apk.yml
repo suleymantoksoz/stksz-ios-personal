@@ -117,13 +117,20 @@ jobs:
             tail -n 100 "$LOG"
           fi
 
+      # ── 12.5) APK Dosya Konumunu Bul ──
+      - name: Find Built APK File
+        run: |
+          echo "=== APK ARAMA BASLIYOR ==="
+          find . -name "*.apk" -type f
+          echo "=== ARAMA BITTI ==="
+
       # ── 13) APK yukle ──
       - name: Upload APK artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: STKSZ-debug-apk
-          path: STKSZ Capital/android/app/build/outputs/apk/debug/app-debug.apk
+          path: "**/*.apk"
           if-no-files-found: warn
           retention-days: 14
 
