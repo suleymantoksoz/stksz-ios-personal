@@ -23,7 +23,7 @@
    Ortam değişkenleri:
      GEMINI_API_KEY   (zorunlu · yalnız sunucuda)
      PORT             (varsayılan 8787)
-     GEMINI_MODEL     (varsayılan gemini-2.0-flash)
+      GEMINI_MODEL     (varsayılan gemini-1.5-flash)
      GEMINI_ENDPOINT  (test için uç nokta override; üretimde boş bırak)
    Ücretsiz barındırma: Render / Railway / Fly.io / Cloudflare Workers
    (anahtar panelden "environment secret" olarak girilir; koda yazılmaz).
@@ -34,7 +34,7 @@ const https = require('https');
 const { URL } = require('url');
 
 const PORT = Number(process.env.PORT) || 8787;
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 const API_KEY = process.env.GEMINI_API_KEY || '';
 const ENDPOINT = process.env.GEMINI_ENDPOINT || 'https://generativelanguage.googleapis.com';
 const MAX_BODY = 8 * 1024 * 1024; // 8MB (görsel base64 için)

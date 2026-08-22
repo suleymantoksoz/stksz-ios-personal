@@ -71,12 +71,7 @@ jobs:
       - name: Ensure www directory exists
         run: mkdir -p "$SRC/www"
 
-      # ── 8a) Capacitor copy ──
-      - name: Capacitor copy
-        working-directory: STKSZ Capital
-        run: npx cap copy android
-
-      # ── 8b) Capacitor sync ──
+      # ── 8) Capacitor sync ──
       - name: Capacitor sync android
         working-directory: STKSZ Capital
         run: npx cap sync android

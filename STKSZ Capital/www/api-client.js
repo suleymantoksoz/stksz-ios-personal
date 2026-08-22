@@ -1154,7 +1154,7 @@
           if (!text) throw new ProviderClientError('no_data', 'AI yanıtı boş döndü.', 'stksz_ai', 0);
           return { text, toolCalls: [], engine: 'STKSZ AI' };
         }
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=' + encodeURIComponent(this.key()), {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(this.key()), {
           method: 'POST', signal: controller.signal,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 800 } })
