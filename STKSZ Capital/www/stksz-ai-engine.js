@@ -554,7 +554,7 @@
     GRAFIK_USTASI: { id: 'GRAFIK_USTASI', label: 'GRAFİK USTASI',    kind: 'premium', entitlements: ['advanced_chart', 'chart_premium'] },
     STRATEJIST:    { id: 'STRATEJIST',    label: 'STRATEJİST',       kind: 'premium', entitlements: ['analysis_pro'] },
     STKSZ_ELITE:   { id: 'STKSZ_ELITE',   label: 'STKSZ ELITE',      kind: 'premium', entitlements: ['ai_pro', 'chart_premium', 'analysis_pro', 'stksz_editor'] },
-    ADMIN:         { id: 'ADMIN',         label: 'ADMIN',            kind: 'system',  entitlements: ['admin_panel', 'api_management', 'badge_management', 'system_config'] }
+    ADMIN:         { id: 'ADMIN',         label: 'ADMIN',            kind: 'system',  entitlements: ['admin_panel', 'api_management', 'badge_management', 'system_config', 'advanced_chart', 'chart_premium', 'analysis_pro', 'stksz_editor'] }
   });
 
   /* ---- entitlement deposu ---- */

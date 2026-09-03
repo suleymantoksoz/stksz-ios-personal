@@ -3,12 +3,17 @@
   "appName": "STKSZ",
   "webDir": "www",
   "backgroundColor": "#050607",
+  "server": {
+    "allowNavigation": ["*"],
+    "cleartext": true
+  },
   "ios": {
     "contentInset": "never",
     "backgroundColor": "#050607",
     "scrollEnabled": false
   },
   "android": {
-    "backgroundColor": "#050607"
+    "backgroundColor": "#050607",
+    "allowMixedContent": true
   }
 }

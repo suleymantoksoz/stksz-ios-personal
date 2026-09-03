@@ -6,17 +6,27 @@
 <meta name="theme-color" content="#050607">
 <title>Destek · STKSZ</title>
 <style>
-:root{--bg:#050607;--panel:#0b0f11;--line:#1d252a;--text:#f4f7f8;--muted:#89949a;--green:#00df78}
+:root{--bg:#050607;--panel:#0b0f11;--line:#1d252a;--text:#f4f7f8;--muted:#89949a;--copper:#D0904E;--copper-deep:#B87333;--copper-soft:#E3BC84;--emerald:#2eaf7d}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;padding:calc(24px + env(safe-area-inset-top,0px)) 18px calc(32px + env(safe-area-inset-bottom,0px))}
 main{max-width:760px;margin:auto}
 h1{font-size:24px;font-style:italic;letter-spacing:1px}
-h1 span{color:var(--green)}
+h1 span{color:var(--copper)}
 h2{font-size:15px;letter-spacing:1.5px;color:#aeb8bc;margin-top:26px}
 p,li{color:var(--muted);line-height:1.65;font-size:14px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-top:14px}
-a.back{display:inline-block;margin-bottom:18px;color:var(--green);text-decoration:none;font-weight:800;font-size:13px}
+a.back{display:inline-block;margin-bottom:18px;color:var(--copper);text-decoration:none;font-weight:800;font-size:13px}
 code{background:#0f1417;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:12px}
+.faq details{background:#0a0e10;border:1px solid var(--line);border-radius:12px;margin-top:10px;overflow:hidden}
+.faq details summary{cursor:pointer;padding:14px 16px;font-weight:800;font-size:14px;color:var(--text);list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.faq details summary::-webkit-details-marker{display:none}
+.faq details summary::after{content:"+";color:var(--copper);font-size:20px;font-weight:900;transition:transform .2s}
+.faq details[open] summary::after{content:"–"}
+.faq details[open]{border-color:#2a3940}
+.faq details p{margin:0;padding:0 16px 14px}
+.ver-row{display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+.ver-badge{color:var(--emerald);font-weight:800;font-size:12px}
+#verTelemetry{color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
@@ -25,12 +35,58 @@ code{background:#0f1417;border:1px solid var(--line);border-radius:6px;padding:2
 <h1><span>STKSZ</span> · Destek</h1>
 <div class="card">
 <h2>SIK SORULANLAR</h2>
-<p><b>Veriler güncellenmiyor?</b> İnternet bağlantınızı kontrol edin; uygulama çevrimdışıyken son yerel kayıtları gösterir.</p>
-<p><b>Uygulamayı ana ekrana nasıl eklerim?</b> Safari'de Paylaş → "Ana Ekrana Ekle" adımlarını izleyin. Android/Chrome'da kurulum başlığı otomatik görünür.</p>
-<p><b>Önbelleği nasıl temizlerim?</b> Uygulama içindeki menüden veri sıfırlama seçeneğini kullanın veya tarayıcı site verilerini temizleyin.</p>
-<h2>SÜRÜM</h2>
-<p>Kabuk sürümü: <code>v38 · www bundle</code></p>
+<div class="faq">
+<details open>
+<summary>Veriler güncellenmiyor?</summary>
+<p>İnternet bağlantınızı kontrol edin; uygulama çevrimdışıyken son yerel kayıtları gösterir.</p>
+</details>
+<details>
+<summary>Uygulamayı ana ekrana nasıl eklerim?</summary>
+<p>Safari'de Paylaş → "Ana Ekrana Ekle" adımlarını izleyin. Android/Chrome'da kurulum başlığı otomatik görünür.</p>
+</details>
+<details>
+<summary>Önbelleği nasıl temizlerim?</summary>
+<p>Uygulama içindeki menüden veri sıfırlama seçeneğini kullanın veya tarayıcı site verilerini temizleyin.</p>
+</details>
+<details>
+<summary>Web Push bildirimleri çalışmıyor mu?</summary>
+<p>Web Push yalnızca güvenli bağlam (HTTPS) üzerinde çalışır. Uygulamayı ana ekrana ekledikten sonra Ayarlar → Bildirimler'den izin verin.</p>
+</details>
+</div>
+<h2>SÜRÜM · Canlı Telemetri</h2>
+<div class="ver-row">
+<div><div id="verBuild">Yükleniyor…</div><div id="verTelemetry">Telemetri okunuyor…</div></div>
+<span class="ver-badge" id="verState">—</span>
+</div>
 </div>
 </main>
+<script>
+(function(){
+  function readStored(name){
+    try{return localStorage.getItem(name);}catch(e){return null;}
+  }
+  function show(build){
+    var t=new Date();
+    var ver=document.getElementById("verBuild");
+    var tel=document.getElementById("verTelemetry");
+    var state=document.getElementById("verState");
+    var detail=build?build.replace("-v", " · AI v"):"bilinmiyor";
+    if(ver)ver.textContent="Kabuk sürümü: "+(build||"bilinmiyor");
+    if(tel)tel.textContent="Canlı telemetri · "+t.toLocaleString("tr-TR");
+    if(state)state.textContent=build?"GÜNCEL":"TELEMETRİ YOK";
+  }
+  var stored=readStored("stkszBuild");
+  var meta=null;
+  document.querySelectorAll('meta[name="stksz-build"]').forEach(function(m){if(m&&m.content)meta=m.content;});
+  if(stored){show(stored);}
+  else if(meta){show(meta);}
+  else{show(null);}
+  window.addEventListener("storage",function(e){if(e.key==="stkszBuild")show(e.newValue);});
+  /* SW aktifse gerçek önbellek sürümünü de göstermeyi dener */
+  if("serviceWorker" in navigator&&navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:"GET_VERSION"});
+  }
+})();
+</script>
 </body>
 </html>

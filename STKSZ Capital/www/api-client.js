@@ -1045,6 +1045,53 @@
       const quote = await this.quote('THYAO');
       record('market', true, { label: quote.provider, freshness: quote.freshness });
       return quote;
+    },
+    /* OHLC geçmişi (endpoint `{SYMBOL}` ve `{KEY}` yer tutucularını destekler).
+       Yanıt yapısı sağlayıcıya göre değişir; bilinen farklı formatlar esnek şekilde
+       okunur. Doğrulanabilir kapanış satırı yoksa null döner — sahte geçmiş üretilmez. */
+    async ohlc(symbol, limit = 60) {
+      if (!this.ready()) throw new ProviderClientError('provider_not_configured', 'BiQuote OHLC için anahtar + endpoint gerekli.', 'biquote', 0);
+      const url = this.buildUrl(symbol);
+      const { ok, status, payload } = await nativeFetchJson(url);
+      if (!ok) throw new ProviderClientError('no_data', 'BiQuote OHLC yanıtı alınamadı (' + status + ').', 'biquote', status);
+      const rows = Array.isArray(payload) ? payload
+        : Array.isArray(payload?.data) ? payload.data
+        : Array.isArray(payload?.result) ? payload.result
+        : Array.isArray(payload?.results) ? payload.results
+        : Array.isArray(payload?.candles) ? payload.candles : [];
+      const out = [];
+      for (const row of rows.slice(-limit)) {
+        const o = Number(row?.open ?? row?.o), h = Number(row?.high ?? row?.h), l = Number(row?.low ?? row?.l), c = Number(row?.close ?? row?.c ?? row?.price ?? row?.last);
+        if (!Number.isFinite(c) || c <= 0) continue;
+        out.push({ open: Number.isFinite(o) && o > 0 ? o : c, high: Number.isFinite(h) && h > 0 ? h : c, low: Number.isFinite(l) && l > 0 ? l : c, close: c, time: row?.time ?? row?.timestamp ?? row?.date ?? null });
+        if (out.length >= limit) break;
+      }
+      if (!out.length) return null;
+      return { provider: 'BiQuote · Kullanıcı anahtarı', providerId: 'biquote', symbol: String(symbol).trim().toUpperCase().replace(/\.IS$/, ''), candles: out, fetchedAt: nowIso() };
+    },
+    /* Dönüştürücü (TAKAS / economic calendar) — endpoint tek bir satır sağlar.
+       Bilinen anahtar adlarını esnek okur; tutarlı eşleşme yoksa null döner. */
+    async economicCalendar() {
+      if (!this.ready()) throw new ProviderClientError('provider_not_configured', 'BiQuote takvim için anahtar + endpoint gerekli.', 'biquote', 0);
+      const base = this.endpoint().replace(/\{SYMBOL\}[^&?]*/gi, '').replace(/symbol=[^&?]*/i, '').replace(/\?$/, '');
+      const url = (base.includes('?') ? base + '&' : base + '?') + 'apikey=' + encodeURIComponent(this.key());
+      const { ok, status, payload } = await nativeFetchJson(url);
+      if (!ok) throw new ProviderClientError('no_data', 'BiQuote takvim yanıtı alınamadı (' + status + ').', 'biquote', status);
+      const items = Array.isArray(payload) ? payload : (payload?.data || payload?.items || payload?.result || []);
+      const events = [];
+      for (const row of (Array.isArray(items) ? items : [])) {
+        const evt = {
+          time: row?.time ?? row?.timestamp ?? row?.date ?? row?.time_tr ?? null,
+          currency: row?.currency ?? row?.iso ?? null,
+          event: row?.event ?? row?.title ?? row?.name ?? null,
+          actual: row?.actual ?? null,
+          forecast: row?.forecast ?? row?.expected ?? null,
+          previous: row?.previous ?? row?.prev ?? null,
+        };
+        if (evt.event) events.push(evt);
+      }
+      if (!events.length) return null;
+      return { provider: 'BiQuote · Kullanıcı anahtarı', providerId: 'biquote', events, fetchedAt: nowIso() };
     }
   };
 
@@ -1154,7 +1201,7 @@
           if (!text) throw new ProviderClientError('no_data', 'AI yanıtı boş döndü.', 'stksz_ai', 0);
           return { text, toolCalls: [], engine: 'STKSZ AI' };
         }
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(this.key()), {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' + encodeURIComponent(this.key()), {
           method: 'POST', signal: controller.signal,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 800 } })
