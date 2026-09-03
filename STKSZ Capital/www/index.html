@@ -5869,19 +5869,25 @@ startAutoRefreshLoop();
 
 window.addEventListener("stksz-native-resume",()=>{renderEnr();renderMarketStatus();renderNotificationState();updateCommandClock();});
 window.addEventListener("stksz-native-pause",()=>{renderEnr();});
-const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMedia.addEventListener?.("change",()=>{if(prefs.theme==="system")applyTheme();});applyAppearance();initEvents();render();renderAuthGate();renderProfileAuth();initializeNativeEnrStorage();initEnrSecurity();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();initializeProviderInfrastructure().then(()=>{maybeAutoUpdate();renderNews();renderApiKeysPanel();
- // AÇILIŞTA OTOMATİK VERİ ÇEKİMİ (v68): kayıtlı anahtar/ücretsiz zincir bağlıysa uygulama
- // her açılışta fiyatları kendisi çeker — kullanıcı tekrar anahtar girmez, butona basmak zorunda kalmaz.
- try{
-  if(providerInfo("market")?.configured){
-   const lastSuccess=Date.parse(data.market?.lastSuccess||"");
-   const stale=!Number.isFinite(lastSuccess)||Date.now()-lastSuccess>=AUTO_REFRESH_INTERVAL_MS;
-   const needPrice=data.assets.some(asset=>(finite(asset.q)??0)>0&&finite(asset.p)===null);
-   if(stale||needPrice)setTimeout(()=>{lastAutoRefreshAt=Date.now();refreshMarket(false);},900);
-   else lastAutoRefreshAt=Number.isFinite(lastSuccess)?lastSuccess:Date.now();
-  }
- }catch(error){}
-ensureFxRates();try{renderAuthGate();renderProfileAuth();}catch(e){}try{renderAdminPanelVisibility();}catch(e){}try{updateHeaderInvestorChip();}catch(e){}try{updateAdBanner();}catch(e){}try{initAdMob();}catch(e){}try{renderCurrencyPanel();}catch(e){}try{var eng=window.STKSZAIEngine;if(eng?.entitlements?.purgeExpired)eng.entitlements.purgeExpired();}catch(e){}try{window.STKSZSync?.start?.();window.STKSZSync&&(window.STKSZSync.onStatus=(s,d)=>renderSyncState(s,d));}catch(e){}});registerServiceWorker();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}initWeather();initTelegramMiniApp();bootDataEngineHealthCheck();bootM5355Status();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
+const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMedia.addEventListener?.("change",()=>{if(prefs.theme==="system")applyTheme();});
+function initApp(){
+  applyAppearance();initEvents();render();renderAuthGate();renderProfileAuth();initializeNativeEnrStorage();initEnrSecurity();
+  (function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();
+  initializeProviderInfrastructure().then(()=>{maybeAutoUpdate();renderNews();renderApiKeysPanel();
+  try{
+    if(typeof refreshMarket==="function" && providerInfo("market")?.configured)refreshMarket(false);
+  }catch(e){}
+  setTimeout(()=>{const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}},3000);
+});
+}
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",initApp,{once:true});
+}else{
+  initApp();
+}
+registerServiceWorker();
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{updateClock();initEditButtons();(function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();});else{updateClock();initEditButtons();}
+initWeather();initTelegramMiniApp();bootDataEngineHealthCheck();bootM5355Status();updateFixedShellOffsets();requestAnimationFrame(updateFixedShellOffsets);window.addEventListener("resize",updateFixedShellOffsets);if("ResizeObserver" in window){const shellObserver=new ResizeObserver(updateFixedShellOffsets);shellObserver.observe(document.querySelector(".header"));shellObserver.observe(document.querySelector(".nav"));}setInterval(updateCommandClock,1000);document.addEventListener("visibilitychange",()=>{if(document.hidden)renderEnr();else updateCommandClock();});
 /* ===== M21: DİSİPLİN KARÜSELİ ===== */
 const DISCIPLINE_TIPS=[
  {text:"Tek bir hisseye tüm sermayeni koyma. 5-8 varlık arası dağılım en optimal risk/getiri dengesini sunar.",label:"Diversifikasyon"},
