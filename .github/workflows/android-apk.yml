@@ -77,13 +77,21 @@ jobs:
       # ── 8) Gradle izni ──
       - name: Grant gradlew execute permission
         working-directory: STKSZ Capital/android
-        run: chmod +x gradlew
+        run: |
+          chmod +x gradlew
+          ls -la gradlew
 
       # ── 9) Gradle build ──
       - name: Build debug APK
         id: gradle-build
         working-directory: STKSZ Capital/android
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          echo "=== GRADLE VERSION ==="
+          ./gradlew --version
+          echo "=== BUILD START ==="
+          ./gradlew assembleDebug --stacktrace --info
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dorg.gradle.daemon=false"
 
       # ── 10) APK konumunu dogrula ──
       - name: Verify APK output
