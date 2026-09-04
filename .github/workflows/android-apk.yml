@@ -89,9 +89,9 @@ jobs:
           echo "=== GRADLE VERSION ==="
           ./gradlew --version
           echo "=== BUILD START ==="
-          ./gradlew assembleDebug --stacktrace --info
+          ./gradlew assembleDebug --no-daemon --stacktrace
         env:
-          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -Dorg.gradle.daemon=false"
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false"
 
       # ── 10) APK konumunu dogrula ──
       - name: Verify APK output
