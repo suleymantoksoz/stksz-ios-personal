@@ -107,6 +107,24 @@ main{max-width:1080px;margin:auto;padding:22px 18px}
 }
 .modal.show{display:flex}.modal-box{width:min(720px,100%);max-height:90vh;overflow:auto;background:#0b1012;border:1px solid #29343a;border-radius:20px;padding:22px}
 .modal-head{display:flex;justify-content:space-between;align-items:center}
+.modal-body{margin-top:14px;line-height:1.65;color:#d5ddda;font-size:13px}
+.modal-close{background:none;border:none;color:#d5ddda;font-size:22px;cursor:pointer;padding:4px 8px}
+.legal-modal{width:min(800px,95vw);max-height:95vh}
+.legal-modal .modal-body{overflow:auto;max-height:calc(95vh - 100px)}
+.legal-modal h3{font-size:18px;margin-bottom:8px;color:#B87333}
+.legal-modal .consent-toggles{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.consent-toggle{display:flex;align-items:center;gap:10px;padding:12px;background:#070a0b;border:1px solid #29343a;border-radius:10px;cursor:pointer}
+.consent-toggle input[type="checkbox"]{width:20px;height:20px;accent-color:#B87333}
+.gdpr-rights-list{list-style:none;padding:0;margin:12px 0}
+.gdpr-rights-list li{padding:10px;background:#070a0b;border:1px solid #29343a;border-radius:10px;margin-bottom:8px;line-height:1.55}
+.privacy-center-modal .privacy-actions{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.privacy-center-modal .privacy-actions button{flex:1 1 calc(50% - 5px)}
+.modal-body .privacy-actions button{font-size:12px;padding:10px 12px}
+.consent-toggle{display:flex;align-items:center;gap:10px;padding:12px;background:#070a0b;border:1px solid #29343a;border-radius:10px;cursor:pointer;transition:background .2s}
+.consent-toggle:hover{background:#0d1216}
+.consent-toggle input[type="checkbox"]{width:20px;height:20px;accent-color:#B87333}
+.gdpr-rights-list{list-style:none;padding:0;margin:12px 0}
+.gdpr-rights-list li{padding:10px;background:#070a0b;border:1px solid #29343a;border-radius:10px;margin-bottom:8px;line-height:1.55}
 .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .field label{display:block;font-size:11px;color:#89949a;margin-bottom:5px}
 .field input{width:100%;background:#070a0b;color:white;border:1px solid #29343a;border-radius:10px;padding:11px}

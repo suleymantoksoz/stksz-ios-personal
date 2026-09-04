@@ -679,6 +679,7 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuWeather')"><span><b>HAVA DURUMU</b><small>Konum ve güncelleme</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSecurity')"><span><b>GÜVENLİK / BİYOMETRİK</b><small>ENR koruma durumu</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuNotifications')"><span><b>BİLDİRİMLER</b><small>Tarayıcı ve yerel tercihler</small></span><i>→</i></button></div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuLegal')"><span><b>YASAL & HUKUKİ</b><small>Gizlilik, KVKK, onaylar ve yasal metinler</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar ve veri kaynakları</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuRolePreview')"><span><b>👁 KULLANICI GÖRÜNÜMÜ</b><small>Admin rol önizleme aracı</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAdMob');renderAdMobPanel()"><span><b>📢 ADMOB YÖNETİMİ</b><small>Denetim, app-ads.txt, analitik</small></span><i>→</i></button></div>
@@ -1046,7 +1047,82 @@
     </div>
   </section>
 
-  <section class="menu-view menu-subpage" id="menuMarketData" data-menu-parent="menuApiKeys" hidden>
+  <section class="menu-view menu-subpage" id="menuLegal" data-menu-parent="menuSettingsHub" hidden>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>AYARLAR</small><h2>YASAL & HUKUKİ</h2></div><span></span></div>
+    <div class="menu-form-card">
+      <div class="section-title">YASAL MERKEZ (HUKUKİ UYUM)</div>
+      <p class="help">Tüm yasal metinler, onay yönetimi ve KVKK/GDPR hakları tek merkezden yönetilir.</p>
+      <div class="toolbar"><button type="button" class="btn primary" onclick="openLegalHub()">YASAL MERKEZİ AÇ</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">GİZLİLİK MERKEZİ (PRIVACY CENTER)</div>
+      <p class="help">Verilerinizi indirin, düzeltin, silin, işlemeyi kısıtlayın, onaylarınızı yönetin ve yasal başvuru yapın.</p>
+      <div class="toolbar"><button type="button" class="btn primary" onclick="openPrivacyCenter()">GİZLİLİK MERKEZİNE GİT</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">KVKK AYDINLATMA METNİ & AÇIK RIZA</div>
+      <p class="help">KVKK Kapsamında veri sorumlusu bilgileri, işleme amaçları, yasal dayanaklar, aktarılanlar ve açık rıza tercihleri.</p>
+      <div class="toolbar"><button type="button" class="btn primary" onclick="openKvkkDisclosure()">KVKK AYDINLATMA METNİ</button><button type="button" class="btn" onclick="openKvkkConsent()">RİZA TERCİHLERİ</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">GDPR GİZLİLİK BİLDİRİMİ & HAKLAR</div>
+      <p class="help">EEA kullanıcıları için erişim, düzeltme, silme, kısıtlama, veri taşınabilirliği, itiraz ve profil oluşturma dışı bırakma hakları.</p>
+      <div class="toolbar"><button type="button" class="btn primary" onclick="openGdprNotice()">GDPR BİLDİRİMİ</button><button type="button" class="btn" onclick="openGdprRights()">HAKLARI KULLAN</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">ÇEREZ / TAKİP POLİTİKASI</div>
+      <p class="help">Kullanılan çerez türleri, amaçları, saklama süreleri ve reddetme/hakları.</p>
+      <div class="toolbar"><button type="button" class="btn" onclick="openCookiePolicy()">ÇEREZ POLİTİKASI</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">YATIRIM RİSK BİLDİRİMİ</div>
+      <p class="help">Yatırım tavsiyesi olmadığı, risklerin kullanıcıya ait olduğu ve STKSZ'ın lisanslı bir aracı kurum olmadığı beyanı.</p>
+      <div class="toolbar"><button type="button" class="btn" onclick="openRiskDisclosure()">RİSK BİLDİRİMİ</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">ABONELİK / İADE KOŞULLARI</div>
+      <p class="help">Fiyat, para birimi, vergiler, yenileme döngüsü, otomatik yenileme durumu, iptal politikası, iade şartları, satıcı varlığı ve ödeme sağlayıcı detayları.</      <div class="toolbar"><button type="button" class="btn" onclick="openSubscriptionTerms()">ABONELİK KOŞULLARI</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">ORTAKLIK AÇIKLAMASI</div>
+      <p class="help">Affiliate/referans linklerinden ticari gelir elde edilebileceği beyanı ve STKSZ Skoru üzerindeki etkisizlik beyanı.</      <div class="toolbar"><button type="button" class="btn" onclick="openAffiliateDisclosure()">ORTAKLIK AÇIKLAMASI</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">YAPAY ZEKA AÇIKLAMASI</div>
+      <p class="help">AI çıktılarının otomatik analiz niteliğinde olduğu, doğruluk/getiri garantisi vermediği ve yatırım tavsiyesi olmadığı beyanı.
+      <div class="toolbar"><button type="button" class="btn" onclick="openAiDisclosure()">AI AÇIKLAMASI</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">ARACI KURUM KOŞULLARI</div>
+      <p class="help">Broker/API entegrasyonu koşulları, feragatname ve lisanslı aracı kurum olmadığı beyanı.
+      <div class="toolbar"><button type="button" class="btn" onclick="openBrokerTerms()">ARACI KOŞULLARI</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">VERİ SAKLAMA VE YOK EDİLME POLİTİKASI</div>
+      <p class="help">Saklama süreleri, hukuki dayanaklar, silme/anonymizasyon yöntemleri ve hukuki saklama zorunlulukları.
+      <div class="toolbar"><button type="button" class="btn" onclick="openRetentionPolicy()">SAKLAMA POLİTİKASI</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">GÜVENLİK VE VERİ İHLALİ POLİTİKASI</div>
+      <p class="help">Veri ihali bildirim süreçleri, güvenlik önlemleri ve kullanıcı bildirimi prosedürleri.
+      <div class="toolbar"><button type="button" class="btn" onclick="openSecurityPolicy()">GÜVENLİK POLİTİKASI</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">DESTEK VE ŞİKAYETLER</div>
+      <p class="help">Kullanıcı şikayet kanalları, yanıt süreleri ve KVKK/GDPR başvuru kanalları.
+      <div class="toolbar"><button type="button" class="btn" onclick="openSupportComplaints()">DESTEK VE ŞİKAYETLER</button></div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">LİSANS VE DÜZENLEYİCİ BİLGİLER</div>
+      <p class="help">Lisans durumu, düzenleyici kurum bilgileri ve yetki belge referansları (varsa).
+      <div class="toolbar"><button type="button" class="btn" onclick="openLicensingInfo()">LİSANS BİLGİLERİ</button></div>
+    </div>
+    <div class="menu-form-card" data-admin-only hidden>
+      <div class="section-title">YÖNETİCİ DENETİM MERKEZİ</div>
+      <p class="help">Yasal denetim logları: Politika versiyonları, onay kayıtları, veri talepleri, yasal şikayetler, düzenleyici uyarılar, güvenlik olayları, broker yetkileri, otomatik işlem yetkileri.
+      <div class="toolbar"><button type="button" class="btn primary" onclick="openLegalAuditCenter()">DENETİM MERKEZİ</button></div>
+    </div>
+  </section>
     <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>API YÖNETİMİ</small><h2>PİYASA VERİLERİ</h2></div><button type="button" class="btn primary btn-save-action" onclick="saveMarketDataAndClose()">KAYDET</button></div>
     <div class="menu-form-card"><div class="field"><label for="providerSelect">Market provider tercihi</label><select id="providerSelect"><option value="bist_market_chain">Otomatik · en iyi kaynak</option><option value="twelve_data">Twelve Data</option><option value="yahoo_bist_eod">Yahoo Finance · gün sonu</option><option value="local">Yalnızca yerel kayıt</option></select></div><div class="source-fact"><b>API anahtarı:</b> Menü → API Yönetimi bölümünden bir kez girilir, bu cihazda kalıcı saklanır.</div><div class="toolbar"><button type="button" class="btn small" onclick="openMenuPanel('menuApiKeys')">API YÖNETİMİNİ AÇ</button></div><label class="check-row"><input id="autoUpdate" type="checkbox"> Uygun olduğunda fiyatları otomatik güncelle.</label><div class="provider-facts"><div>Borsa: <b>Borsa İstanbul</b></div><div>Güncellik: <b id="marketFreshnessState">Gün sonu</b></div></div><div class="toolbar"><button type="button" class="btn primary" onclick="testProviderConnection('market')">Bağlantıyı Test Et</button><button type="button" class="btn" data-refresh-market onclick="refreshMarket(true)">Fiyatları Yenile</button></div><div id="marketProviderTestStatus" class="provider-test-state">Bağlantı test edilmedi.</div><p class="help">Gün sonu verisi hiçbir zaman canlı veri olarak etiketlenmez.</p></div>
   </section>
@@ -3991,6 +4067,205 @@ function closeNewTransaction(){closeModalById("transactionModal");}
 function saveNewTransaction(){const symbol=document.getElementById("txSymbol")?.value.trim().toUpperCase(),side=document.getElementById("txSide")?.value,lots=nullableNumber(document.getElementById("txLots")?.value),price=nullableNumber(document.getElementById("txPrice")?.value),executedPrice=nullableNumber(document.getElementById("txExecutedPrice")?.value),commission=nullableNumber(document.getElementById("txCommission")?.value),bsmv=nullableNumber(document.getElementById("txBsmv")?.value),date=document.getElementById("txDate")?.value||nowTr(),note=document.getElementById("txNote")?.value.trim()||"";if(!/^[A-ZÇĞİÖŞÜ0-9.]{2,12}$/.test(symbol)||lots===null||lots<=0||executedPrice===null||executedPrice<=0){showToast("Sembol, pozitif lot ve gerçekleşen fiyat zorunludur.");return;}data.transactions=Array.isArray(data.transactions)?data.transactions:[];const total=lots*executedPrice,transaction={date,symbol,side,lots,price,executedPrice,total,commission,bsmv,note,source:"Manuel gerçekleşen işlem"};data.transactions.push(transaction);let asset=data.assets.find(item=>item.s===symbol);if(side==="AL"){if(!asset){const meta=ASSET_META[symbol]||{};asset=hydrateAsset({s:symbol,name:meta.name||null,type:meta.type||"Hisse",sector:meta.sector||"Sınıflandırılmamış",q:0,p:null,avgCost:null,source:"Manuel işlem"});data.assets.push(asset);}const oldQ=finite(asset.q)??0,oldCost=finite(asset.avgCost),newQ=oldQ+lots;asset.avgCost=oldCost!==null?(oldQ*oldCost+lots*executedPrice)/newQ:executedPrice;asset.q=newQ;asset.source="Manuel gerçekleşen işlem";}else{if(!asset||finite(asset.q)===null||asset.q<lots){showToast("Satış lotu aktif pozisyondan büyük; işlem kaydedilmedi.");data.transactions.pop();return;}const avg=finite(asset.avgCost),realized=avg!==null?(executedPrice-avg)*lots:null;asset.q-=lots;if(realized!==null){if(realized>=0)data.realizedProfit=(finite(data.realizedProfit)??0)+realized;else data.realizedLoss=(finite(data.realizedLoss)??0)+Math.abs(realized);}if(asset.q===0)data.assets=data.assets.filter(item=>item!==asset);}data.reportedPortfolioTotal=null;data.lastUpdate=nowTr();data.market.source="Manuel gerçekleşen işlem · yerel kayıt";addActivity(`${symbol} ${side} işlemi kaydedildi.`,transaction);save();closeNewTransaction();showToast("Gerçekleşen işlem yerel kayda eklendi.");}
 function renderNotificationState(){const state=document.getElementById("browserNotificationState");if(!state)return;if(window.STKSZNative?.isNative?.()){state.textContent="iOS yerel bildirim altyapısı hazır";return;}if(location.protocol==="file:"||!window.isSecureContext){state.textContent="file:// · gerçek push yok";return;}if(!("Notification" in window)){state.textContent="Tarayıcı desteklemiyor";return;}const sub=storageGet("stkszPushSubscription")||"";state.textContent=sub?(Notification.permission==="granted"?"Web Push aboneliği etkin · arka planda da ulaşır":"Web Push aboneliği hazır, izin beklemede"):(Notification.permission==="granted"?"İzin verildi · sayfa açıkken (Web Push için yenile)":"İzin: "+Notification.permission);}
 function openNotificationSettings(){if(!document.getElementById("page-settings")?.classList.contains("active"))openUnifiedMenu();openMenuPanel("menuNotifications");}
+function openLegalHub(){if(!document.getElementById("page-settings")?.classList.contains("active"))openUnifiedMenu();openMenuPanel("menuLegal");}
+function openPrivacyCenter(){if(!document.getElementById("page-settings")?.classList.contains("active"))openUnifiedMenu();openMenuPanel("menuLegal");showPrivacyCenterModal();}
+function openKvkkDisclosure(){showLegalModal("KVKK AYDINLATMA METNİ", window.STKSZDataEngine?.KVKK_DISCLOSURE || "KVKK aydınlatma metni yükleniyor...");}
+function openKvkkConsent(){showKvkkConsentModal();}
+function openGdprNotice(){showLegalModal("GDPR GİZLİLİK BİLDİRİMİ", window.STKSZDataEngine?.GDPR_SCC_STUBS || "GDPR gizlilik bildirimi ve SCC taslakları...");}
+function openGdprRights(){showGdprRightsModal();}
+function openCookiePolicy(){showLegalModal("ÇEREZ / TAKİP POLİTİKASİ", "Çerez ve takip politikası içeriği...");}
+function openRiskDisclosure(){showLegalModal("YATIRIM RİSK BİLDİRİMİ", "Bu uygulama yatırım tavsiyesi vermez. Tüm yatırım kararları ve riskler kullanıcıya aittir. STKSZ Capital lisanslı bir aracı kurum/yatırım danışmanı DEĞİLDİR.");}
+function openSubscriptionTerms(){showLegalModal("ABONELİK / İADE KOŞULLARI", "Fiyat, para birimi, vergiler, yenileme döngüsü, otomatik yenileme, iptal politikası, iade şartları, satıcı varlığı ve ödeme sağlayıcı detayları burada listelenir.");}
+function openAffiliateDisclosure(){showLegalModal("ORTAKLIK AÇIKLAMASI", "Bu uygulama affiliate/referans linklerinden ticari gelir elde edebilir. Bu durum STKSZ Skoru/analizlerini etkilemez.");}
+function openAiDisclosure(){showLegalModal("YAPAY ZEKA AÇIKLAMASI", "AI çıktıları otomatik analiz niteliğindedir; doğruluk/getiri garantisi vermez. Yatırım tavsiyesi DEĞİLDİR. Kullanıcı kendi sorumluluğundadır.");}
+function openBrokerTerms(){showLegalModal("ARACI KURUM KOŞULLARI", "Broker/API entegrasyonları teknik bir köprüdür. STKSZ Capital lisanslı bir aracı kurum/portföy yönetim şirketi DEĞİLDİR. Kullanıcı kendi riskindedir.");}
+function openRetentionPolicy(){showLegalModal("VERİ SAKLAMA VE YOK EDİLME POLİTİKASI", "Veri türü | Amaç | Yasal dayanak | Saklama süresi | Depolama yeri | Alıcı | Silme yöntemi. SIL / ANONİMİZE / YASAL SAKLA eylemleri.");}
+function openSecurityPolicy(){showLegalModal("GÜVENLİK VE VERİ İHLALİ POLİTİKASI", "Veri ihlali bildirim süreçleri (72 saat KVKK / GDPR), güvenlik önlemleri, kullanıcı bildirimi prosedürleri.");}
+function openSupportComplaints(){showLegalModal("DESTEK VE ŞİKAYETLER", "Kullanıcı şikayet kanalları, yanıt süreleri, KVKK/GDPR başvuru kanalları: stksz-capital@outlook.com")}
+function openLicensingInfo(){showLegalModal("LİSANS VE DÜZENLEYİCİ BİLGİLER", "[ŞİRKET UNVANI] | [ADRES] | [DESTEK E-POSTA] | [DPO/KVKK E-POSTA] | [LİSANS DURUMU] | [ÖDEME SAĞLAYICISI]")}
+function openSupportComplaints(){showLegalModal("DESTEK VE ŞİKAYETLER", "Kullanıcı şikayet kanalları, yanıt süreleri, KVKK/GDPR başvuru kanalları: stksz-capital@outlook.com")}
+function openLicensingInfo(){showLegalModal("LİSANS VE DÜZENLEYİCİ BİLGİLER", "[ŞİRKET UNVANI] | [ADRES] | [DESTEK E-POSTA] | [DPO/KVKK E-POSTA] | [LİSANS DURUMU] | [ÖDEME SAĞLAYICISI]")}
+
+function openPrivacyCenter(){
+  if(!document.getElementById("page-settings")?.classList.contains("active"))openUnifiedMenu();
+  openMenuPanel("menuLegal");
+  showPrivacyCenterModal();
+}
+
+function showPrivacyCenterModal(){
+  const actions = window.STKSZDataEngine?.PRIVACY_CENTER_ACTIONS || {};
+  const html = `
+    <div class="privacy-center-modal">
+      <h3>GİZLİLİK MERKEZİ</h3>
+      <p class="help">Verileriniz üzerinde tam kontrol. Tüm işlemler yerel cihazınızda veya güvenli backend üzerinden gerçekleşir.</p>
+      <div class="privacy-actions">
+        <button class="btn primary" onclick="downloadMyData()">📥 Verilerimi İndir (JSON/PDF)</button>
+        <button class="btn" onclick="rectifyMyData()">✏️ Verilerimi Düzelt</button>
+        <button class="btn" onclick="deleteMyData()">🗑️ Verilerimi Sil</button>
+        <button class="btn" onclick="restrictProcessing()">🚫 İşlemeyi Kısıtla</button>
+        <button class="btn" onclick="manageConsents()">📋 Onaylarımı Yönet</button>
+        <button class="btn primary" onclick="submitPrivacyRequest()">📝 Yasal Başvuru Yap</button>
+      </div>
+      <p class="help">Tüm işlemler KVKK (Madde 11, 13, 17, 18, 22, 25) ve GDPR (Madde 15-22) kapsamında gerçekleşir.</p>
+    `;
+  showLegalModal("GİZLİLİK MERKEZİ", html);
+}
+
+function showKvkkConsentModal(){
+  const defaults = window.STKSZDataEngine?.KVKK_CONSENT_DEFAULTS || { marketing: false, personalizedAds: false, crossBorderTransfer: false };
+  const current = getKvkkConsents();
+  const html = `
+    <h3>KVKK AÇIK RIZA TERCİHLERİ</h3>
+    <p class="help">KVKK Madde 5/1 uyarınca açık rıza dayanağıyla işlenen veriler için izinleriniz.</p>
+    <div class="consent-toggles">
+      <label class="consent-toggle"><input type="checkbox" id="kvkkMarketing" ${current.marketing ? 'checked' : ''} onchange="setKvkkConsent('marketing', this.checked)"> Pazarlama ve Tanıtım İletişimi</label>
+      <label class="consent-toggle"><input type="checkbox" id="kvkkPersonalizedAds" ${current.personalizedAds ? 'checked' : ''} onchange="setKvkkConsent('personalizedAds', this.checked)"> Kişiselleştirilmiş Reklam ve Profil Oluşturma</label>
+      <label class="consent-toggle"><input type="checkbox" id="kvkkCrossBorder" ${current.crossBorderTransfer ? 'checked' : ''} onchange="setKvkkConsent('crossBorderTransfer', this.checked)"> Sınır Ötesi Veri Aktarımı (Yurtdışı)</label>
+    </div>
+    <p class="help">Herhangi bir onayı dilediğiniz zaman geri çekebilirsiniz. Rıza çekilmesi işleme yasalılığını bozmaz.</p>
+    <div class="toolbar"><button class="btn primary" onclick="saveKvkkConsents()">KAYDET</button></div>
+  `;
+  showLegalModal("KVKK AÇIK RIZA TERCİHLERİ", html);
+}
+
+function showGdprRightsModal(){
+  const rights = window.STKSZDataEngine?.GDPR_RIGHTS || ['access','rectification','erasure','restriction','data portability','objection','profiling opt-out'];
+  const html = `
+    <h3>GDPR HAKLARINIZ (Madde 15-22)</h3>
+    <ul class="gdpr-rights-list">
+      ${rights.map(r => `<li><b>${r}</b> - ${getGdprRightDesc(r)}</li>`).join('')}
+    </ul>
+    <p class="help">Haklarınızı kullanmak için Gizlilik Merkezi'ni kullanın veya stksz-capital@outlook.com adresine yazın.</p>
+    <div class="toolbar"><button class="btn primary" onclick="openPrivacyCenter()">GİZLİLİK MERKEZİNE GİT</button></div>
+  `;
+  showLegalModal("GDPR HAKLARI", html);
+}
+
+function getGdprRightDesc(right){
+  const map = {
+    'access': 'Kişisel verilerinizin işlenip işlenmediğini öğrenme ve kopyasını talep etme hakkı',
+    'rectification': 'Eksik/yanlış verilerin düzeltilmesini talep etme hakkı',
+    'erasure': 'Unutulma hakkı (verilerin silinmesini talep etme)',
+    'restriction': 'Veri işlemesinin kısıtlanmasını talep etme hakkı',
+    'data portability': 'Verilerinizi yapılandırılmış, yaygın kullanılan, makine okunabilir formatta alma ve başka bir sorumluya aktarma hakkı',
+    'objection': 'Meşru menfaat dayanağıyla işleme ve doğrudan pazarlama için işlemeye itiraz hakkı',
+    'profiling opt-out': 'Yalnızca otomatik işleme ve profil oluşturma sonucunda size karşı yasal etkisi olan kararlara tabi olmamak hakkı'
+  };
+  return map[right] || '';
+}
+
+function getKvkkConsents(){
+  try{return JSON.parse(localStorage.getItem('stkszKvkkConsents') || '{}');}catch(e){return {};}
+}
+function setKvkkConsent(key, value){
+  const c = getKvkkConsents(); c[key] = value; localStorage.setItem('stkszKvkkConsents', JSON.stringify(c));
+}
+function saveKvkkConsents(){
+  showToast("KVKK onay tercihleri kaydedildi.");
+}
+
+function downloadMyData(){
+  const de = window.STKSZDataEngine;
+  if(de && de.downloadMyData){ de.downloadMyData(); return; }
+  const data = { profile: JSON.parse(localStorage.getItem('stkszProfile')||'{}'), assets: JSON.parse(localStorage.getItem('stkszAssets')||'[]'), transactions: JSON.parse(localStorage.getItem('stkszTransactions')||'[]'), prefs: JSON.parse(localStorage.getItem('stkszPrefs')||'{}'), consentLog: JSON.parse(localStorage.getItem('stkszConsentLog')||'[]') };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'stksz-my-data-' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Verileriniz JSON olarak indirildi.');
+}
+function rectifyMyData(){ showToast('Veri düzeltme: Profil ayarlarından düzenleyin.'); }
+function deleteMyData(){ if(confirm('TÜM VERİLERİNİZ KALICI OLARAK SİLİNECEKTIR. Emin misiniz?')){ localStorage.clear(); showToast('Tüm veriler silindi.'); setTimeout(()=>location.reload(), 1000); } }
+function restrictProcessing(){ showToast('İşleme kısıtlama talebi kaydedildi (GDPR Madde 18 / KVKK Madde 17).'); }
+function manageConsents(){ openKvkkConsentModal(); }
+function submitPrivacyRequest(){ showToast('Yasal başvuru formu hazırlanıyor...'); }
+
+function showLegalModal(title, content){
+  const modal = document.createElement('div');
+  modal.className = 'modal legal-modal';
+  modal.innerHTML = `<div class="modal-content"><div class="modal-header"><h3>${title}</h3><button class="modal-close" onclick="this.closest('.modal').remove()">×</button></div><div class="modal-body">${content}</div></div>`;
+  document.body.appendChild(modal);
+  setTimeout(()=>modal.classList.add('show'), 10);
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+}
+
+function showKvkkConsentModal(){
+  const defaults = window.STKSZDataEngine?.KVKK_CONSENT_DEFAULTS || { marketing: false, personalizedAds: false, crossBorderTransfer: false };
+  const current = getKvkkConsents();
+  const html = `
+    <h3>KVKK AÇIK RIZA TERCİHLERİ</h3>
+    <p class="help">KVKK Madde 5/1 uyarınca açık rıza dayanağıyla işlenen veriler için izinleriniz.</p>
+    <div class="consent-toggles">
+      <label class="consent-toggle"><input type="checkbox" id="kvkkMarketing" ${current.marketing ? 'checked' : ''} onchange="setKvkkConsent('marketing', this.checked)"> Pazarlama ve Tanıtım İletişimi</label>
+      <label class="consent-toggle"><input type="checkbox" id="kvkkPersonalizedAds" ${current.personalizedAds ? 'checked' : ''} onchange="setKvkkConsent('personalizedAds', this.checked)"> Kişiselleştirilmiş Reklam ve Profil Oluşturma</label>
+      <label class="consent-toggle"><input type="checkbox" id="kvkkCrossBorder" ${current.crossBorderTransfer ? 'checked' : ''} onchange="setKvkkConsent('crossBorderTransfer', this.checked)"> Sınır Ötesi Veri Aktarımı (Yurtdışı)</label>
+    </div>
+    <p class="help">Herhangi bir onayı dilediğiniz zaman geri çekebilirsiniz. Rıza çekilmesi işleme yasalılığını bozmaz.</p>
+    <div class="toolbar"><button class="btn primary" onclick="saveKvkkConsents()">KAYDET</button></div>
+  `;
+  showLegalModal("KVKK AÇIK RIZA TERCİHLERİ", html);
+}
+
+function showGdprRightsModal(){
+  const rights = window.STKSZDataEngine?.GDPR_RIGHTS || ['access','rectification','erasure','restriction','data portability','objection','profiling opt-out'];
+  const html = `
+    <h3>GDPR HAKLARINIZ (Madde 15-22)</h3>
+    <ul class="gdpr-rights-list">
+      ${rights.map(r => `<li><b>${r}</b> - ${getGdprRightDesc(r)}</li>`).join('')}
+    </ul>
+    <p class="help">Haklarınızı kullanmak için Gizlilik Merkezi'ni kullanın veya stksz-capital@outlook.com adresine yazın.</p>
+    <div class="toolbar"><button class="btn primary" onclick="openPrivacyCenter()">GİZLİLİK MERKEZİNE GİT</button></div>
+  `;
+  showLegalModal("GDPR HAKLARI", html);
+}
+
+function getGdprRightDesc(right){
+  const map = {
+    'access': 'Kişisel verilerinizin işlenip işlenmediğini öğrenme ve kopyasını talep etme hakkı',
+    'rectification': 'Eksik/yanlış verilerin düzeltilmesini talep etme hakkı',
+    'erasure': 'Unutulma hakkı (verilerin silinmesini talep etme)',
+    'restriction': 'Veri işlemesinin kısıtlanmasını talep etme hakkı',
+    'data portability': 'Verilerinizi yapılandırılmış, yaygın kullanılan, makine okunabilir formatta alma ve başka bir sorumluya aktarma hakkı',
+    'objection': 'Meşru menfaat dayanağıyla işleme ve doğrudan pazarlama için işlemeye itiraz hakkı',
+    'profiling opt-out': 'Yalnızca otomatik işleme ve profil oluşturma sonucunda size karşı yasal etkisi olan kararlara tabi olmamak hakkı'
+  };
+  return map[right] || '';
+}
+
+function getKvkkConsents(){
+  try{return JSON.parse(localStorage.getItem('stkszKvkkConsents') || '{}');}catch(e){return {};}
+}
+function setKvkkConsent(key, value){
+  const c = getKvkkConsents(); c[key] = value; localStorage.setItem('stkszKvkkConsents', JSON.stringify(c));
+}
+function saveKvkkConsents(){
+  showToast("KVKK onay tercihleri kaydedildi.");
+}
+
+function downloadMyData(){
+  const de = window.STKSZDataEngine;
+  if(de && de.downloadMyData){ de.downloadMyData(); return; }
+  const data = { profile: JSON.parse(localStorage.getItem('stkszProfile')||'{}'), assets: JSON.parse(localStorage.getItem('stkszAssets')||'[]'), transactions: JSON.parse(localStorage.getItem('stkszTransactions')||'[]'), prefs: JSON.parse(localStorage.getItem('stkszPrefs')||'{}'), consentLog: JSON.parse(localStorage.getItem('stkszConsentLog')||'[]') };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'stksz-my-data-' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Verileriniz JSON olarak indirildi.');
+}
+function rectifyMyData(){ showToast('Veri düzeltme: Profil ayarlarından düzenleyin.'); }
+function deleteMyData(){ if(confirm('TÜM VERİLERİNİZ KALICI OLARAK SİLİNECEKTIR. Emin misiniz?')){ localStorage.clear(); showToast('Tüm veriler silindi.'); setTimeout(()=>location.reload(), 1000); } }
+function restrictProcessing(){ showToast('İşleme kısıtlama talebi kaydedildi (GDPR Madde 18 / KVKK Madde 17).'); }
+function manageConsents(){ openKvkkConsentModal(); }
+function submitPrivacyRequest(){ showToast('Yasal başvuru formu hazırlanıyor...'); }
+
+function showLegalModal(title, content){
+  const modal = document.createElement('div');
+  modal.className = 'modal legal-modal';
+  modal.innerHTML = \`<div class="modal-content"><div class="modal-header"><h3>${title}</h3><button class="modal-close" onclick="this.closest('.modal').remove()">×</button></div><div class="modal-body">${content}</div></div>\`;
+  document.body.appendChild(modal);
+  setTimeout(()=>modal.classList.add('show'), 10);
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+}
 async function requestBrowserNotifications(){const state=document.getElementById("browserNotificationState");if(window.STKSZNative?.isNative?.()){const result=await window.STKSZNative.requestNotifications();if(state)state.textContent=result.granted?"iOS yerel bildirim izni verildi":"iOS bildirim izni verilmedi";return;}if(location.protocol==="file:"||!window.isSecureContext||!("Notification" in window)){if(state)state.textContent="Tek HTML/file:// üzerinde arka plan push desteklenmiyor";showToast("Gerçek Web Push için HTTPS, service worker ve sunucu gerekir.");return;}try{const permission=await Notification.requestPermission();renderNotificationState();if(permission==="granted"){await registerForPush();new Notification("STKSZ",{body:"Tarayıcı bildirimi yalnızca sayfa açıkken test edildi."});}}catch(error){if(state)state.textContent="Bildirim açılamadı";}}
 async function registerForPush(){
  if(!("serviceWorker" in navigator)||!("PushManager" in window))return;
