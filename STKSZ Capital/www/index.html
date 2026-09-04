@@ -59,7 +59,6 @@
   <!-- v119 (2. ADIM): AI butonu alt navigasyon merkezine taşındı -->
    <div class="header-side header-side-v2">
     <div class="header-status-row">
-      <div id="status" class="header-data-status" aria-live="polite">Veri: Yerel kayıt · Son: Henüz yok</div>
       <div id="headerInvestorChip" class="header-investor-chip" hidden aria-label="Yatırımcı rozeti"></div>
       <button type="button" id="headerRefreshBtn" class="hbtn header-refresh-btn" onclick="manualRefreshAll()" aria-label="Verileri yenile" title="Verileri yenile"><svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"/><path d="M20.5 3.5v4.6h-4.6"/></svg></button>
     </div>
@@ -454,9 +453,12 @@
     <div style="padding:14px">
       <div id="ipoCalendar"><div class="empty-state"><b>Doğrulanmış halka arz kaydı yok.</b><br>Sayfa açıldığında haber taraması otomatik çalışır; kayıt geldiğinde şirket, tarih, talep durumu, tahmini lot ve gerekli nakit burada listelenir. Güncel duyurular için aşağıdaki SPK ve KAP bağlantılarını kullanabilirsiniz.</div></div>
       <div class="source-fact" id="ipoCommandState" style="margin-top:10px">IPO Komut Merkezi: <b>yükleniyor…</b></div>
-      <div id="ipoLimitTable" class="ipo-limit-table-wrap" hidden></div>
-      <div id="ipoScenarioPanel" class="ipo-scenario" hidden></div>
-      <div id="ipoRiskPanel" class="ipo-risk" hidden></div>
+      <button type="button" class="btn btn-sm ipo-detail-toggle" id="ipoDetailToggle" onclick="toggleIpoDetails()" aria-expanded="false">HESAPLAMA &amp; LİMİT DETAYLARINI GÖSTER</button>
+      <div id="ipoDetailPanels" class="ipo-detail-panels" hidden>
+        <div id="ipoLimitTable" class="ipo-limit-table-wrap" hidden></div>
+        <div id="ipoScenarioPanel" class="ipo-scenario" hidden></div>
+        <div id="ipoRiskPanel" class="ipo-risk" hidden></div>
+      </div>
       <p class="help" style="margin:10px 0 0">Yalnızca yapılandırılmış ve doğrulanmış halka arz verisi gösterilir; şirket, lot veya nakit tahmini üretilmez. Talep aralığı (fair price) doğrulanmış kaynakta görünüyorsa 10 işlem günlük limite dayalı alt/üst katılım bütçesi komut merkezinde hesaplanır.</p>
       <div class="toolbar" style="margin:12px 0 0"><a class="btn btn-link" href="https://spk.gov.tr/spk-bultenleri/2026-yili-spk-bultenleri" target="_blank" rel="noopener noreferrer">SPK Bültenleri →</a><a class="btn btn-link" href="https://www.kap.org.tr/tr/" target="_blank" rel="noopener noreferrer">KAP →</a></div>
     </div>
@@ -2743,6 +2745,12 @@ function runSweep(){
  const r=de.sweepCalculator(cash,p);
  out.innerHTML=r.ok?`<b>${r.lots}</b> lot · toplam ${money(r.total)} · kalan <b>${money(r.leftover)}</b>`:esc(r.note||"VERİ YETERSİZ");
 }
+function toggleIpoDetails(){
+ const wrap=document.getElementById("ipoDetailPanels"),btn=document.getElementById("ipoDetailToggle");
+ if(!wrap)return;
+ const wasHidden=wrap.hidden;wrap.hidden=!wasHidden;
+ if(btn){btn.setAttribute("aria-expanded",String(wasHidden));btn.textContent=wasHidden?"HESAPLAMA & LİMİT DETAYLARINI GİZLE":"HESAPLAMA & LİMİT DETAYLARINI GÖSTER";}
+}
 function renderOpportunityData(){
   renderDailyOpportunity("dailyOpportunity");renderOpportunityCards();renderSmartFilters();renderCompositePanel();renderStressTest();scanBreakoutAlerts();renderCuratedBulletin();renderSignalTerminal();fillGridSymbols();try{renderMicroOpportunities();}catch(e){}
  const ipo=document.getElementById("ipoCalendar");if(ipo){const items=data.ipoCalendar?.items||[];
@@ -3238,8 +3246,10 @@ function openCryptoDetail(idx){
   setText("cryptoDetailHigh","$"+formatNumber(c.high,2,4));
   setText("cryptoDetailLow","$"+formatNumber(c.low,2,4));
   setText("cryptoDetailVolume","$"+formatNumber(c.volume,0,0));
-  document.querySelectorAll('.page').forEach(p=>p.hidden=true);
-  document.getElementById("page-crypto-detail").hidden=false;
+  document.querySelectorAll(".page").forEach(p=>{p.hidden=false;p.classList.remove("active");});
+  const d=document.getElementById("page-crypto-detail");
+  d.hidden=false;
+  d.classList.add("active");
    drawCryptoChart(c);
    computeCryptoIndicators(c);
    loadCryptoCandles(c.symbol).then(()=>{if(cryptoDetailIdx!==null&&cryptoPriceCache[cryptoDetailIdx]?.symbol===c.symbol){computeCryptoIndicators(c);drawCryptoChart(c);}}).catch(()=>{});
@@ -5954,8 +5964,8 @@ function applyLayoutEditMode(){
 
 /* ============ AÇILIR / KAPANIR BÖLÜMLER (v69) ============
    Çok yer kaplayan bölümler + / − butonuyla katlanır. Durum localStorage'da kalıcıdır. */
-const COLLAPSIBLE_SECTIONS=["GÖRSEL YÜKLE / GÜNCELLE","BEKLEYEN TEMETTÜ","EMİRLER / VALÖR","MİDAS PORTFÖY DAĞILIMI"];
-const COLLAPSED_DEFAULT=new Set(["GÖRSEL YÜKLE / GÜNCELLE"]);
+const COLLAPSIBLE_SECTIONS=["GÖRSEL YÜKLE / GÜNCELLE","BEKLEYEN TEMETTÜ","EMİRLER / VALÖR","MİDAS PORTFÖY DAĞILIMI","STRES TESTİ & ÇEŞİTLENDİRME","VOLÜM PATLAMA & ÇIKIŞ ALARMLARI","SİZNİN İÇİN ÖNE ÇIKANLAR","ALGORİTMİK SİNYAL TERMİNALİ","GRID & DCA STRATEJİ KURULUMU"];
+const COLLAPSED_DEFAULT=new Set(["GÖRSEL YÜKLE / GÜNCELLE","STRES TESTİ & ÇEŞİTLENDİRME","VOLÜM PATLAMA & ÇIKIŞ ALARMLARI","SİZNİN İÇİN ÖNE ÇIKANLAR","ALGORİTMİK SİNYAL TERMİNALİ","GRID & DCA STRATEJİ KURULUMU"]);
 let collapsedSections=safeJson(storageGet("stkszCollapsedSections"),null);
 function sectionTitleText(el){return (el?.textContent||"").replace(/[+−]\s*$/,"").replace(/\s+/g," ").trim().toLocaleUpperCase("tr-TR");}
 function setupCollapsibleSections(){

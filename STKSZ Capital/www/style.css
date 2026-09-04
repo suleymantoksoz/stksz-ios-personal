@@ -3234,6 +3234,9 @@ body[data-theme="light"] .ipo-fair-range .value{color:#1a2018}
 body[data-theme="light"] .ipo-limit-table td{border-color:#d4c9b5;color:#1a2018}
 body[data-theme="light"] .ipo-limit-table thead th{background:rgba(184,115,51,.18);color:#8C5220}
 body[data-theme="light"] .ipo-limit-table .ipo-day{background:#f5efe4;color:#8C5220}
+.ipo-detail-panels{margin-top:12px}
+.ipo-detail-toggle{margin-top:10px;border-color:rgba(184,115,51,.35);color:#D0904E}
+body[data-theme="light"] .ipo-detail-toggle{color:#8C5220;border-color:#c9a878}
 /* Profil sayfası — Yatırımcı Rozetleri alanı */
 .profile-badge-display{display:flex;flex-wrap:wrap;gap:6px;padding:8px 0;min-height:36px;align-items:center}
 .profile-badge-display .profile-badge{font-size:10px;padding:5px 10px;border-radius:20px;border:1px solid rgba(184,115,51,.25);background:rgba(14,11,8,.7);color:#D0904E;font-weight:600;letter-spacing:.3px}
