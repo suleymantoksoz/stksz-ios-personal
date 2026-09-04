@@ -3715,7 +3715,7 @@ function refreshRadarDaily(){
  setTimeout(()=>{setRadarHub(radarHub)}, 1500);
 }
 function addComparison(sym){/* add symbol to comparison panel */}
-function loadComparisonData(){/* load data for comparison selects */}
+
 // Stock comparison & portfolio health
 function compareStocks(){
  const s1=document.getElementById('compSymbol1').value,s2=document.getElementById('compSymbol2').value,s3=document.getElementById('compSymbol3').value;
@@ -4083,10 +4083,7 @@ function openRetentionPolicy(){showLegalModal("VERİ SAKLAMA VE YOK EDİLME POL�
 function openSecurityPolicy(){showLegalModal("GÜVENLİK VE VERİ İHLALİ POLİTİKASI", "Veri ihlali bildirim süreçleri (72 saat KVKK / GDPR), güvenlik önlemleri, kullanıcı bildirimi prosedürleri.");}
 function openSupportComplaints(){showLegalModal("DESTEK VE ŞİKAYETLER", "Kullanıcı şikayet kanalları, yanıt süreleri, KVKK/GDPR başvuru kanalları: stksz-capital@outlook.com")}
 function openLicensingInfo(){showLegalModal("LİSANS VE DÜZENLEYİCİ BİLGİLER", "[ŞİRKET UNVANI] | [ADRES] | [DESTEK E-POSTA] | [DPO/KVKK E-POSTA] | [LİSANS DURUMU] | [ÖDEME SAĞLAYICISI]")}
-function openSupportComplaints(){showLegalModal("DESTEK VE ŞİKAYETLER", "Kullanıcı şikayet kanalları, yanıt süreleri, KVKK/GDPR başvuru kanalları: stksz-capital@outlook.com")}
-function openLicensingInfo(){showLegalModal("LİSANS VE DÜZENLEYİCİ BİLGİLER", "[ŞİRKET UNVANI] | [ADRES] | [DESTEK E-POSTA] | [DPO/KVKK E-POSTA] | [LİSANS DURUMU] | [ÖDEME SAĞLAYICISI]")}
 
-function openPrivacyCenter(){
   if(!document.getElementById("page-settings")?.classList.contains("active"))openUnifiedMenu();
   openMenuPanel("menuLegal");
   showPrivacyCenterModal();
@@ -4111,83 +4108,24 @@ function showPrivacyCenterModal(){
   showLegalModal("GİZLİLİK MERKEZİ", html);
 }
 
-function showKvkkConsentModal(){
-  const defaults = window.STKSZDataEngine?.KVKK_CONSENT_DEFAULTS || { marketing: false, personalizedAds: false, crossBorderTransfer: false };
-  const current = getKvkkConsents();
-  const html = `
-    <h3>KVKK AÇIK RIZA TERCİHLERİ</h3>
-    <p class="help">KVKK Madde 5/1 uyarınca açık rıza dayanağıyla işlenen veriler için izinleriniz.</p>
-    <div class="consent-toggles">
-      <label class="consent-toggle"><input type="checkbox" id="kvkkMarketing" ${current.marketing ? 'checked' : ''} onchange="setKvkkConsent('marketing', this.checked)"> Pazarlama ve Tanıtım İletişimi</label>
-      <label class="consent-toggle"><input type="checkbox" id="kvkkPersonalizedAds" ${current.personalizedAds ? 'checked' : ''} onchange="setKvkkConsent('personalizedAds', this.checked)"> Kişiselleştirilmiş Reklam ve Profil Oluşturma</label>
-      <label class="consent-toggle"><input type="checkbox" id="kvkkCrossBorder" ${current.crossBorderTransfer ? 'checked' : ''} onchange="setKvkkConsent('crossBorderTransfer', this.checked)"> Sınır Ötesi Veri Aktarımı (Yurtdışı)</label>
-    </div>
-    <p class="help">Herhangi bir onayı dilediğiniz zaman geri çekebilirsiniz. Rıza çekilmesi işleme yasalılığını bozmaz.</p>
-    <div class="toolbar"><button class="btn primary" onclick="saveKvkkConsents()">KAYDET</button></div>
-  `;
-  showLegalModal("KVKK AÇIK RIZA TERCİHLERİ", html);
-}
 
-function showGdprRightsModal(){
-  const rights = window.STKSZDataEngine?.GDPR_RIGHTS || ['access','rectification','erasure','restriction','data portability','objection','profiling opt-out'];
-  const html = `
-    <h3>GDPR HAKLARINIZ (Madde 15-22)</h3>
-    <ul class="gdpr-rights-list">
-      ${rights.map(r => `<li><b>${r}</b> - ${getGdprRightDesc(r)}</li>`).join('')}
-    </ul>
-    <p class="help">Haklarınızı kullanmak için Gizlilik Merkezi'ni kullanın veya stksz-capital@outlook.com adresine yazın.</p>
-    <div class="toolbar"><button class="btn primary" onclick="openPrivacyCenter()">GİZLİLİK MERKEZİNE GİT</button></div>
-  `;
-  showLegalModal("GDPR HAKLARI", html);
-}
 
-function getGdprRightDesc(right){
-  const map = {
-    'access': 'Kişisel verilerinizin işlenip işlenmediğini öğrenme ve kopyasını talep etme hakkı',
-    'rectification': 'Eksik/yanlış verilerin düzeltilmesini talep etme hakkı',
-    'erasure': 'Unutulma hakkı (verilerin silinmesini talep etme)',
-    'restriction': 'Veri işlemesinin kısıtlanmasını talep etme hakkı',
-    'data portability': 'Verilerinizi yapılandırılmış, yaygın kullanılan, makine okunabilir formatta alma ve başka bir sorumluya aktarma hakkı',
-    'objection': 'Meşru menfaat dayanağıyla işleme ve doğrudan pazarlama için işlemeye itiraz hakkı',
-    'profiling opt-out': 'Yalnızca otomatik işleme ve profil oluşturma sonucunda size karşı yasal etkisi olan kararlara tabi olmamak hakkı'
-  };
-  return map[right] || '';
-}
 
-function getKvkkConsents(){
-  try{return JSON.parse(localStorage.getItem('stkszKvkkConsents') || '{}');}catch(e){return {};}
-}
-function setKvkkConsent(key, value){
-  const c = getKvkkConsents(); c[key] = value; localStorage.setItem('stkszKvkkConsents', JSON.stringify(c));
-}
-function saveKvkkConsents(){
-  showToast("KVKK onay tercihleri kaydedildi.");
-}
 
-function downloadMyData(){
-  const de = window.STKSZDataEngine;
-  if(de && de.downloadMyData){ de.downloadMyData(); return; }
-  const data = { profile: JSON.parse(localStorage.getItem('stkszProfile')||'{}'), assets: JSON.parse(localStorage.getItem('stkszAssets')||'[]'), transactions: JSON.parse(localStorage.getItem('stkszTransactions')||'[]'), prefs: JSON.parse(localStorage.getItem('stkszPrefs')||'{}'), consentLog: JSON.parse(localStorage.getItem('stkszConsentLog')||'[]') };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'stksz-my-data-' + new Date().toISOString().slice(0,10) + '.json'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('Verileriniz JSON olarak indirildi.');
-}
-function rectifyMyData(){ showToast('Veri düzeltme: Profil ayarlarından düzenleyin.'); }
-function deleteMyData(){ if(confirm('TÜM VERİLERİNİZ KALICI OLARAK SİLİNECEKTIR. Emin misiniz?')){ localStorage.clear(); showToast('Tüm veriler silindi.'); setTimeout(()=>location.reload(), 1000); } }
-function restrictProcessing(){ showToast('İşleme kısıtlama talebi kaydedildi (GDPR Madde 18 / KVKK Madde 17).'); }
-function manageConsents(){ openKvkkConsentModal(); }
-function submitPrivacyRequest(){ showToast('Yasal başvuru formu hazırlanıyor...'); }
 
-function showLegalModal(title, content){
-  const modal = document.createElement('div');
-  modal.className = 'modal legal-modal';
-  modal.innerHTML = `<div class="modal-content"><div class="modal-header"><h3>${title}</h3><button class="modal-close" onclick="this.closest('.modal').remove()">×</button></div><div class="modal-body">${content}</div></div>`;
-  document.body.appendChild(modal);
-  setTimeout(()=>modal.classList.add('show'), 10);
-  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function showKvkkConsentModal(){
   const defaults = window.STKSZDataEngine?.KVKK_CONSENT_DEFAULTS || { marketing: false, personalizedAds: false, crossBorderTransfer: false };
@@ -6147,7 +6085,7 @@ window.addEventListener("stksz-native-pause",()=>{renderEnr();});
 const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMedia.addEventListener?.("change",()=>{if(prefs.theme==="system")applyTheme();});
 function initApp(){
   applyAppearance();initEvents();render();renderAuthGate();renderProfileAuth();initializeNativeEnrStorage();initEnrSecurity();
-  (function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();
+)();
   initializeProviderInfrastructure().then(()=>{maybeAutoUpdate();renderNews();renderApiKeysPanel();
   try{
     if(typeof refreshMarket==="function" && providerInfo("market")?.configured)refreshMarket(false);
