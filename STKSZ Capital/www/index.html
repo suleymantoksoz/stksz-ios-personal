@@ -3726,7 +3726,7 @@ function compareStocks(){
   const labels=[s1||'--',s2||'--',s3||'--'];
   let html='<div class="comparison-result"><h4>Karşılaştırma Sonucu</h4>';
   html+='<table><tr><th>Sembol</th><th>STKSZ Score</th><th>P/E</th><th>P/B</th><th>Karar</th></tr>';
-  scores.forEach((s,i)=>{html+='<tr><td>'+labels[i]+'</td><td>'+s+'</td><td>--</td><td>--</td><td>'+(s>70?'AL:'+ (s>40?'HOLD':'SELL')+'</td>');});
+  scores.forEach((s,i)=>{html+='<tr><td>'+labels[i]+'</td><td>'+s+'</td><td>--</td><td>--</td><td>'+(s>70?'AL':(s>40?'HOLD':'SELL'))+'</td>';});
   html+='</table></div>';
   html+='<div class="health-score">Sağlık puanı: <span>'+Math.floor((scores.reduce((a,b)=>a+b,0)/3))+'</span>/100</div>';
   radarHubContent.innerHTML=html;
@@ -3735,13 +3735,6 @@ function compareStocks(){
 function loadComparisonData(){
  const s=document.getElementById('compSymbol1').options;
  // populate options from available assets - simplified
-}
- const eng=window.STKSZAIEngine;if(!eng)return;
- const admin=eng.entitlements.isAdmin();
- const hasElite=eng.entitlements.badges().some(b=>b.id==="STKSZ_ELITE");
- if(!admin&&!hasElite){showToast("STKSZ Editör yalnızca Elite Trader (100₺) rozeti sahiplerine özeldir.");return;}
- closeUnifiedMenu();showPage("home");
- setTimeout(()=>{const btn=document.querySelector("[data-chart-editor]");if(btn)btn.click();else showToast("Editöre erişim için bir grafik açın.");},400);
 }
 /* ---- ADMIN görünümü: API Yönetimi yalnız admin'e tam açılır ----
    Asıl yetki kontrolü BACKEND'dedir (x-stksz-admin-token). Buradaki
@@ -4084,11 +4077,6 @@ function openSecurityPolicy(){showLegalModal("GÜVENLİK VE VERİ İHLALİ POLİ
 function openSupportComplaints(){showLegalModal("DESTEK VE ŞİKAYETLER", "Kullanıcı şikayet kanalları, yanıt süreleri, KVKK/GDPR başvuru kanalları: stksz-capital@outlook.com")}
 function openLicensingInfo(){showLegalModal("LİSANS VE DÜZENLEYİCİ BİLGİLER", "[ŞİRKET UNVANI] | [ADRES] | [DESTEK E-POSTA] | [DPO/KVKK E-POSTA] | [LİSANS DURUMU] | [ÖDEME SAĞLAYICISI]")}
 
-  if(!document.getElementById("page-settings")?.classList.contains("active"))openUnifiedMenu();
-  openMenuPanel("menuLegal");
-  showPrivacyCenterModal();
-}
-
 function showPrivacyCenterModal(){
   const actions = window.STKSZDataEngine?.PRIVACY_CENTER_ACTIONS || {};
   const html = `
@@ -4199,7 +4187,7 @@ function submitPrivacyRequest(){ showToast('Yasal başvuru formu hazırlanıyor.
 function showLegalModal(title, content){
   const modal = document.createElement('div');
   modal.className = 'modal legal-modal';
-  modal.innerHTML = \`<div class="modal-content"><div class="modal-header"><h3>${title}</h3><button class="modal-close" onclick="this.closest('.modal').remove()">×</button></div><div class="modal-body">${content}</div></div>\`;
+  modal.innerHTML = `<div class="modal-content"><div class="modal-header"><h3>${title}</h3><button class="modal-close" onclick="this.closest('.modal').remove()">×</button></div><div class="modal-body">${content}</div></div>`;
   document.body.appendChild(modal);
   setTimeout(()=>modal.classList.add('show'), 10);
   modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
@@ -6085,7 +6073,7 @@ window.addEventListener("stksz-native-pause",()=>{renderEnr();});
 const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMedia.addEventListener?.("change",()=>{if(prefs.theme==="system")applyTheme();});
 function initApp(){
   applyAppearance();initEvents();render();renderAuthGate();renderProfileAuth();initializeNativeEnrStorage();initEnrSecurity();
-)();
+  (function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();
   initializeProviderInfrastructure().then(()=>{maybeAutoUpdate();renderNews();renderApiKeysPanel();
   try{
     if(typeof refreshMarket==="function" && providerInfo("market")?.configured)refreshMarket(false);
