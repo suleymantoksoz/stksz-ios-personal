@@ -51,12 +51,12 @@ jobs:
           cache: npm
           cache-dependency-path: "STKSZ Capital/package-lock.json"
 
-      # ── 4) Java 21 Temurin ──
-      - name: Setup Java 21 (Temurin)
+      # ── 4) Java 17 Temurin ──
+      - name: Setup Java 17 (Temurin)
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
           cache: gradle
 
       # ── 5) Android SDK ──
@@ -66,7 +66,7 @@ jobs:
       # ── 6) npm install ──
       - name: Install dependencies
         working-directory: STKSZ Capital
-        run: npm ci || npm install --no-fund --no-audit
+        run: npm ci
 
       # ── 7) Capacitor sync + copy ──
       - name: Capacitor sync & copy
@@ -96,7 +96,7 @@ jobs:
           set -e
           exit "$status"
         env:
-          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=1024m -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2"
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false"
 
       # ── 10) APK konumunu dogrula ──
       - name: Verify APK output
