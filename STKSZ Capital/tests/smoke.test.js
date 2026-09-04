@@ -1,8 +1,10 @@
-const {JSDOM}=require("jsdom");const fs=require("fs");
-const html=fs.readFileSync("/home/user/www/index.html","utf8");
-const vwSrc=fs.readFileSync("/home/user/www/virtual-wallet.js","utf8");
+const {JSDOM}=require("jsdom");const fs=require("fs");const path=require("path");const {webcrypto}=require("crypto");
+const root=path.resolve(__dirname,"..");
+const html=fs.readFileSync(path.join(root,"www","index.html"),"utf8");
+const vwSrc=fs.readFileSync(path.join(root,"www","virtual-wallet.js"),"utf8");
 let pass=0,fail=0;function t(n,c){c?(pass++,console.log("✅ "+n)):(fail++,console.log("❌ "+n));}
 const dom=new JSDOM(html,{runScripts:"dangerously",url:"http://localhost/",pretendToBeVisual:true,beforeParse(w){
+ Object.defineProperty(w,"crypto",{value:webcrypto});
  w.HTMLCanvasElement.prototype.getContext=function(){return new Proxy({},{get:(t,p)=>p==="measureText"?()=>({width:10}):()=>{}});};
  w.matchMedia=w.matchMedia||(()=>({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}));
  w.scrollTo=()=>{};w.fetch=()=>Promise.reject(new Error("offline"));w.confirm=()=>true;
@@ -20,6 +22,7 @@ setTimeout(()=>{try{
  t("Legacy OCR aç/kapat çalışır", (()=>{w.eval("toggleLegacyOcr()");return d.getElementById("legacyOcrWrap").hidden===false;})());
  t("uploadMidasTotal hâlâ render ediliyor", d.getElementById("uploadMidasTotal").textContent.includes("₺"));
  t("AI overlay + öneri işleyicisi", w.eval("typeof aiHandleImage")==="function"&&w.eval("typeof aiRenderVisionResult")==="function");
+ t("Piyasa Verileri menü paneli izole açılır",(()=>{w.eval("openUnifiedMenu();openMenuPanel('menuMarketData')");const panel=d.getElementById("menuMarketData"),api=d.getElementById("menuApiKeys");w.eval("closeMenuPanel();closeUnifiedMenu()");return panel?.hidden===true&&api?.hidden===true;})());
  t("render() hatasız", (()=>{try{w.eval("render()");return true;}catch(e){return false;}})());
  console.log(`SMOKE v97: ${pass}/${pass+fail}`);process.exit(fail?1:0);
 }catch(e){console.error("HATA:",e);process.exit(1);}},1200);
