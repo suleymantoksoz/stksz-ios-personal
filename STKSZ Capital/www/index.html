@@ -27,46 +27,67 @@
 <link rel="stylesheet" href="style.css?v=122">
 </head>
 <body>
-<div id="appBootSplash" class="app-boot-splash" role="status" aria-label="STKSZ açılıyor"><div><img src="assets/icons/stksz-logo.png" alt="STKSZ"><span>GÜVENLİ VERİ KABUĞU HAZIRLANIYOR</span></div></div>
+<div id="appBootSplash" class="app-boot-splash" role="status" aria-label="STKSZ açılıyor"><div class="boot-splash-inner"><img src="assets/icons/stksz-logo.png" alt="STKSZ CAPITAL"><span class="boot-splash-brand">STKSZ CAPITAL</span><span class="boot-splash-loading" aria-hidden="true"></span></div></div>
 <div id="pwaInstallBanner" class="pwa-install-banner" hidden><div><b>STKSZ'yi cihazına kur</b><small>Standalone, offline kabuk ve hızlı erişim.</small></div><button type="button" class="btn small primary" onclick="STKSZNative.install()">YÜKLE</button></div>
 
 <div id="authGate" class="auth-gate" hidden>
  <div class="auth-card">
   <img src="assets/icons/stksz-logo.png" alt="STKSZ CAPITAL" class="auth-logo">
   <div id="authChoices">
-   <div class="auth-section">
-    <div class="auth-section-title">KAYIT OL</div>
-    <button type="button" class="auth-btn" onclick="authRegister('google')"><svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62Z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" fill="#EA4335"/></svg>Google ile hızlı kayıt</button>
-    <button type="button" class="auth-btn" onclick="authRegister('apple')"><svg class="svg-fill" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9z"/></svg>Apple ile hızlı kayıt</button>
-    <button type="button" class="auth-btn" onclick="toggleAuthRegisterForm()">Hesap oluştur</button>
-    <div id="authRegisterFormWrap" class="auth-user-form-wrap" hidden>
-     <div id="authRegisterForm">
-      <input id="authRegUsername" type="text" placeholder="Kullanıcı adı (en az 3 karakter)" autocomplete="username" autocapitalize="none" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authRegPassword').focus();}">
-      <input id="authRegPassword" type="password" placeholder="Şifre (en az 6 karakter)" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authRegPassword2').focus();}">
-      <input id="authRegPassword2" type="password" placeholder="Şifre (tekrar)" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();authRegisterWithPassword();}">
-      <button type="button" class="auth-btn auth-primary" onclick="authRegisterWithPassword()">KAYIT OL</button>
-      <div id="authRegisterError" class="auth-error" hidden></div>
-     </div>
+   <div class="auth-hero">
+    <img src="assets/icons/stksz-logo.png" alt="STKSZ CAPITAL" class="auth-hero-logo">
+    <h1>STKSZ CAPITAL</h1>
+    <p>Doğrulanmış veriyle çalışan komuta merkezine hoş geldin.</p>
+   </div>
+   <div class="auth-step-cards">
+    <button type="button" class="auth-choice-card" onclick="authShowLoginOptions()">
+     <span class="acc-icon acc-icon-login"><svg viewBox="0 0 24 24"><path d="M15 12H3M15 12l-4-4M15 12l-4 4"/><path d="M8 4h9a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8"/></svg></span>
+     <span class="auth-choice-text"><b>GİRİŞ YAP</b><small>Hesabınla devam et</small></span>
+    </button>
+    <button type="button" class="auth-choice-card auth-choice-primary" onclick="authShowRegisterOptions()">
+     <span class="acc-icon acc-icon-register"><svg viewBox="0 0 24 24"><path d="M16 3a4.5 4.5 0 0 0-4.5 4.5c0 .3 0 .6.1.9L5 15v4h4l7-6.6c.3.1.6.1.9.1A4.5 4.5 0 0 0 16 3Z"/><path d="M19 6h-2M18 5v2"/></svg></span>
+     <span class="auth-choice-text"><b>KAYIT OL</b><small>Yeni hesap oluştur</small></span>
+    </button>
+    <button type="button" class="auth-choice-card" onclick="authGuest()">
+     <span class="acc-icon acc-icon-guest"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+     <span class="auth-choice-text"><b>MİSAFİR GİRİŞİ</b><small>Görüntüleme modu · kayıt gerekmez</small></span>
+    </button>
+   </div>
+  </div>
+  <div id="authRegisterStep" class="auth-step-view" hidden>
+   <div class="auth-step-head">
+    <button type="button" class="auth-back-btn" onclick="authShowChoices()" aria-label="Geri dön">←</button>
+    <div class="auth-step-title"><small>KAYIT OL</small><b>Devam etmek için yöntemini seç</b></div>
+   </div>
+   <button type="button" class="auth-btn" onclick="authRegister('apple')"><svg class="svg-fill" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9z"/></svg>APPLE İLE KAYDOL</button>
+   <button type="button" class="auth-btn" onclick="authRegister('google')"><svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62Z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" fill="#EA4335"/></svg>GOOGLE İLE KAYDOL</button>
+   <button type="button" class="auth-btn" onclick="toggleAuthRegisterForm()"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 8h16M8 5v14"/></svg>E-POSTA İLE KAYDOL</button>
+   <div id="authRegisterFormWrap" class="auth-user-form-wrap" hidden>
+    <div id="authRegisterForm">
+     <input id="authRegUsername" type="text" placeholder="Kullanıcı adı (en az 3 karakter)" autocomplete="username" autocapitalize="none" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authRegPassword').focus();}">
+     <input id="authRegPassword" type="password" placeholder="Şifre (en az 6 karakter)" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authRegPassword2').focus();}">
+     <input id="authRegPassword2" type="password" placeholder="Şifre (tekrar)" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();authRegisterWithPassword();}">
+     <button type="button" class="auth-btn auth-primary" onclick="authRegisterWithPassword()">KAYIT OL</button>
+     <div id="authRegisterError" class="auth-error" hidden></div>
     </div>
    </div>
-   <div class="auth-section">
-    <div class="auth-section-title">KULLANICI GİRİŞİ</div>
-    <button type="button" class="auth-btn" onclick="authRegister('google')"><svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62Z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" fill="#EA4335"/></svg>Google ile giriş</button>
-    <button type="button" class="auth-btn" onclick="authRegister('apple')"><svg class="svg-fill" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9z"/></svg>Apple ile giriş</button>
-    <button type="button" class="auth-btn" onclick="toggleAuthUserForm()">Kullanıcı adı + şifre</button>
-    <div id="authUserFormWrap" class="auth-user-form-wrap" hidden>
-     <div id="authLoginForm">
-      <input id="authUsername" type="text" placeholder="Kullanıcı adı" autocomplete="username" autocapitalize="none" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authPassword').focus();}">
-      <input id="authPassword" type="password" placeholder="Şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();authLoginWithPassword();}">
-      <button type="button" class="auth-btn auth-primary" onclick="authLoginWithPassword()">GİRİŞ YAP</button>
-      <div id="authLoginError" class="auth-error" hidden></div>
-     </div>
-    </div>
+  </div>
+  <div id="authLoginStep" class="auth-step-view" hidden>
+   <div class="auth-step-head">
+    <button type="button" class="auth-back-btn" onclick="authShowChoices()" aria-label="Geri dön">←</button>
+    <div class="auth-step-title"><small>GİRİŞ YAP</small><b>Hesabına erişim yöntemini seç</b></div>
    </div>
-   <div class="auth-section">
-    <div class="auth-section-title">MİSAFİR GİRİŞİ</div>
-    <button type="button" class="auth-guest" onclick="authGuest()">Misafir olarak göz at →</button>
-    <p class="auth-note">Misafir modunda veriler görüntülenir; düzenleme, işlem ve senkron için hesap gerekir.</p>
+   <button type="button" class="auth-btn" onclick="authRegister('google')"><svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62Z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" fill="#EA4335"/></svg>GOOGLE İLE GİRİŞ</button>
+   <button type="button" class="auth-btn" onclick="authRegister('apple')"><svg class="svg-fill" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9z"/></svg>APPLE İLE GİRİŞ</button>
+   <button type="button" class="auth-btn" onclick="toggleAuthUserForm()"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>KULLANICI ADI + ŞİFRE</button>
+   <div id="authUserFormWrap" class="auth-user-form-wrap" hidden>
+    <div id="authLoginForm">
+     <input id="authUsername" type="text" placeholder="Kullanıcı adı" autocomplete="username" autocapitalize="none" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authPassword').focus();}">
+     <input id="authPassword" type="password" placeholder="Şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();authLoginWithPassword();}">
+     <button type="button" class="auth-btn auth-primary" onclick="authLoginWithPassword()">GİRİŞ YAP</button>
+     <button type="button" class="auth-btn auth-admin-login" onclick="authShowAdminLogin()"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3Z"/><path d="m9 12 2 2 4-4.5"/></svg>YÖNETİCİ GİRİŞİ</button>
+     <div id="authLoginError" class="auth-error" hidden></div>
+    </div>
    </div>
   </div>
   <div id="authBiometric" hidden>
@@ -94,7 +115,6 @@
 
 <main id="appScroll">
 <section class="page active" id="page-home">
-  <div class="section-title">PORTFÖY DEĞERİ · ÖZET</div>
   <article class="portfolio-value-hero" aria-labelledby="portfolioValueTitle">
     <div class="portfolio-value-main">
       <div class="label" id="portfolioValueTitle">TOPLAM VARLIK</div>
@@ -412,11 +432,13 @@
 <section class="page" id="page-risk" hidden aria-hidden="true"></section>
 
 <section class="page" id="page-opportunities">
-  <div class="section-title">FIRSATLAR</div>
-  <div class="card">
-    <div class="label">STKSZ KURALI</div>
-    <div class="value">Fırsatı doğrula</div>
-    <div class="help">Doğrulanmış piyasa, portföy ve risk verisi olmadan otomatik al/sat önerisi üretilmez.</div>
+  <div class="page-hero page-hero-op">
+    <div class="page-hero-badge" aria-hidden="true">FIR</div>
+    <div><h1>Fırsatlar</h1><p>Doğrulanmış piyasa, portföy ve işlem kayıtlarından türetilir · sabit örnek üretilmez.</p></div>
+  </div>
+  <div class="rule-banner opp-rule-banner">
+    <span class="rule-banner-ic" aria-hidden="true">i</span>
+    <div><b>STKSZ KURALI</b><small>Doğrulanmış piyasa, portföy ve risk verisi olmadan otomatik al/sat önerisi üretilmez. "VERİ YETERSİZ − KARAR YOK" ilkesi her koşulda geçerlidir.</small></div>
   </div>
 
   <div class="section-title">GÜNÜN FIRSATI</div>
@@ -464,6 +486,12 @@
   <div class="section-title">ÇOK KAYNAKLI BİLEŞİK SKOR</div>
   <div id="compositePanel"><div class="empty-state">VERİ YOK</div></div>
 
+  <div class="section-title">TAKVİM GÖRÜNÜMÜ</div>
+  <div class="ipo-choice-row" id="ipoChoiceRow" role="tablist" aria-label="Halka arz takvimi görünümü">
+    <button type="button" class="ipo-choice-card active" data-ipo-mode="all" onclick="setIpoFilter('all')"><b>TAKVİM</b><small>Tüm doğrulanmış kayıtlar</small></button>
+    <button type="button" class="ipo-choice-card" data-ipo-mode="new" onclick="setIpoFilter('new')"><b>YENİ BAŞLAYANLAR</b><small>Talep başlangıcı önümüzdeki 7 gün</small></button>
+    <button type="button" class="ipo-choice-card" data-ipo-mode="open" onclick="setIpoFilter('open')"><b>DEVAM EDENLER</b><small>Şu anda talep toplayanlar</small></button>
+  </div>
   <div class="card" style="padding:0;overflow:hidden">
     <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,rgba(208,144,78,.18),rgba(140,82,32,.06));border-bottom:1px solid rgba(184,115,51,.4)">
       <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:var(--copper-grad);box-shadow:0 3px 10px rgba(184,115,51,.35);font-size:17px;flex:none">📅</span>
@@ -602,26 +630,35 @@
   <div class="menu-view menu-home-view" id="menuHome">
     <div class="menu-view-head modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeUnifiedMenu()">KAPAT</button><div><h2>MENÜ</h2></div><span></span></div>
     
-    <div class="menu-card-grid" id="menuMainCards">
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuProfile')"><span><b>PROFİL</b><small>Kullanıcı bilgileri ve profil fotoğrafı</small></span><i>→</i></button></div>
+    <div class="menu-card-grid menu-card-grid-cats" id="menuMainCards">
+      <div class="menu-cat-label">HESAP</div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuProfile')"><span><b>PROFİL</b><small>Kullanıcı bilgileri, rozet ve üyelik</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuTheme')"><span><b>TEMA</b><small>Koyu veya açık görünüm</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuActivityPanel')"><span><b>İŞLEM GEÇMİŞİ</b><small>Varlık ve emir kayıtları</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuReports');renderReportsPanel()"><span><b>📊 RAPORLAR</b><small>Portföy ve piyasa raporları · dışa aktar</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuRadar');renderRadarPanel()"><span><b>📡 STKSZ RADAR</b><small>Fırsatlar, akış ve tarayıcı</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSettingsHub')"><span><b>AYARLAR</b><small>Görünüm, hava, güvenlik ve bildirim</small></span><i>→</i></button></div>
-      <div class="menu-nav-card ai-nav-card"><button type="button" class="menu-nav-trigger" onclick="openStkszAi()"><span><b>🤖 STKSZ AI</b><small>Portföy yorumu, haber özeti ve soru-cevap</small></span><i>→</i></button></div>
-      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar, veri kaynakları ve bağlantı testleri</small></span><i>→</i></button></div>
-      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuPromoCodes')"><span><b>🎁 PROMOSYON KODU</b><small>Hediye kodu oluştur ve yönet</small></span><i>→</i></button></div>
-      <div class="menu-nav-card" data-elite-only hidden><button type="button" class="menu-nav-trigger" onclick="openStkszEditorFromMenu()"><span><b>✏️ STKSZ EDİTÖR</b><small>Kendi stratejini ve endikatörünü yaz</small></span><i>→</i></button></div>
-      <div class="menu-nav-card" data-elite-locked hidden><button type="button" class="menu-nav-trigger" onclick="showToast('STKSZ Editör yalnızca Elite Trader (100₺) rozeti sahiplerine özeldir.')"><span><b>🔒 STKSZ EDİTÖR</b><small>100₺ Elite Trader rozeti ile erişilebilir</small></span><i>🔒</i></button></div>
 
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuVirtualWallet')"><span><b>🧪 SANAL CÜZDAN</b><small>Simülasyon · gerçek para değildir</small></span><i>→</i></button></div>
+      <div class="menu-cat-label">ANALİZ & ARAÇLAR</div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openStkszAi()"><span><b>STKSZ AI</b><small>Portföy yorumu, haber özeti ve soru-cevap</small></span><i>→</i></button></div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuReports');renderReportsPanel()"><span><b>RAPORLAR</b><small>Portföy ve piyasa raporları · dışa aktar</small></span><i>→</i></button></div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuRadar');renderRadarPanel()"><span><b>STKSZ RADAR</b><small>Fırsatlar, akış ve tarayıcı</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-elite-only hidden><button type="button" class="menu-nav-trigger" onclick="openStkszEditorFromMenu()"><span><b>STKSZ EDİTÖR</b><small>Kendi stratejini ve indikatörünü yaz</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-elite-locked hidden><button type="button" class="menu-nav-trigger" onclick="showToast('STKSZ Editör yalnızca Elite Trader (100₺) rozeti sahiplerine özeldir.')"><span><b>STKSZ EDİTÖR</b><small>100₺ Elite Trader rozeti ile erişilebilir</small></span><i>→</i></button></div>
+      <div class="menu-nav-card menu-telegram-card" data-telegram-only hidden><button type="button" class="menu-nav-trigger" onclick="openTelegramBot()"><span><b>TELEGRAM BOT</b><small>Otomatik bildirim ve sinyal botu</small></span><i>→</i></button></div>
+      <div class="menu-nav-card menu-telegram-locked" data-telegram-locked hidden><button type="button" class="menu-nav-trigger" onclick="showToast('Telegram Bot erişimi için 100₺ Premium Rozet edinin veya Admin olun.')"><span><b>TELEGRAM BOT</b><small>100₺ Premium Rozet ile erişilebilir</small></span><i>→</i></button></div>
+
+      <div class="menu-cat-label">SİSTEM</div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSettingsHub')"><span><b>AYARLAR</b><small>Görünüm, hava, güvenlik ve bildirim</small></span><i>→</i></button></div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuVirtualWallet')"><span><b>SANAL CÜZDAN</b><small>Simülasyon · gerçek para değildir</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuDataManagement')"><span><b>VERİ YÖNETİMİ</b><small>Yedek, geri yükleme ve CSV</small></span><i>→</i></button></div>
-      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuCurrency')"><span><b>💱 PARA BİRİMİ</b><small>TL ₺, USD $, EUR €, SAR ﷼</small></span><i>→</i></button></div>
+      <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuCurrency')"><span><b>PARA BİRİMİ</b><small>TL ₺, USD $, EUR €, SAR ﷼</small></span><i>→</i></button></div>
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAbout')"><span><b>HAKKINDA</b><small>STKSZ veri ve güvenlik ilkeleri</small></span><i>→</i></button></div>
-      <div class="menu-nav-card menu-telegram-card" data-telegram-only hidden><button type="button" class="menu-nav-trigger" onclick="openTelegramBot()"><span><b>🤖 TELEGRAM BOT</b><small>Otomatik bildirim ve sinyal botu</small></span><i>→</i></button></div>
-      <div class="menu-nav-card menu-telegram-locked" data-telegram-locked hidden><button type="button" class="menu-nav-trigger" onclick="showToast('Telegram Bot erişimi için 100₺ Premium Rozet edinin veya Admin olun.')"><span><b>🔒 TELEGRAM BOT</b><small>100₺ Premium Rozet ile erişilebilir</small></span><i>🔒</i></button></div>
-      <div class="menu-nav-card menu-logout-card"><button type="button" class="menu-nav-trigger" onclick="authLogout()"><span><b>🚪 ÇIKIŞ YAP</b><small>Oturumu kapat ve çıkış ekranına dön</small></span><i>→</i></button></div>
+
+      <div class="menu-cat-label menu-cat-admin-label" data-admin-only hidden>YÖNETİM</div>
+      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAdminHub');renderAdminHub()"><span><b>YÖNETİM MERKEZİ</b><small>Telegram, ödemeler, kullanıcılar, rozetler ve sistem</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API & VERİ KAYNAKLARI</b><small>Anahtarlar, sağlayıcılar ve bağlantı testleri</small></span><i>→</i></button></div>
+      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuPromoCodes')"><span><b>PROMOSYON KODU</b><small>Hediye kodu oluştur ve yönet</small></span><i>→</i></button></div>
+
+      <div class="menu-cat-label">OTURUM</div>
+      <div class="menu-nav-card menu-logout-card"><button type="button" class="menu-nav-trigger" onclick="authLogout()"><span><b>ÇIKIŞ YAP</b><small>Oturumu kapat ve çıkış ekranına dön</small></span><i>→</i></button></div>
     </div>
   </div>
 
@@ -629,13 +666,21 @@
     <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>PROFİL</h2></div>
     <div id="profileAuthBox" class="menu-form-card"></div><button type="button" class="btn primary btn-save-action" onclick="saveProfileAndClose()">KAYDET</button></div>
     <div class="menu-form-card profile-page-card">
-      <div class="profile-photo-zone"><button type="button" class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePhotoInput').click()" aria-label="Profil fotoğrafı seç"><span>＋</span></button><button type="button" class="btn small" onclick="document.getElementById('profilePhotoInput').click()">PROFİL FOTOĞRAFI YÜKLE</button><input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden onchange="handleProfilePhoto(this.files[0])"></div>
-      <div class="field"><label for="profileName">Profil adı</label><input id="profileName" placeholder="Profil adı"></div>
-      <div class="field"><label for="investorProfile">Yatırımcı Rozetleri</label><div id="investorProfileBadgeDisplay" class="profile-badge-display"><span class="help">Testi tamamlayarak rozet kazan veya rozet kodu gir.</span></div></div>
-      <div id="profileBadgeRow" class="profile-badge-row"></div>
-      <div id="profileBadgeLevel" class="profile-badge-section"><div class="profile-badge-section-title">🛡️ UNVAN ROZETİ</div><div id="profileBadgeLevelContent" class="profile-badge-section-content"><span class="help">Yatırımcı testini yaparak unvan rozetini kazan.</span></div></div>
-      <div id="profileBadgePremium" class="profile-badge-section"><div class="profile-badge-section-title">⭐ AYRICALIK ROZETİ</div><div id="profileBadgePremiumContent" class="profile-badge-section-content"><span class="help">Satın alınan rozetler burada gösterilir.</span></div></div>
-      <p class="help">Profil bilgileri ve fotoğraf yalnızca bu tarayıcının yerel kaydında tutulur.</p>
+      <div class="profile-hero">
+        <button type="button" class="profile-avatar" id="profileAvatar" onclick="document.getElementById('profilePhotoInput').click()" aria-label="Profil fotoğrafı seç"><img id="profileAvatarImg" alt="" aria-hidden="true" data-src="" hidden></button>
+        <input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden onchange="handleProfilePhoto(this.files[0])">
+        <div class="profile-hero-meta">
+          <input id="profileName" placeholder="Profil adı" aria-label="Profil adı">
+          <div id="profileRoleBadge" class="profile-role-badge" aria-live="polite">—</div>
+          <small id="profileAccountLine" class="profile-account-line">—</small>
+        </div>
+        <button type="button" class="btn small profile-photo-edit" onclick="document.getElementById('profilePhotoInput').click()">FOTOĞRAF</button>
+      </div>
+      <div id="investorProfileBadgeDisplay" class="profile-badge-display profile-hero-badges"></div>
+      <div id="profileBadgeRow" class="profile-badge-row profile-hero-badges"></div>
+      <div id="profileBadgeLevel" class="profile-badge-section"><div class="profile-badge-section-title">UNVAN ROZETİ</div><div id="profileBadgeLevelContent" class="profile-badge-section-content"><span class="help">Yatırımcı testini yaparak unvan rozetini kazan.</span></div></div>
+      <div id="profileBadgePremium" class="profile-badge-section"><div class="profile-badge-section-title">AYRICALIK ROZETİ</div><div id="profileBadgePremiumContent" class="profile-badge-section-content"><span class="help">Satın alınan rozetler burada gösterilir.</span></div></div>
+      <p class="help">Profil fotoğrafı ve ad yalnızca bu cihazın yerel kaydında saklanır; rozet ve üyelik seviyesi hesabının gerçek üyelik verisinden gelir.</p>
     </div>
 
     <!-- v118 (1. ADIM): YATIRIMCI SEVİYESİ TESTİ — STKSZ'ye ait kısa test; hiçbir bankanın resmî testi değildir -->
@@ -707,6 +752,35 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuLegal')"><span><b>YASAL & HUKUKİ</b><small>Gizlilik, KVKK, onaylar ve yasal metinler</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar ve veri kaynakları</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuRolePreview')"><span><b>👁 KULLANICI GÖRÜNÜMÜ</b><small>Admin rol önizleme aracı</small></span><i>→</i></button></div>
+    </div>
+  </section>
+
+<section class="menu-view menu-subpage" id="menuAdminHub" data-menu-parent="menuHome" hidden>
+    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>YÖNETİM</small><h2>YÖNETİM MERKEZİ</h2></div><button type="button" class="btn small" onclick="renderAdminHub(true)">YENİLE</button></div>
+    <div class="menu-form-card">
+      <div class="section-title">SİSTEM ÖZETİ</div>
+      <div class="admin-hub-grid">
+        <div class="admin-hub-tile"><span class="admin-hub-key">Web paketleri</span><b id="adminHubWebVersion">—</b></div>
+        <div class="admin-hub-tile"><span class="admin-hub-key">Hedefler</span><b id="adminHubTarget">—</b></div>
+        <div class="admin-hub-tile"><span class="admin-hub-key">Zamanlayıcı</span><b id="adminHubSchedule">—</b></div>
+        <div class="admin-hub-tile"><span class="admin-hub-key">Kullanıcı & oturum</span><b id="adminHubUsers">—</b></div>
+        <div class="admin-hub-tile"><span class="admin-hub-key">Rozetler</span><b id="adminHubBadges">—</b></div>
+        <div class="admin-hub-tile"><span class="admin-hub-key">Bağlantı</span><b id="adminHubConnect">—</b></div>
+      </div>
+    </div>
+    <div class="menu-form-card">
+      <div class="section-title">YÖNETİM ARAÇLARI</div>
+      <div class="menu-card-grid menu-card-grid-2" id="adminHubGrid">
+        <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openTelegramBot()"><span><b>TELEGRAM BOT</b><small>Bildirim ve sinyal botu ayarları</small></span><i>→</i></button></div>
+        <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API & VERİ KAYNAKLARI</b><small>Sağlayıcı anahtarları ve testler</small></span><i>→</i></button></div>
+        <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuRolePreview')"><span><b>KULLANICI GÖRÜNÜMÜ</b><small>Rol önizleme ve rozet kontrolü</small></span><i>→</i></button></div>
+        <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuPromoCodes');renderPromoCodeList()"><span><b>PROMOSYON KODU</b><small>Hediye kodu oluştur ve yönet</small></span><i>→</i></button></div>
+        <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuReports');renderReportsPanel()"><span><b>SİSTEM RAPORLARI</b><small>Portföy ve dışa aktarma raporları</small></span><i>→</i></button></div>
+        <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuDataManagement')"><span><b>VERİ YÖNETİMİ</b><small>Yedek, geri yükleme ve CSV</small></span><i>→</i></button></div>
+      </div>
+    </div>
+    <div class="menu-form-card">
+      <p class="help">Bu bölüm yalnızca yönetici hesabıyla (YÖNETİCİ rolü) görünür. Gizli anahtar veya kişisel veri bu ekranda gösterilmez veya dışa aktarılmaz.</p>
     </div>
   </section>
 
@@ -1358,8 +1432,13 @@
 </div>
 
 <div class="ai-overlay" id="stkszAiOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="aiOverlayTitle">
- <div class="ai-overlay-head">
-  <div class="ai-overlay-title"><span class="ai-orb" aria-hidden="true"></span><div><h2 id="aiOverlayTitle">STKSZ AI</h2><small id="aiEngineLabel">Yapay zekâ asistan · yalnızca doğrulanmış verilerle</small></div><span class="ai-conn-badge" id="aiConnBadge" data-state="unknown" aria-live="polite">BAĞLANTI KONTROL EDİLİYOR…</span></div>
+ <div class="ai-overlay-head ai-head-shell">
+  <div class="ai-head-glow" aria-hidden="true"></div>
+  <div class="ai-overlay-title">
+   <span class="ai-orb-wrap" aria-hidden="true"><span class="ai-orb"></span></span>
+   <div class="ai-head-text"><small class="ai-eyebrow">STKSZ YAPAY ZEKÂ KATMANI</small><h2 id="aiOverlayTitle">STKSZ AI</h2><small id="aiEngineLabel">Yalnızca doğrulanmış verilerle yorum yapar · API anahtarları asla gösterilmez</small></div>
+   <span class="ai-conn-badge ai-conn-pill" id="aiConnBadge" data-state="unknown" aria-live="polite"><i class="ai-conn-dot" aria-hidden="true"></i><span class="ai-conn-label">BAĞLANTI KONTROL EDİLİYOR…</span></span>
+  </div>
   <button type="button" class="hbtn ai-close-btn" onclick="closeStkszAi()" aria-label="STKSZ AI'yı kapat"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
  </div>
  <div id="aiKeyWarning" class="ocr-warning ai-key-warning" hidden>STKSZ AI için bağlantı gerekli. <button type="button" class="btn small" onclick="closeStkszAi();openUnifiedMenu();openMenuPanel('menuApiKeys')">API Yönetimi</button> → STKSZ AI kartından Backend URL veya yedek anahtar ekle.</div>
@@ -1445,7 +1524,50 @@
  </div>
 </div>
 <div class="asset-detail-page" id="assetDetailPage" hidden aria-modal="true" role="dialog">
- <div class="asset-detail-shell"><div class="asset-detail-head"><div class="asset-detail-title"><small id="assetDetailKind">VARLIK</small><h2 id="assetDetailName">Varlık Detayı</h2><small id="assetDetailSymbol">—</small><div class="asset-detail-price-row" id="assetDetailPriceBox" hidden><b id="assetDetailPrice">—</b><span id="assetDetailChange"></span></div></div><div class="asset-detail-nav"><button type="button" class="asset-detail-nav-btn" onclick="assetDetailNav(-1)" title="Önceki varlık" aria-label="Önceki varlık">‹</button><span id="assetDetailNavPos" class="asset-detail-nav-pos"></span><button type="button" class="asset-detail-nav-btn" onclick="assetDetailNav(1)" title="Sonraki varlık" aria-label="Sonraki varlık">›</button></div><div class="asset-detail-head-actions"><button type="button" class="btn small alert-add-btn" id="assetDetailAlertBtn" onclick="openPriceAlertModal()" title="Bildirim ekle" aria-label="Fiyat bildirimi ekle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 15v-5a6 6 0 1 0-12 0v5l-1.7 2.6a.7.7 0 0 0 .58 1.1h14.24a.7.7 0 0 0 .58-1.1L18 15Z"/><path d="M10 21a2.2 2.2 0 0 0 4 0"/></svg></button><button type="button" class="asset-detail-close" onclick="closeAssetDetail()">Kapat</button></div></div><div id="assetDetailBody"></div></div>
+ <div class="stksz-editor-page" id="stkszEditorZone" hidden role="dialog" aria-modal="true" aria-labelledby="stkszEditorZoneTitle">
+  <div class="stksz-editor-head stksz-editor-head-page"><button type="button" class="btn btn-close-action" onclick="stkszEditorClosePage()">← GERİ</button><div><small>STKSZ EDİTÖR</small><h2 id="stkszEditorZoneTitle">BETİK EDİTÖRÜ</h2><p>Kendi indikatör/strateji betiğin · sembol bazında kaydedilir</p></div><label class="check-row pine-mode-toggle"><input id="pineModeToggle" type="checkbox" onchange="togglePineMode(this.checked)"> Pine v6</label></div>
+  <div class="stksz-editor-body">
+  <div class="stksz-editor-wrap">
+   <div id="editorHighlight" class="editor-highlight" aria-hidden="true"></div>
+   <textarea id="stkszEditorCode" spellcheck="false" autocapitalize="off" autocomplete="off" oninput="onEditorInput()" onscroll="syncEditorHighlight()"></textarea>
+  </div>
+  <div id="editorMobileToolbar" class="editor-mobile-toolbar">
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('close')">close</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('open')">open</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('high')">high</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('low')">low</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('volume')">vol</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('sma(close,20)')">SMA</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('ema(close,50)')">EMA</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('rsi(close,14)')">RSI</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('plot(')">plot</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('hline(100)')">hline</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('marker(')">marker</button>
+   <button type="button" class="editor-quick-btn" onclick="editorInsert('crossover(')">crossover</button>
+  </div>
+  <div class="toolbar stksz-editor-actions">
+   <button type="button" class="btn small primary" data-editor-run>▶ ÇALIŞTIR</button>
+   <button type="button" class="btn small" data-editor-save>KAYDET</button>
+   <button type="button" class="btn small" data-editor-reset>ÖRNEĞE DÖN</button>
+   <button type="button" class="btn small" data-editor-clear>GRAFİKTEN KALDIR</button>
+   <button type="button" class="btn small" onclick="editorLint()">LINT</button>
+   <button type="button" class="btn small" onclick="editorAddToWebhook()">WEBHOOK</button>
+  </div>
+  <div id="stkszEditorStatus" class="help">Betiğiniz güvenli alanda çalışır (ağ/DOM erişimi kapalı).</div>
+  <div id="editorLintResults" class="editor-lint-results" hidden></div>
+  <details class="stksz-editor-help"><summary>📖 Komut rehberi</summary>
+   <pre>VERİLER : open high low close volume time
+İNDİKATÖR: sma(close,20) ema(close,50) wma(close,9)
+          rsi(close,14) macd(close,12,26,9) → {macd,signal,hist}
+          highest(high,20) lowest(low,20) change(close,5)
+SİNYAL   : crossover(a,b) crossunder(a,b) → true/false dizisi
+ÇİZİM    : plot(dizi,{isim,renk,kalinlik,panel:"alt"})
+          hline(100,{isim:"Seviye",renk:"#e7b51e"})
+          marker(koşulDizisi,{yazi:"AL",renk:"#00df78"})</pre>
+  </details>
+  </div>
+ </div>
+ <div class="asset-detail-shell"><div class="asset-detail-head"><div class="asset-detail-title"><small id="assetDetailKind">VARLIK</small><h2 id="assetDetailName">Varlık Detayı</h2><small id="assetDetailSymbol">—</small><div class="asset-detail-price-row" id="assetDetailPriceBox" hidden><b id="assetDetailPrice">—</b><span id="assetDetailChange"></span></div></div><div class="asset-detail-nav"><button type="button" class="asset-detail-nav-btn" onclick="assetDetailNav(-1)" title="Önceki varlık" aria-label="Önceki varlık">‹</button><span id="assetDetailNavPos" class="asset-detail-nav-pos"></span><button type="button" class="asset-detail-nav-btn" onclick="assetDetailNav(1)" title="Sonraki varlık" aria-label="Sonraki varlık">›</button></div><div class="asset-detail-head-actions"><button type="button" class="btn small asset-fav-btn" id="assetDetailFavBtn" onclick="toggleFavorite(getAssetDetailSymbol())" title="Favorilere ekle / çıkar" aria-label="Favorilere ekle / çıkar" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.3 6.2 21l1.5-6.6L3 10.1l6.7-.6L12 3l2.3 6.5 6.7.6-4.7 4.3 1.5 6.6z"/></svg></button><button type="button" class="btn small alert-add-btn" id="assetDetailAlertBtn" onclick="openPriceAlertModal()" title="Bildirim ekle" aria-label="Fiyat bildirimi ekle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 15v-5a6 6 0 1 0-12 0v5l-1.7 2.6a.7.7 0 0 0 .58 1.1h14.24a.7.7 0 0 0 .58-1.1L18 15Z"/><path d="M10 21a2.2 2.2 0 0 0 4 0"/></svg></button><button type="button" class="asset-detail-close" onclick="closeAssetDetail()">Kapat</button></div></div><div id="assetDetailBody"></div></div>
 </div>
 
 <div class="modal" id="reportModal">
@@ -1853,7 +1975,7 @@ function setVisibleMenuView(id){document.querySelectorAll("#page-settings .menu-
 function showMenuHome(){menuPanelStack=[];pendingProfilePhoto="";setVisibleMenuView("menuHome");}
 function openUnifiedMenu(){const settings=document.getElementById("page-settings"),button=document.querySelector(".header-menu-btn");if(settings?.classList.contains("active")){closeUnifiedMenu();return;}const active=[...document.querySelectorAll(".page.active")].find(page=>page.id!=="page-settings");menuReturnPage=active?.id.replace("page-","")||"home";showPage("settings");showMenuHome();button?.setAttribute("aria-expanded","true");}
 function closeUnifiedMenu(){const target=document.getElementById("page-"+menuReturnPage)?menuReturnPage:"home";showMenuHome();showPage(target,document.querySelector(`.nav button[data-page="${target}"]`));document.querySelector(".header-menu-btn")?.setAttribute("aria-expanded","false");}
-function openMenuPanel(id){const target=document.getElementById(id);if(!target)return;const current=visibleMenuView();if(current&&current.id!==id)menuPanelStack.push(current.id);setVisibleMenuView(id);if(id==="menuActivityPanel")renderMenuActivity();if(id==="menuSecurity")refreshMenuSecurityState();if(id==="menuApiKeys"){renderApiKeysPanel();renderAdminPanelVisibility();refreshNonAdminStates();}if(id==="menuProfile")renderInvestorProfileUI();if(id==="menuFxData")refreshFxPanel();if(id==="menuVirtualWallet")renderVirtualWallet();if(id==="menuDataManagement")renderSyncState();if(id==="menuCurrency")renderCurrencyPanel();if(id==="menuPromoCodes")renderPromoCodeList();if(id==="menuRolePreview"){const s=document.getElementById("rolePreviewStatus");const r=getPreviewRole();if(s)s.textContent=r?"Aktif rol önizlemesi: "+r.toUpperCase():'Aktif rol: orijinal (önizleme yok)';}}
+function openMenuPanel(id){const target=document.getElementById(id);if(!target)return;const current=visibleMenuView();if(current&&current.id!==id)menuPanelStack.push(current.id);setVisibleMenuView(id);if(id==="menuProfile"){renderInvestorProfileUI();setTimeout(()=>{try{renderProfileHero();}catch(e){}},0);}if(id==="menuActivityPanel")renderMenuActivity();if(id==="menuSecurity")refreshMenuSecurityState();if(id==="menuApiKeys"){renderApiKeysPanel();renderAdminPanelVisibility();refreshNonAdminStates();}if(id==="menuFxData")refreshFxPanel();if(id==="menuVirtualWallet")renderVirtualWallet();if(id==="menuDataManagement")renderSyncState();if(id==="menuCurrency")renderCurrencyPanel();if(id==="menuPromoCodes")renderPromoCodeList();if(id==="menuRolePreview"){const s=document.getElementById("rolePreviewStatus");const r=getPreviewRole();if(s)s.textContent=r?"Aktif rol önizlemesi: "+r.toUpperCase():'Aktif rol: orijinal (önizleme yok)';}}
 function closeMenuPanel(){const current=visibleMenuView();if(current?.id==="menuProfile"){pendingProfilePhoto="";renderSettings();}const previous=menuPanelStack.pop()||"menuHome";setVisibleMenuView(previous);}
 function saveProfileAndClose(){saveProfile();closeMenuPanel();}
 function saveGoalsAndClose(){saveMenuNotes();closeMenuPanel();}
@@ -2024,49 +2146,8 @@ function stkszChartPanelHtml(symbol){
    <span class="chart-tool-state" id="chartToolState">İmleç</span>
   </div>
   <div class="stksz-canvas-wrap"><canvas id="stkszChartCanvas" aria-label="${esc(clean)} fiyat grafiği"></canvas></div>
-  <div id="stkszChartStatus" class="help chart-status">Grafik: yerel geçmiş varsa otomatik çizilir; güncellemek için GEÇMİŞİ ÇEK.</div>
-   <div id="stkszEditorZone" class="stksz-editor" hidden>
-    <div class="stksz-editor-head"><b>STKSZ EDİTÖR</b><small>Kendi indikatör/strateji betiğin · sembol bazında kaydedilir</small><label class="check-row pine-mode-toggle"><input id="pineModeToggle" type="checkbox" onchange="togglePineMode(this.checked)"> Pine v6</label></div>
-    <div class="stksz-editor-wrap">
-     <div id="editorHighlight" class="editor-highlight" aria-hidden="true"></div>
-     <textarea id="stkszEditorCode" spellcheck="false" autocapitalize="off" autocomplete="off" oninput="onEditorInput()" onscroll="syncEditorHighlight()"></textarea>
-    </div>
-    <div id="editorMobileToolbar" class="editor-mobile-toolbar">
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('close')">close</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('open')">open</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('high')">high</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('low')">low</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('volume')">vol</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('sma(close,20)')">SMA</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('ema(close,50)')">EMA</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('rsi(close,14)')">RSI</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('plot(')">plot</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('hline(100)')">hline</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('marker(')">marker</button>
-     <button type="button" class="editor-quick-btn" onclick="editorInsert('crossover(')">crossover</button>
-    </div>
-    <div class="toolbar stksz-editor-actions">
-     <button type="button" class="btn small primary" data-editor-run>▶ ÇALIŞTIR</button>
-     <button type="button" class="btn small" data-editor-save>KAYDET</button>
-     <button type="button" class="btn small" data-editor-reset>ÖRNEĞE DÖN</button>
-     <button type="button" class="btn small" data-editor-clear>GRAFİKTEN KALDIR</button>
-     <button type="button" class="btn small" onclick="editorLint()">LINT</button>
-     <button type="button" class="btn small" onclick="editorAddToWebhook()">WEBHOOK</button>
-    </div>
-    <div id="stkszEditorStatus" class="help">Betiğiniz güvenli alanda çalışır (ağ/DOM erişimi kapalı).</div>
-    <div id="editorLintResults" class="editor-lint-results" hidden></div>
-    <details class="stksz-editor-help"><summary>📖 Komut rehberi</summary>
-     <pre>VERİLER : open high low close volume time
-İNDİKATÖR: sma(close,20) ema(close,50) wma(close,9)
-          rsi(close,14) macd(close,12,26,9) → {macd,signal,hist}
-          highest(high,20) lowest(low,20) change(close,5)
-SİNYAL   : crossover(a,b) crossunder(a,b) → true/false dizisi
-ÇİZİM    : plot(dizi,{isim,renk,kalinlik,panel:"alt"})
-          hline(100,{isim:"Seviye",renk:"#e7b51e"})
-          marker(koşulDizisi,{yazi:"AL",renk:"#00df78"})</pre>
-    </details>
-   </div>
- </div>`;
+<div id="stkszChartStatus" class="help chart-status">Grafik: yerel geçmiş varsa otomatik çizilir; güncellemek için GEÇMİŞİ ÇEK.</div>
+  </div>`;
 }
 /* Aykırı mum filtresi (v82): medyan kapanıştan aşırı sapan (bozuk OCR/veri) mumlar çizimi bozmasın */
 function filterOutlierCandles(rows,getClose){
@@ -2110,24 +2191,35 @@ function initStkszChartPanel(symbol){
  }));
  body.querySelector("[data-tool-clear]")?.addEventListener("click",()=>{if(confirm(stkszChartSymbol+" üzerindeki tüm çizimler silinsin mi?"))stkszChartInstance.clearDrawings();});
  body.querySelector("[data-chart-load]")?.addEventListener("click",()=>stkszChartFetchHistory(stkszChartSymbol));
- body.querySelector("[data-chart-editor]")?.addEventListener("click",()=>{
-  const zone=document.getElementById("stkszEditorZone");if(!zone)return;
-  zone.hidden=!zone.hidden;
-  if(!zone.hidden){const ta=document.getElementById("stkszEditorCode");if(ta&&!ta.value)ta.value=stkszEditorScripts[stkszChartSymbol]||stkszEditorScripts["*"]||STKSZ_EDITOR_DEFAULT;}
- });
- body.querySelector("[data-editor-run]")?.addEventListener("click",stkszEditorRun);
- body.querySelector("[data-editor-save]")?.addEventListener("click",()=>{
+body.querySelector("[data-chart-editor]")?.addEventListener("click",()=>{openStkszEditorPage();});
+  if(candles.length&&stkszEditorScripts[stkszChartSymbol]){
+   try{stkszChartInstance.setOverlay(STKSZChart.runStkszScript(stkszEditorScripts[stkszChartSymbol],candles));}catch(error){}
+  }
+}
+/* v-devo: STKSZ Editör artık ayrı tam sayfa (overlay) — GERİ ile detay ekranına dönülür.
+   Zone #assetDetailPage içinde değil; bağlar bir kez global olarak kurulur. */
+let stkszEditorBoundOnce=false;
+function bindStkszEditorOnce(){
+ if(stkszEditorBoundOnce)return;stkszEditorBoundOnce=true;
+ const zone=document.getElementById("stkszEditorZone");if(!zone)return;
+ zone.querySelector("[data-editor-run]")?.addEventListener("click",stkszEditorRun);
+ zone.querySelector("[data-editor-save]")?.addEventListener("click",()=>{
   const code=document.getElementById("stkszEditorCode")?.value||"";
   stkszEditorScripts[stkszChartSymbol]=code;storageSet("stkszEditorScripts",JSON.stringify(stkszEditorScripts));
-  setText("stkszEditorStatus","💾 Betik "+stkszChartSymbol+" için kaydedildi; grafik her açılışta otomatik uygulanır.");showToast("STKSZ Editör betiği kaydedildi.");
+  setText("stkszEditorStatus","Betik "+stkszChartSymbol+" için kaydedildi; grafik her açılışta otomatik uygulanır.");showToast("STKSZ Editör betiği kaydedildi.");
  });
- body.querySelector("[data-editor-reset]")?.addEventListener("click",()=>{const ta=document.getElementById("stkszEditorCode");if(ta)ta.value=STKSZ_EDITOR_DEFAULT;});
- body.querySelector("[data-editor-clear]")?.addEventListener("click",()=>{stkszChartInstance.setOverlay(null);delete stkszEditorScripts[stkszChartSymbol];storageSet("stkszEditorScripts",JSON.stringify(stkszEditorScripts));setText("stkszEditorStatus","Betik grafikten ve kayıttan kaldırıldı.");});
- /* kayıtlı betik varsa otomatik uygula */
- if(candles.length&&stkszEditorScripts[stkszChartSymbol]){
-  try{stkszChartInstance.setOverlay(STKSZChart.runStkszScript(stkszEditorScripts[stkszChartSymbol],candles));}catch(error){}
- }
+ zone.querySelector("[data-editor-reset]")?.addEventListener("click",()=>{const ta=document.getElementById("stkszEditorCode");if(ta)ta.value=STKSZ_EDITOR_DEFAULT;});
+ zone.querySelector("[data-editor-clear]")?.addEventListener("click",()=>{try{stkszChartInstance?.setOverlay(null);}catch(e){}delete stkszEditorScripts[stkszChartSymbol];storageSet("stkszEditorScripts",JSON.stringify(stkszEditorScripts));setText("stkszEditorStatus","Betik grafikten ve kayıttan kaldırıldı.");});
 }
+function openStkszEditorPage(){
+ const zone=document.getElementById("stkszEditorZone");if(!zone)return;
+ bindStkszEditorOnce();
+ const ta=document.getElementById("stkszEditorCode");
+ if(ta&&ta.value==="")ta.value=stkszEditorScripts[stkszChartSymbol]||stkszEditorScripts["*"]||STKSZ_EDITOR_DEFAULT;
+ try{const candles=stkszCandlesFor(stkszChartSymbol);if(candles.length&&stkszEditorScripts[stkszChartSymbol]&&typeof stkszChartInstance!=="undefined"&&stkszChartInstance){stkszChartInstance.setOverlay(STKSZChart.runStkszScript(stkszEditorScripts[stkszChartSymbol],candles));}}catch(error){}
+ zone.hidden=false;lockBodyScroll();
+}
+function stkszEditorClosePage(){const zone=document.getElementById("stkszEditorZone");if(!zone)return;zone.hidden=true;unlockBodyScroll();}
 function stkszEditorRun(){
  if(!stkszChartInstance)return;
  const code=document.getElementById("stkszEditorCode")?.value||"";
@@ -2289,7 +2381,7 @@ function openAssetDetail(index){const item=currentAssetResults[Number(index)];if
  if(item.kind==="asset"){const asset=item.asset,latest=asset.history?.[0]||{},previous=asset.history?.[1]||{},unrealized=assetUnrealized(asset);name=asset.name||"Varlık adı verisi yok";symbol=asset.s;kind=asset.type;fields=[["Güncel fiyat",moneyOrNoData(asset.p)],["Açılış",moneyOrNoData(asset.open??latest.open)],["Önceki kapanış",moneyOrNoData(asset.previousClose??previous.close)],["Piyasa değişimi",finite(asset.marketChangePct)===null?"VERİ YOK":pct(asset.marketChangePct)],["Günlük yüksek",moneyOrNoData(asset.high??latest.high)],["Günlük düşük",moneyOrNoData(asset.low??latest.low)],["İşlem hacmi",valueOrNoData(finite(asset.volume),countFmt)],["Portföydeki adet",valueOrNoData(finite(asset.q),fmt)],["Ortalama maliyet",moneyOrNoData(asset.avgCost)],["Portföy değeri",moneyOrNoData(asset.v)],["Kâr/Zarar",unrealized===null?"VERİ YOK":signedMoney(unrealized)],["Midas günlük K/Z",asset.dailyVerified?signedMoneyOrNoData(asset.d):"VERİ YOK"],["Veri kaynağı",asset.source||"API bağlı değil"],["Güncellik",PROVIDERS.freshnessLabel?PROVIDERS.freshnessLabel(asset.marketFreshness):asset.marketFreshness||"VERİ YOK"]];chart=chartSvg(asset);
  }else if(item.kind==="ipo"){const ipo=item.item;name=ipo.company||"Halka Arz";symbol=ipo.symbol||"—";kind="Halka Arz";fields=[["Tarih",ipo.date||"VERİ YOK"],["Talep durumu",ipo.status||"VERİ YOK"],["Tahmini lot",valueOrNoData(finite(ipo.estimatedLots),fmt)],["Gerekli nakit",moneyOrNoData(ipo.requiredCash)],["Risk/not",ipo.note||"VERİ YOK"],["Kaynak",ipo.source||data.ipoCalendar?.source||"VERİ YOK"]];
  }else{name=item.category;symbol="—";kind=item.category;fields=[["Güncel fiyat","VERİ YOK"],["Açılış","VERİ YOK"],["Önceki kapanış","VERİ YOK"],["İşlem hacmi","VERİ YOK"]];}
- setText("assetDetailName",name);setText("assetDetailSymbol",symbol);setText("assetDetailKind",kind.toUpperCase());
+ setText("assetDetailName",name);setText("assetDetailSymbol",symbol);setText("assetDetailKind",kind.toUpperCase());try{renderAssetDetailFav();}catch(error){}
  /* v115: Midas tarzı büyük fiyat + günlük değişim başlıkta (yalnız doğrulanmış veri; yoksa gizli) */
  try{const priceBox=document.getElementById("assetDetailPriceBox"),priceEl=document.getElementById("assetDetailPrice"),changeEl=document.getElementById("assetDetailChange");if(priceBox&&priceEl&&changeEl){const asset=item.kind==="asset"?item.asset:null,priceValue=asset?finite(asset.p):null,changeValue=asset?finite(asset.marketChangePct):null;if(priceValue!==null){priceEl.textContent=money(priceValue);changeEl.textContent=changeValue===null?"":pct(changeValue);changeEl.className=changeValue===null?"":changeValue>0?"positive":changeValue<0?"negative":"neutral";priceBox.hidden=false;}else{priceBox.hidden=true;}}}catch(error){}
  /* v83: tek grafik sistemi — yalnız STKSZ GRAFİK (TradingView paneli kaldırıldı, kullanıcı isteği) */
@@ -2325,7 +2417,9 @@ function attachAssetDetailSwipe(){
 }
 function closeAssetDetail(){
  const page=document.getElementById("assetDetailPage");if(!page||page.hidden)return;
- page.hidden=true;unlockBodyScroll();
+ const zone=document.getElementById("stkszEditorZone");if(zone&&!zone.hidden){zone.hidden=true;}
+ unlockBodyScroll();
+ page.hidden=true;
  if(assetDetailFromCrypto){
   assetDetailFromCrypto=false;
   page.classList.remove("asset-detail-crypto-open");
@@ -2344,7 +2438,7 @@ function openStkszEditorFromMenu(){
   const asset=candidates[0]||(Array.isArray(data.assets)?data.assets.find(a=>a&&a.s):null);
   if(!asset){showToast("Portföyde varlık yok — önce varlık ekleyin.");return;}
   openAssetDetailForSymbol(asset.s);
-  setTimeout(()=>{const zone=document.getElementById("stkszEditorZone");if(!zone)return;if(zone.hidden){const toggle=document.querySelector("#assetDetailPage [data-chart-editor]");if(toggle){try{toggle.click();}catch(e){zone.hidden=false;}}else{zone.hidden=false;}}},180);
+  setTimeout(()=>{try{openStkszEditorPage();}catch(e){const zone=document.getElementById("stkszEditorZone");if(zone)zone.hidden=false;}},180);
 }
 function riskLevel(score){if(score<=34)return {key:"low",label:"Düşük"};if(score<=66)return {key:"medium",label:"Orta"};return {key:"high",label:"Yüksek"};}
 function riskAnalysis(){
@@ -2704,6 +2798,19 @@ function renderIpoScenario(items){
   <div class="ipo-proj-disclaimer">Deterministik matematiksel projeksiyon: her satır bir önceki senaryo fiyatından BIST adımına yuvarlanmış %10 tavan/taban ile zincirlenir. HİÇBİR GARANTİ YOKTUR — yatırım tavsiyesi değildir.</div>`;
 }
 function setIpoMode(m){sessionStorage.setItem("ipoMode",String(m||"HER_IKISI").toUpperCase());renderIpoScenario((data?.ipoCalendar?.items)||[]);}
+function setIpoFilter(mode){
+ sessionStorage.setItem("stkszIpoFilter",String(mode||"all"));
+ document.querySelectorAll("#ipoChoiceRow .ipo-choice-card").forEach(btn=>btn.classList.toggle("active",btn.dataset.ipoMode===mode));
+ renderOpportunityData();
+}
+function ipoFilteredItems(){
+ const mode=sessionStorage.getItem("stkszIpoFilter")||"all";const items=data.ipoCalendar?.items||[];
+ if(mode==="all")return items;
+ const tsOf=item=>{const t=Date.parse(item.publishedIso||"");if(Number.isFinite(t))return t;const p=(item.date||"").split(".");if(p.length===3){const t2=Date.parse(`${p[2]}-${p[1]}-${p[0]}`);if(Number.isFinite(t2))return t2;}return NaN;};
+ if(mode==="new"){const now=Date.now();return items.filter(item=>{const ts=tsOf(item);return Number.isFinite(ts)&&ts>=now-2*86400000&&ts<=now+7*86400000;});}
+ if(mode==="open"){return items.filter(item=>/AÇIK|BAŞVURU|TALEP TOPL|ÖN TALEP/i.test(String(item.status||"")));}
+ return items;
+}
 function setIpoLots(v){sessionStorage.setItem("ipoLots",String(Math.max(1,Number(v)||1)));renderIpoScenario((data?.ipoCalendar?.items)||[]);}
 function renderIpoRisk(items){
  const panel=document.getElementById("ipoRiskPanel");if(!panel)return;
@@ -2761,12 +2868,12 @@ function toggleIpoDetails(){
 }
 function renderOpportunityData(){
   renderDailyOpportunity("dailyOpportunity");renderOpportunityCards();renderSmartFilters();renderCompositePanel();renderStressTest();scanBreakoutAlerts();renderCuratedBulletin();renderSignalTerminal();fillGridSymbols();try{renderMicroOpportunities();}catch(e){}
- const ipo=document.getElementById("ipoCalendar");if(ipo){const items=data.ipoCalendar?.items||[];
+ const ipo=document.getElementById("ipoCalendar");if(ipo){const ipoF=(sessionStorage.getItem("stkszIpoFilter")||"all"),items=ipoFilteredItems();
   /* v93 (EK-1): gerçek yayın tarihi + yaş kontrolü — 14 günden eski haber "ESKİ KAYIT" olarak işaretlenir, güncel gibi gösterilmez */
   const stampOf=item=>{const t=Date.parse(item.publishedIso||"");if(Number.isFinite(t))return t;const p=(item.date||"").split(".");if(p.length===3){const t2=Date.parse(`${p[2]}-${p[1]}-${p[0]}`);if(Number.isFinite(t2))return t2;}return NaN;};
    ipo.innerHTML=items.length?items.map(item=>{const ts=stampOf(item),ageDays=Number.isFinite(ts)?Math.floor((Date.now()-ts)/86400000):null,isOld=ageDays!==null&&ageDays>14;
     const dateLabel=item.date?(Number.isFinite(ts)?`Yayın: ${item.date}${ageDays!==null?` (${ageDays===0?"bugün":ageDays+" gün önce"})`:""}`:`Yayın: ${item.date}`):"Yayın tarihi doğrulanamadı";
-    return `<article class="plan-card${isOld?" ipo-old":""}"><div class="plan-head"><div><b>${esc(item.company||"—")}</b><div class="holding-name">${esc(dateLabel)}</div></div><span class="signal-badge ${isOld?"unknown":esc(item.signalKey||'unknown')}">${isOld?"ESKİ KAYIT · GÜNCELLİĞİ DOĞRULANMADI":esc(item.status||"DURUM BİLİNMİYOR")}</span></div><div class="plan-metrics"><div>Katılım: ${esc(item.participation||"Açıklanmadı")}</div><div>Tahmini lot: ${valueOrNoData(finite(item.estimatedLots),fmt)}</div><div>Gerekli nakit: ${moneyOrNoData(item.requiredCash)}</div><div>Risk/not: ${esc(item.note||"—")}</div></div>${renderIpoFairRange(item)}<p>Kaynak: ${esc(item.source||data.ipoCalendar.source||"Kaynak belirtilmedi")}${item.url?` · <a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">Habere git ↗</a>`:""}</p></article>`;}).join(""):`<div class="empty-state">${data.ipoCalendar?.lastError?"Güncel veri alınamadı — "+esc(data.ipoCalendar.lastError)+(data.ipoCalendar?.lastSuccess?" · Son başarılı tarama: "+esc(data.ipoCalendar.lastSuccess):""):"Takvimde doğrulanmış halka arz kaydı yok. Fırsatlar sayfası açılınca haber taraması otomatik denenir."}</div>`;
+    return `<article class="plan-card${isOld?" ipo-old":""}"><div class="plan-head"><div><b>${esc(item.company||"—")}</b><div class="holding-name">${esc(dateLabel)}</div></div><span class="signal-badge ${isOld?"unknown":esc(item.signalKey||'unknown')}">${isOld?"ESKİ KAYIT · GÜNCELLİĞİ DOĞRULANMADI":esc(item.status||"DURUM BİLİNMİYOR")}</span></div><div class="plan-metrics"><div>Katılım: ${esc(item.participation||"Açıklanmadı")}</div><div>Tahmini lot: ${valueOrNoData(finite(item.estimatedLots),fmt)}</div><div>Gerekli nakit: ${moneyOrNoData(item.requiredCash)}</div><div>Risk/not: ${esc(item.note||"—")}</div></div>${renderIpoFairRange(item)}<p>Kaynak: ${esc(item.source||data.ipoCalendar.source||"Kaynak belirtilmedi")}${item.url?` · <a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">Habere git ↗</a>`:""}</p></article>`;}).join(""):`<div class="empty-state">${data.ipoCalendar?.lastError?"Güncel veri alınamadı — "+esc(data.ipoCalendar.lastError)+(data.ipoCalendar?.lastSuccess?" · Son başarılı tarama: "+esc(data.ipoCalendar.lastSuccess):""):(ipoF==="new"?"Önümüzdeki 7 gün içinde talep başlayacak doğrulanmış kayıt yok.":ipoF==="open"?"Şu anda talep toplayan doğrulanmış kayıt yok.":"Takvimde doğrulanmış halka arz kaydı yok. Fırsatlar sayfası açılınca haber taraması otomatik denenir.")}</div>`;
     renderIpoLimitTable(stampOf,items);
     try{renderIpoScenario(items);renderIpoRisk(items);}catch(e){}}
  const ipoItems=data.ipoCalendar?.items||[];const ipoCashValues=ipoItems.map(item=>finite(item.requiredCash)).filter(value=>value!==null);
@@ -3303,8 +3410,7 @@ async function openCryptoStkszEditor(idx){
   page.hidden=false;
   lockBodyScroll();
   requestAnimationFrame(()=>initStkszChartPanel(c.symbol));
-  const zone=document.getElementById("stkszEditorZone");
-  if(zone){zone.hidden=false;const ta=document.getElementById("stkszEditorCode");if(ta&&!ta.value)ta.value=stkszEditorScripts[c.symbol]||stkszEditorScripts["*"]||STKSZ_EDITOR_DEFAULT;}
+  try{openStkszEditorPage();}catch(error){/* M16: kripto editör açılışı UI'ı bozmaz */}
  }catch(error){/* M16: kripto editör açılışı UI'ı bozmaz */}
 }
 function drawCryptoChart(c){
@@ -3643,8 +3749,27 @@ function renderAdminPanelVisibility(){
  document.querySelectorAll("[data-elite-only]").forEach(el=>{el.hidden=!editorAccess;});
  document.querySelectorAll("[data-elite-locked]").forEach(el=>{el.hidden=editorAccess;});
  applyGuestMode();
- try{updateHeaderInvestorChip();}catch(e){}
- try{renderLockedFeatures();}catch(e){}
+try{updateHeaderInvestorChip();}catch(e){}
+  try{renderLockedFeatures();}catch(e){}
+}
+function renderAdminHub(force){
+ const eng=window.STKSZAIEngine;
+ const el=document.getElementById("adminHubWebVersion");
+ if(el){
+  const build=(document.querySelector('meta[name="stksz-build"]')?.content||"v1");
+  const frags=document.location.search.match(/[?&](web|probe|test)=?([^&]*)/i);
+  const parts=[eng?"v40|STKSZAIEngine":"—"];
+  if(frags&&frags[0])parts.push(frags[0].replace(/[?&]/g,""));
+  el.textContent=build+(parts.length>1?" · "+parts.join(" · "):"");
+ }
+ setText("adminHubTarget",document.getElementById("targetSelect")?.value||(data.target||"—"));
+ setText("adminHubSchedule",storageGet("stkszSchedule")?String(storageGet("stkszSchedule")).length?"Zamanlı görev kurulu":"—":"—");
+ const users=typeof getUsers==="function"?getUsers():{};
+ setText("adminHubUsers",(users&&typeof users==="object"&&!Array.isArray(users)?Object.keys(users).length+" hesap":"1 hesap")+" · "+(typeof authState!=="undefined"&&authState?.username?authState.username:"—"));
+ setText("adminHubBadges",eng?eng.entitlements.badges().map(b=>b.id).join(", ")||"Rozet yok":"Rozet yok");
+ const provid=window.STKSZProviders;
+ const mkt=provid?.bistMarketProvider?.configured?.()||provid?.marketProvider?.configured?.()||provid?.fallbackProvider?.configured?.();
+ setText("adminHubConnect",mkt?"BAĞLI":"BAĞLI DEĞİL");
 }
 /* ---- Misafir modu: menü kartları üzerinde overlay + kilit ---- */
 function applyGuestMode(){
@@ -4355,7 +4480,10 @@ function refreshFavoriteViews(){
  try{renderPortfolioAssets(calc());}catch(error){}
  try{renderOpportunityData();}catch(error){}
  try{const searchInput=document.getElementById("searchInput");if(searchInput&&searchInput.value)renderSearch();}catch(error){}
+ try{renderAssetDetailFav();}catch(error){}
 }
+function getAssetDetailSymbol(){const el=document.getElementById("assetDetailSymbol");return el?String(el.textContent||"").trim():"";}
+function renderAssetDetailFav(){const btn=document.getElementById("assetDetailFavBtn");if(!btn)return;const sym=getAssetDetailSymbol(),on=Boolean(sym)&&favoriteSet().has(sym);btn.classList.toggle("active",on);btn.setAttribute("aria-pressed",String(on));btn.setAttribute("title",on?"Favorilerden çıkar":"Favorilere ekle");}
 function toggleFavorite(symbol){const clean=String(symbol||"").toUpperCase();const known=data.assets.some(asset=>asset.s===clean)||SEARCH_UNIVERSE.some(item=>item.s===clean)||Boolean(ASSET_META[clean])||(data.watchlist||[]).some(item=>item.symbol===clean);if(!known)return;const favorites=favoriteSet(),adding=!favorites.has(clean);if(adding)favorites.add(clean);else favorites.delete(clean);data.favorites=[...favorites];storageSet("stkszData",JSON.stringify(dataForLocalStorage()));persistNativeEnr();refreshFavoriteViews();showToast(`${clean} ${adding?'favorilere eklendi':'favorilerden çıkarıldı'}.`);}
 function openSelectedAssetManual(){if(!selectedPortfolioSymbol){showToast("Önce bir Midas varlığı seç.");return;}openManual(selectedPortfolioSymbol);}
 function renderPortfolioHero(total,scoreData){
@@ -4774,7 +4902,7 @@ function aiApplyTradeProposal(payload){
 async function refreshAiConnBadge(){
  const badge=document.getElementById("aiConnBadge");if(!badge)return;
  const ai=window.STKSZProviders?.stkszAiProvider;
- const set=(state,text)=>{badge.dataset.state=state;badge.textContent=text;};
+ const set=(state,text)=>{badge.dataset.state=state;const label=badge.querySelector(".ai-conn-label");if(label)label.textContent=text;else badge.textContent=text;};
  /* v118: kullanıcıya model sağlayıcı adı gösterilmez — yalnız STKSZ AI bağlantı durumu */
  if(!ai?.configured?.()){set("off","STKSZ AI · BAĞLI DEĞİL");return;}
  if(ai.usesBackend?.()){
@@ -4811,13 +4939,17 @@ function renderAuthGate(){
   setText("authWelcomeText","Tekrar hoş geldin"+(authState.name?", "+authState.name:"")+" 👋");
   return;
  }
- gate.hidden=isAuthed();
- if(!isAuthed()){document.getElementById("authChoices").hidden=false;document.getElementById("authBiometric").hidden=true;const err=document.getElementById("authLoginError");if(err)err.hidden=true;const rerr=document.getElementById("authRegisterError");if(rerr)rerr.hidden=true;const wrap=document.getElementById("authUserFormWrap");if(wrap)wrap.hidden=true;const rwrap=document.getElementById("authRegisterFormWrap");if(rwrap)rwrap.hidden=true;}
+gate.hidden=isAuthed();
+  if(!isAuthed()){document.getElementById("authChoices").hidden=false;document.getElementById("authBiometric").hidden=true;_authHideSteps();const err=document.getElementById("authLoginError");if(err)err.hidden=true;const rerr=document.getElementById("authRegisterError");if(rerr)rerr.hidden=true;const wrap=document.getElementById("authUserFormWrap");if(wrap)wrap.hidden=true;const rwrap=document.getElementById("authRegisterFormWrap");if(rwrap)rwrap.hidden=true;}
 }
 function authRegister(provider){
  const label={google:"Google",apple:"Apple"}[provider]||provider;
- showToast(label+" ile kayıt/giriş için OAuth yapılandırması gerekli (Client ID / Services ID). Şu anda \"Hesap oluştur\" veya \"Kullanıcı adı + şifre\" seçenekleriyle devam edin.");
+ showToast(label+" ile kayıt/giriş için OAuth yapılandırması gerekli (Client ID / Services ID). Şu anda \"E-Posta İle Kaydol\" veya \"Kullanıcı adı + şifre\" seçenekleriyle devam edin.");
 }
+function _authHideSteps(){["authRegisterStep","authLoginStep","authBiometric"].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=true;});}
+function authShowLoginOptions(){_authHideSteps();document.getElementById("authChoices").hidden=true;const el=document.getElementById("authLoginStep");if(el)el.hidden=false;}
+function authShowRegisterOptions(){_authHideSteps();document.getElementById("authChoices").hidden=true;const el=document.getElementById("authRegisterStep");if(el)el.hidden=false;}
+function authShowAdminLogin(){const f=document.getElementById("authUsername");const p=document.getElementById("authPassword");if(f)f.value="admin";if(p){p.value="";p.focus();}showToast("Yönetici hesabı: kullanıcı adı 'admin' ile giriş yapılır.");}
 function toggleAuthRegisterForm(){const wrap=document.getElementById("authRegisterFormWrap");if(!wrap)return;const opening=wrap.hidden;wrap.hidden=!opening;if(opening){const first=wrap.querySelector("input");if(first)first.focus();}}
 async function authRegisterWithPassword(){
  if(!authReady){showToast("Sistem yükleniyor, lütfen bekleyin...");return;}
@@ -4875,7 +5007,7 @@ async function authBiometricLogin(){
   showToast("Hoş geldin"+(authState.name?", "+authState.name:"")+"!");
  }catch(error){showToast("Biyometrik giriş kullanılamadı; Farklı hesapla devam edebilirsin.");}
 }
-function authShowChoices(){document.getElementById("authBiometric").hidden=true;document.getElementById("authChoices").hidden=false;}
+function authShowChoices(){document.getElementById("authChoices").hidden=false;const bio=document.getElementById("authBiometric");if(bio)bio.hidden=true;_authHideSteps();}
 function authLogout(){if(!confirm("Oturum kapatılsın mı? Verilerin cihazda korunur."))return;authState=null;storageRemove("stkszAuth");renderAuthGate();renderProfileAuth();try{renderAdminPanelVisibility();}catch(e){}}
 async function changePassword(){
  if(!isAuthed()||isGuest())return;
@@ -4915,6 +5047,20 @@ function renderProfileAuth(){
   };
  });
 })();
+function renderProfileHero(){
+ const el=document.getElementById("profileRoleBadge");if(!el)return;
+ const eng=window.STKSZAIEngine;
+ let role="free";
+ if(eng){if(eng.entitlements.isAdmin())role="admin";else if(eng.entitlements.badges().some(b=>b.id==="STKSZ_ELITE"))role="elite";else if(eng.entitlements.badges().some(b=>b.id==="STKSZ_PRO"))role="pro";}
+ const meta={free:["ÜCRETSİZ ÜYE","role-free"],pro:["STKSZ PRO","role-pro"],elite:["STKSZ ELITE","role-elite"],admin:["YÖNETİCİ","role-admin"]}[role]||["ÜCRETSİZ ÜYE","role-free"];
+ el.className="profile-role-badge "+meta[1];el.textContent=meta[0];
+ const line=document.getElementById("profileAccountLine");if(!line)return;
+ if(isGuest()){line.textContent="Misafir modu · görüntüleme açık, düzenleme/işlem kapalı";return;}
+ if(typeof authState!=="undefined"&&authState&&authState.mode==="account"){
+  const prov={password:"E-posta / şifre",google:"Google",apple:"Apple",email:"E-posta"}[authState.provider]||"Yerel hesap";
+  line.textContent=(authState.email?authState.email+" · ":"")+prov+(authState.createdAt?" · "+String(authState.createdAt).slice(0,10):"")+(authState.quickLock?" · Biyometrik giriş açık":"");
+ }else{line.textContent="Oturum yok";}
+}
 function openStkszAi(){
  const overlay=document.getElementById("stkszAiOverlay");if(!overlay)return;
  overlay.hidden=false;document.body.classList.add("ai-open");lockBodyScroll();
@@ -5787,7 +5933,7 @@ function renderNews(){
  const list=document.getElementById("newsList");if(!list)return;const items=newsItemsForView();list.innerHTML="";
  if(items.length){list.innerHTML=items.map((item,index)=>{const url=safeHttpUrl(item.url),published=item.publishedAt?new Date(item.publishedAt):null,time=published&&!Number.isNaN(published.getTime())?published.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}):"—",tone=newsTone(item),categories=item.categories||[],symbols=item.symbols||[],primary=categories[0]||"KAYNAK";
   /* Haber kartı artık DIŞ SİTEYE GİTMEZ; uygulama içi detay modalını açar (data-news-open). */
-  return `<article class="news-item news-card-pro compact-news-card news-clickable" data-news-open="${index}" data-news-symbols="${esc(symbols.join(','))}" role="button" tabindex="0" aria-label="Haber detayını aç"><div class="news-compact-head"><span class="news-category"><i class="news-dot ${tone.key}"></i>${esc(primary)} · ${esc(item.source||"VERİ YOK")}</span><span class="news-time">${esc(time)}</span></div><div class="news-title">${esc(item.title)}</div>${item.description?`<p>${esc(String(item.description).slice(0,160))}${String(item.description).length>160?"…":""}</p>`:""}<div class="news-compact-footer"><div class="news-tags">${symbols.length?symbols.map(symbol=>`<span class="symbol-tag">${esc(symbol)}</span>`).join(""):categories.slice(0,3).map(category=>`<span>${esc(category)}</span>`).join("")}</div><div class="news-meta"><span class="news-open-hint">Detay için dokun →</span></div></div></article>`;
+  return `<article class="news-item news-card-pro compact-news-card news-clickable" data-news-open="${index}" data-news-symbols="${esc(symbols.join(','))}" role="button" tabindex="0" aria-label="Haber detayını aç">${index===0&&Array.isArray(newsCache.items)&&newsCache.items.length?"<span class=\"news-headline-badge\">ÖNE ÇIKAN</span>":""}<div class="news-compact-head"><span class="news-category"><i class="news-dot ${tone.key}"></i>${esc(primary)} · ${esc(item.source||"VERİ YOK")}</span><span class="news-time">${esc(time)}</span></div><div class="news-title">${esc(item.title)}</div>${item.description?`<p>${esc(String(item.description).slice(0,160))}${String(item.description).length>160?"…":""}</p>`:""}<div class="news-compact-footer"><div class="news-tags">${symbols.length?symbols.map(symbol=>`<span class="symbol-tag">${esc(symbol)}</span>`).join(""):categories.slice(0,3).map(category=>`<span>${esc(category)}</span>`).join("")}</div><div class="news-meta"><span class="news-open-hint">Detay için dokun →</span></div></div></article>`;
  }).join("");}else list.innerHTML=`<div class="empty-state news-empty-state">${esc(newsEmptyMessage())}</div>`;
  renderNews.lastItems=items;
  const hasLive=Array.isArray(newsCache.items)&&newsCache.items.length;setText("newsStatus",hasLive?`Veri kaynağı: ${newsCache.source||"Google News RSS"} · Son başarılı haber: ${newsCache.lastSuccess} · Gecikmeli olabilir.`:"API bağlı değil veya veri alınamadı. Sahte haber üretilmez; doğrulanmış kaynak bağlantıları kullanılır.");
