@@ -34,18 +34,40 @@
  <div class="auth-card">
   <img src="assets/icons/stksz-logo.png" alt="STKSZ CAPITAL" class="auth-logo">
   <div id="authChoices">
-   <button type="button" class="auth-btn" onclick="authRegister('google')"><svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62Z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" fill="#EA4335"/></svg>Google ile devam et</button>
-   <button type="button" class="auth-btn" onclick="toggleAuthUserForm()">Kullanıcı ile devam et</button>
-   <div id="authUserFormWrap" class="auth-user-form-wrap" hidden>
-    <div id="authLoginForm">
-     <input id="authUsername" type="text" placeholder="Kullanıcı adı" autocomplete="username" autocapitalize="none" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authPassword').focus();}">
-     <input id="authPassword" type="password" placeholder="Şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();authLoginWithPassword();}">
-     <button type="button" class="auth-btn auth-primary" onclick="authLoginWithPassword()">Giriş Yap</button>
-     <div id="authLoginError" class="auth-error" hidden></div>
+   <div class="auth-section">
+    <div class="auth-section-title">KAYIT OL</div>
+    <button type="button" class="auth-btn" onclick="authRegister('google')"><svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62Z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" fill="#EA4335"/></svg>Google ile hızlı kayıt</button>
+    <button type="button" class="auth-btn" onclick="authRegister('apple')"><svg class="svg-fill" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9z"/></svg>Apple ile hızlı kayıt</button>
+    <button type="button" class="auth-btn" onclick="toggleAuthRegisterForm()">Hesap oluştur</button>
+    <div id="authRegisterFormWrap" class="auth-user-form-wrap" hidden>
+     <div id="authRegisterForm">
+      <input id="authRegUsername" type="text" placeholder="Kullanıcı adı (en az 3 karakter)" autocomplete="username" autocapitalize="none" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authRegPassword').focus();}">
+      <input id="authRegPassword" type="password" placeholder="Şifre (en az 6 karakter)" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authRegPassword2').focus();}">
+      <input id="authRegPassword2" type="password" placeholder="Şifre (tekrar)" autocomplete="new-password" onkeydown="if(event.key==='Enter'){event.preventDefault();authRegisterWithPassword();}">
+      <button type="button" class="auth-btn auth-primary" onclick="authRegisterWithPassword()">KAYIT OL</button>
+      <div id="authRegisterError" class="auth-error" hidden></div>
+     </div>
     </div>
    </div>
-   <button type="button" class="auth-guest" onclick="authGuest()">Misafir olarak göz at →</button>
-   <p class="auth-note">Misafir modunda veriler görüntülenir; düzenleme, işlem ve senkron için hesap gerekir.</p>
+   <div class="auth-section">
+    <div class="auth-section-title">KULLANICI GİRİŞİ</div>
+    <button type="button" class="auth-btn" onclick="authRegister('google')"><svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62Z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" fill="#EA4335"/></svg>Google ile giriş</button>
+    <button type="button" class="auth-btn" onclick="authRegister('apple')"><svg class="svg-fill" viewBox="0 0 384 512"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9z"/></svg>Apple ile giriş</button>
+    <button type="button" class="auth-btn" onclick="toggleAuthUserForm()">Kullanıcı adı + şifre</button>
+    <div id="authUserFormWrap" class="auth-user-form-wrap" hidden>
+     <div id="authLoginForm">
+      <input id="authUsername" type="text" placeholder="Kullanıcı adı" autocomplete="username" autocapitalize="none" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('authPassword').focus();}">
+      <input id="authPassword" type="password" placeholder="Şifre" autocomplete="current-password" onkeydown="if(event.key==='Enter'){event.preventDefault();authLoginWithPassword();}">
+      <button type="button" class="auth-btn auth-primary" onclick="authLoginWithPassword()">GİRİŞ YAP</button>
+      <div id="authLoginError" class="auth-error" hidden></div>
+     </div>
+    </div>
+   </div>
+   <div class="auth-section">
+    <div class="auth-section-title">MİSAFİR GİRİŞİ</div>
+    <button type="button" class="auth-guest" onclick="authGuest()">Misafir olarak göz at →</button>
+    <p class="auth-note">Misafir modunda veriler görüntülenir; düzenleme, işlem ve senkron için hesap gerekir.</p>
+   </div>
   </div>
   <div id="authBiometric" hidden>
    <p class="auth-welcome" id="authWelcomeText">Tekrar hoş geldin</p>
@@ -535,6 +557,7 @@
 <section class="page" id="page-crypto-detail" hidden>
   <div class="crypto-detail-header">
     <button type="button" class="btn small" onclick="closeCryptoDetail()">← GERİ</button>
+    <button type="button" class="btn small primary" onclick="openCryptoStkszEditor(cryptoDetailIdx)">⚙ STKSZ EDİTÖR</button>
     <div class="crypto-detail-title"><h2 id="cryptoDetailSymbol">—</h2><span id="cryptoDetailPair">/USDT</span></div>
   </div>
   <div id="cryptoDetailContent">
@@ -684,56 +707,10 @@
       <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuLegal')"><span><b>YASAL & HUKUKİ</b><small>Gizlilik, KVKK, onaylar ve yasal metinler</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuApiKeys')"><span><b>API YÖNETİMİ</b><small>Anahtarlar ve veri kaynakları</small></span><i>→</i></button></div>
       <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuRolePreview')"><span><b>👁 KULLANICI GÖRÜNÜMÜ</b><small>Admin rol önizleme aracı</small></span><i>→</i></button></div>
-      <div class="menu-nav-card" data-admin-only hidden><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuAdMob');renderAdMobPanel()"><span><b>📢 ADMOB YÖNETİMİ</b><small>Denetim, app-ads.txt, analitik</small></span><i>→</i></button></div>
     </div>
   </section>
 
-  <section class="menu-view menu-subpage" id="menuAdMob" data-menu-parent="menuSettingsHub" hidden>
-    <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>YÖNETİCİ</small><h2>ADMOB YÖNETİMİ</h2></div><span></span></div>
-    <div class="menu-form-card" data-admin-only hidden>
-      <div class="section-title">HESAP DENETİM &amp; KONTROL LİSTESİ</div>
-      <div id="admobAudit" class="admob-audit">Yükleniyor…</div>
-      <div class="section-title">ORTAM &amp; YAPILANDIRMA</div>
-      <div id="admobEnvBar" class="admob-env-bar"></div>
-      <div class="field"><label for="admobPubInput">Yayıncı Kimliği (pub-XXXXXXXXXXXX)</label><input id="admobPubInput" type="text" autocomplete="off" spellcheck="false" placeholder="pub-XXXXXXXXXXXXXXXX"></div>
-      <div class="field"><label for="admobBundleInput">Uygulama Bundle ID</label><input id="admobBundleInput" type="text" autocomplete="off" spellcheck="false" placeholder="com.stksz.app"></div>
-      <div class="field"><label for="admobBannerCfg">ADMOB_BANNER_ID (production)</label><input id="admobBannerCfg" type="text" autocomplete="off" spellcheck="false" placeholder="ca-app-pub-..."></div>
-      <div class="toolbar"><button type="button" class="btn primary" onclick="saveAdmobConfig()">YAPILANDIRMAYI KAYDET</button></div>
-      <div class="section-title">app-ads.txt PİPLİN</div>
-      <div id="appAdsBlock" class="admob-appads"></div>
-      <div class="toolbar"><button type="button" class="btn small" onclick="runAppAdsVerification()">app-ads.txt DOĞRULA</button></div>
-      <div id="appAdsVerify" class="provider-test-state">Doğrulama yapılmadı.</div>
-      <div class="section-title">ANALİTİK STUBLARI (SAHTE RAKAM ÜRETMEZ)</div>
-      <div id="admobReporting" class="admob-reporting"></div>
-      <div class="section-title">REKLAM YERLEŞİM KURALLARI</div>
-      <p class="help">Reklamlar uygulama butonlarına BENZEMEZ, gezinmeyi engellemez ve finansal işlem formlarını tıkamaz. Bölümlü kilit tarzı yerleşim yoktur; doğal alt reklam yuvası + kontrollü geçiş arası kullanılır. STKSZ AI yalnız senaryo üretir (yatırım tavsiyesi değildir) — bu, AdMob finans politikasına uyum sağlar.</p>
-      <div class="section-title">FEATURE FLAG KONTROLLERİ (ANLIK)</div>
-      <div id="admobFlagGrid" class="admob-flag-grid"></div>
-      <div class="section-title">ROL TESTİ (GÖRÜNÜM MODU — DB ROLÜ DEĞİŞMEZ)</div>
-      <div class="pd-role-grid" id="admobRoleGrid">
-        <button type="button" class="btn pd-role-btn" onclick="testAdRole('guest')">GUEST</button>
-        <button type="button" class="btn pd-role-btn" onclick="testAdRole('free')">FREE</button>
-        <button type="button" class="btn pd-role-btn" onclick="testAdRole('pro')">PRO</button>
-        <button type="button" class="btn pd-role-btn" onclick="testAdRole('elite')">ELITE</button>
-        <button type="button" class="btn pd-role-btn pd-role-admin" onclick="testAdRole('admin')">ADMIN (Reklamsız)</button>
-      </div>
-      <div id="admobRoleResult" class="provider-test-state" style="margin-top:10px">Bir rol seçin…</div>
-      <div class="section-title">STORE BÜTÜNLÜĞÜ (Item 26)</div>
-      <div id="admobStoreIntegrity" class="admob-audit"></div>
-      <div class="field"><label for="admobDomainInput">Geliştirici Web Alanı + Gizlilik + Destek (https)</label><input id="admobDomainInput" type="text" autocomplete="off" spellcheck="false" placeholder="https://stksz.com · https://stksz.com/privacy · https://stksz.com/support"></div>
-      <div class="section-title">GİZLİLİK &amp; YASAL KAPSAM (Item 27)</div>
-      <div id="admobPrivacyCoverage" class="admob-audit"></div>
-      <div class="section-title">POLİCY CENTER DİAGNOSTİĞİ (Item 28)</div>
-      <div id="admobPolicyDiag" class="admob-audit">Yükleniyor…</div>
-      <div class="toolbar"><button type="button" class="btn small" onclick="logAdPolicyTest()">POLİCY OLAYI KAYDET</button><button type="button" class="btn small" onclick="clearAdPolicyDiagUI()">TEMİZLE</button></div>
-    </div>
-    <div class="menu-form-card" data-non-admin-note>
-      <div class="section-title">SİSTEM DURUMU</div>
-      <div class="source-fact">AdMob yapılandırması yalnızca yönetici tarafından yönetilir.</div>
-    </div>
-  </section>
-
-  <section class="menu-view menu-subpage" id="menuRolePreview" data-menu-parent="menuSettingsHub" hidden>
+<section class="menu-view menu-subpage" id="menuRolePreview" data-menu-parent="menuSettingsHub" hidden>
     <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>YÖNETİCİ</small><h2>KULLANICI GÖRÜNÜMÜ</h2></div><span></span></div>
     <div class="menu-form-card" data-admin-only hidden>
       <div class="section-title">ROL ÖNİZLEME MODU</div>
@@ -1287,13 +1264,6 @@
   </section>
 </section>
 </main>
-
-<div id="adBanner" class="ad-banner" hidden>
-  <div class="ad-banner-inner">
-    <div class="ad-banner-content"><span class="ad-banner-tag">REKLAM</span><span class="ad-banner-text">STKSZ ile yatırımlarını takip et</span></div>
-    <button type="button" class="ad-banner-upgrade" onclick="openBadgeShop()">Reklamları Kaldır (Pro Trader) →</button>
-  </div>
-</div>
 
 <nav class="nav" aria-label="Ana navigasyon">
   <button type="button" class="active" data-page="home" aria-current="page" aria-controls="page-home" onclick="showPage('home',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span><span class="nav-label">Ana Sayfa</span></button>
@@ -2106,7 +2076,15 @@ function filterOutlierCandles(rows,getClose){
  if(!median)return rows;
  return rows.filter(row=>{const c=getClose(row);return Number.isFinite(c)&&c>median*0.4&&c<median*2.5;});
 }
+function isCryptoSymbol(symbol){const clean=String(symbol||"").toUpperCase();return cryptoPriceCache.some(c=>c.symbol===clean);}
 function stkszCandlesFor(symbol){
+ if(isCryptoSymbol(symbol)){
+  /* Kripto: Binance mumları (cryptoCandles) doğrudan STKSZ grafik/editor motoruna beslenir.
+     Veri kaynağı değişmez — hâlâ Binance; dönüşüm yalnız kline → STKSZ mum biçimi. */
+  const k=cryptoCandles[symbol];
+  if(Array.isArray(k)&&k.length)return filterOutlierCandles(k,row=>parseFloat(row[4])).map(row=>({t:Number(row[0])||Date.now(),o:parseFloat(row[1]),h:parseFloat(row[2]),l:parseFloat(row[3]),c:parseFloat(row[4])||0,v:parseFloat(row[5])||0})).filter(candle=>Number.isFinite(candle.c)&&candle.c>0);
+  return [];
+ }
  const asset=data.assets.find(a=>a.s===symbol);
  const hist=(asset?.history||[]).slice().reverse(); // eski→yeni
  const rows=hist.filter(h=>finite(h.close)!==null);
@@ -2120,9 +2098,9 @@ function initStkszChartPanel(symbol){
  stkszChartInstance.resize();
  const candles=stkszCandlesFor(stkszChartSymbol);
  stkszChartInstance.setData(candles);
- setText("stkszChartStatus",candles.length?`${candles.length} günlük yerel kayıt çizildi · Kaynak: ${data.assets.find(a=>a.s===stkszChartSymbol)?.marketProvider||"yerel"} · Tekerlek/iki parmak: zoom, sürükle: kaydır.`:"Yerel geçmiş yok. Fiyat geçmişi otomatik çekiliyor…");
+ setText("stkszChartStatus",candles.length?`${candles.length} kayıt çizildi · Kaynak: ${isCryptoSymbol(stkszChartSymbol)?"Binance (1h mum)":(data.assets.find(a=>a.s===stkszChartSymbol)?.marketProvider||"yerel")} · Tekerlek/iki parmak: zoom, sürükle: kaydır.`:"Veri yok. Fiyat geçmişi otomatik çekiliyor…");
  /* v115: geçmiş otomatik çekilir — yerel kayıt yoksa veya son mum 24 saatten eskiyse (kullanıcı isteği: "geçmişi çek otomatik olsun"). Buton manuel yenileme için durur. */
- try{const first=Date.parse(candles[0]?.date||""),last=Date.parse(candles[candles.length-1]?.date||"");const latestDate=Math.max(Number.isFinite(first)?first:-Infinity,Number.isFinite(last)?last:-Infinity);const stale=!candles.length||!Number.isFinite(latestDate)||latestDate===-Infinity||Date.now()-latestDate>24*60*60*1000;if(stale&&/^[A-Z0-9ÇĞİÖŞÜ.]{2,12}$/.test(stkszChartSymbol))setTimeout(()=>{try{stkszChartFetchHistory(stkszChartSymbol);}catch(error){}},250);}catch(error){}
+ try{const first=Date.parse(candles[0]?.date||""),last=Date.parse(candles[candles.length-1]?.date||"");const latestDate=Math.max(Number.isFinite(first)?first:-Infinity,Number.isFinite(last)?last:-Infinity);const stale=!candles.length||!Number.isFinite(latestDate)||latestDate===-Infinity||Date.now()-latestDate>24*60*60*1000;if(stale&&!isCryptoSymbol(stkszChartSymbol)&&/^[A-Z0-9ÇĞİÖŞÜ.]{2,12}$/.test(stkszChartSymbol))setTimeout(()=>{try{stkszChartFetchHistory(stkszChartSymbol);}catch(error){}},250);}catch(error){}
  const body=document.getElementById("assetDetailBody");if(!body)return;
  new ResizeObserver(()=>stkszChartInstance&&stkszChartInstance.resize()).observe(canvas.parentElement);
  body.querySelectorAll(".chart-tool[data-tool]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -2164,6 +2142,18 @@ function stkszEditorRun(){
 }
 async function stkszChartFetchHistory(symbol){
  const status=document.getElementById("stkszChartStatus");
+ /* Kripto: geçmiş Binance'ten çekilir (bistProvider kripto bilmez). */
+ if(isCryptoSymbol(symbol)){
+  if(status)status.textContent="Binance mumları çekiliyor…";
+  try{
+   await loadCryptoCandles(symbol);
+   const candles=stkszCandlesFor(symbol);
+   stkszChartInstance.setData(candles);
+   if(status)status.textContent= candles.length?`✅ ${candles.length} saatlik Binance mumu yüklendi · Kaynak: Binance (${symbol}/USDT).`:"❌ Binance verisi alınamadı.";
+   if(stkszEditorScripts[symbol]){try{stkszChartInstance.setOverlay(STKSZChart.runStkszScript(stkszEditorScripts[symbol],candles));}catch(e){}}
+  }catch(error){if(status)status.textContent="❌ Binance verisi alınamadı: "+providerErrorText(error);}
+  return;
+ }
  if(status)status.textContent="Fiyat geçmişi API'den çekiliyor…";
  try{
   const provider=bistProvider;
@@ -2333,7 +2323,17 @@ function attachAssetDetailSwipe(){
   page.addEventListener("touchmove",event=>{if(startX===null)return;const dx=event.touches[0].clientX-startX,dy=event.touches[0].clientY-startY;if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.2){event.preventDefault();}},{passive:false});
   page.addEventListener("touchend",event=>{if(startX===null)return;const dx=event.changedTouches[0].clientX-startX,dy=event.changedTouches[0].clientY-startY;startX=null;startY=null;if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.2)return;assetDetailNav(dx<0?1:-1);},{passive:true});
 }
-function closeAssetDetail(){const page=document.getElementById("assetDetailPage");if(!page||page.hidden)return;page.hidden=true;unlockBodyScroll();}
+function closeAssetDetail(){
+ const page=document.getElementById("assetDetailPage");if(!page||page.hidden)return;
+ page.hidden=true;unlockBodyScroll();
+ if(assetDetailFromCrypto){
+  assetDetailFromCrypto=false;
+  page.classList.remove("asset-detail-crypto-open");
+  /* Editörden geri → kripto detay ekranına dönülür. */
+  const idx=cryptoDetailIdx;const c=cryptoPriceCache[idx];
+  if(c){try{openCryptoDetail(idx,{skipEditor:true});}catch(error){}}
+ }
+}
 /* Portföy kartından tam detay sayfası: sembole göre varlığı bulur ve detayını açar.
    v144/M11: gezinilebilir kart listesi — tüm Midas varlıkları currentAssetResults'a yüklenir,
    böylece ok/kaydırma ile önceki/sonraki varlığa geçilebilir. */
@@ -3235,7 +3235,7 @@ function connectCryptoWs(){
 function disconnectCryptoWs(){if(cryptoWs){try{cryptoWs.close();}catch(err){}cryptoWs=null;}if(cryptoWsReconnectTimer){clearTimeout(cryptoWsReconnectTimer);cryptoWsReconnectTimer=null;}}
 /* ---- KRİPTO DETAY ---- */
 let cryptoDetailIdx=null;
-function openCryptoDetail(idx){
+function openCryptoDetail(idx,opts){
  try{
   const c=cryptoPriceCache[idx];if(!c)return;
   cryptoDetailIdx=idx;
@@ -3252,9 +3252,16 @@ function openCryptoDetail(idx){
   d.classList.add("active");
    drawCryptoChart(c);
    computeCryptoIndicators(c);
-   loadCryptoCandles(c.symbol).then(()=>{if(cryptoDetailIdx!==null&&cryptoPriceCache[cryptoDetailIdx]?.symbol===c.symbol){computeCryptoIndicators(c);drawCryptoChart(c);}}).catch(()=>{});
-   connectDepthWs(c.symbol);
-   window.scrollTo(0,0);
+loadCryptoCandles(c.symbol).then(()=>{
+     if(cryptoDetailIdx!==null&&cryptoPriceCache[cryptoDetailIdx]?.symbol===c.symbol){
+      computeCryptoIndicators(c);drawCryptoChart(c);
+      /* Kripto seçimi akışı: detay/grafik → STKSZ EDITOR otomatik açılır (geri dönüşte detay → liste).
+         Editörden dönüşte (skipEditor) kullanıcı detay ekranında kalır, editör yeniden açılmaz. */
+      if(!(opts&&opts.skipEditor))openCryptoStkszEditor(cryptoDetailIdx);
+     }
+    }).catch(()=>{});
+    connectDepthWs(c.symbol);
+    window.scrollTo(0,0);
  }catch(error){/* M16: detay açılışında oluşacak hata beyaz ekran üretmesin */}
 }
 function closeCryptoDetail(){
@@ -3263,6 +3270,34 @@ function closeCryptoDetail(){
  document.getElementById("page-crypto-detail").hidden=true;
  document.getElementById("page-crypto").hidden=false;
  showPage('crypto',document.querySelector('[data-page="crypto"]'));
+}
+/* ---- Kripto → STKSZ EDITOR (kullanıcı isteği: kripto grafiği + mevcut STKSZ analiz/editör sistemi) ----
+   Mevcut asset detail sayfası yeniden kullanılır: stkszChartPanelHtml + stksz editor motoru aynı kalır;
+   yalnız veri kaynağı Binance (stkszCandlesFor kripto dalı). Geri dönüş: editör → crypto detay → liste. */
+let assetDetailFromCrypto=false;
+async function openCryptoStkszEditor(idx){
+ try{
+  const c=cryptoPriceCache[Number(idx)];if(!c)return;
+  const page=document.getElementById("assetDetailPage"),body=document.getElementById("assetDetailBody");
+  if(!page||!body)return;
+  await loadCryptoCandles(c.symbol);
+  if(cryptoDetailIdx!==(Number(idx))||cryptoPriceCache[Number(idx)]?.symbol!==c.symbol)return;
+  /* Editör açıkken varlık ok/kaydırma ve bildirim butonu gizlenir (kripto tek varlıklı görünüm). */
+  assetDetailFromCrypto=true;
+  page.classList.add("asset-detail-crypto-open");
+  setText("assetDetailName",c.symbol);
+  setText("assetDetailSymbol",c.symbol);
+  setText("assetDetailKind","KRİPTO");
+  const priceBox=document.getElementById("assetDetailPriceBox");if(priceBox)priceBox.hidden=true;
+  body.innerHTML=stkszChartPanelHtml(c.symbol);
+  const panel=body.querySelector(".stksz-chart-panel");
+  if(panel){const head=panel.querySelector(".tv-panel-head");if(head)head.insertAdjacentHTML("beforeend",'<div class="tv-actions-extra"><span class="label">Binance · '+esc(c.symbol)+'/USDT</span></div>');}
+  page.hidden=false;
+  lockBodyScroll();
+  requestAnimationFrame(()=>initStkszChartPanel(c.symbol));
+  const zone=document.getElementById("stkszEditorZone");
+  if(zone){zone.hidden=false;const ta=document.getElementById("stkszEditorCode");if(ta&&!ta.value)ta.value=stkszEditorScripts[c.symbol]||stkszEditorScripts["*"]||STKSZ_EDITOR_DEFAULT;}
+ }catch(error){/* M16: kripto editör açılışı UI'ı bozmaz */}
 }
 function drawCryptoChart(c){
  try{
@@ -3398,174 +3433,6 @@ function openCryptoTrade(side){
  if(isGuest()){showToast("İşlem için hesap gerekli. Menü → Profil'den giriş yapın.");return;}
  const symbol=c.symbol+"USDT";
  openVwTrade(side,symbol);
-}
-/* ---- Alt Bar Reklam Alanı (Google AdMob) ---- */
-/* M61: merkezi yapılandırma — production kimliği yalnız yapılandırmadan gelir;
-   development/staging istisnasız TEST kimliği kullanır. */
-const ADMOB_FALLBACK_BANNER_ID="ca-app-pub-4377559428015852/9827923519";
-let showAds=true;
-let admobInitialized=false;
-let admobBannerVisible=false;
-function admobEnv(){const h=(typeof location!=="undefined"&&location.hostname)||"";if(!h||h==="localhost"||h==="127.0.0.1"||(typeof location!=="undefined"&&location.protocol==="file:"))return "development";return "production";}
-function admobUserConfig(){try{return safeJson(storageGet("stkszAdmobConfig"),{})||{};}catch(e){return {};}}
-function admobSnapshot(){const de=window.STKSZDataEngine;return de?de.admobConfigSnapshot(admobEnv(),admobUserConfig()):null;}
-function admobBannerId(){const de=window.STKSZDataEngine;if(!de)return ADMOB_FALLBACK_BANNER_ID;const r=de.resolveAdIds(admobEnv(),admobUserConfig());return r.ids.ADMOB_BANNER_ID||ADMOB_FALLBACK_BANNER_ID;}
-function admobTestMode(){return admobEnv()!=="production";}
-async function initAdMob(){
- if(admobInitialized)return;
- try{
-  const {AdMob}=Capacitor.Plugins;
-  if(!AdMob)return;
-  await AdMob.trackingAuthorizationStatus();
-  await AdMob.initialize({initializeForTesting:admobTestMode()});
-  admobInitialized=true;
- }catch(e){admobInitialized=false;}
-}
-async function showAdMobBanner(){
- if(!showAds)return;
- if(!admobInitialized){try{await initAdMob();}catch(e){}}
- if(!admobInitialized)return;
- try{
-  const {AdMob}=Capacitor.Plugins;
-  await AdMob.showBanner({
-   adId:admobBannerId(),
-   adSize:"ADAPTIVE_BANNER",
-   position:"bottom",
-   isTesting:admobTestMode()
-  });
-  admobBannerVisible=true;
-  document.body.classList.add("admob-active");
- }catch(e){
-  /* Item 24/28: yükleme hatası UI akışını engellemez; yuva zarif kapanır ve
-     olay Policy Center diagnostik defterine kaydedilir (rastgele değişiklik yok). */
-  admobBannerVisible=false;
-  document.body.classList.remove("admob-active");
-  try{window.STKSZDataEngine&&STKSZDataEngine.logAdPolicyEvent('admob_load_failure',(e&&e.message)||'banner yüklenemedi');}catch(_){}
- }
-}
-async function hideAdMobBanner(){
- try{
-  const {AdMob}=Capacitor.Plugins;
-  if(admobBannerVisible){await AdMob.hideBanner();admobBannerVisible=false;}
-  document.body.classList.remove("admob-active");
- }catch(e){}
-}
-function updateAdBanner(){
- const de=window.STKSZDataEngine;
- if(de){
-  /* M60 rol + M61/M61f kapısı (feature_ads*, pro/elite ad-free, birim bazlı) */
-  const g=de.adsUnitPlan(effectiveRole(), de.featureFlags());
-  showAds=Boolean(g&&g.show&&g.units.banner);
- }else{
-  const eng=window.STKSZAIEngine;
-  const hasAnyBadge=eng?.entitlements?.badges()?.some(b=>["STKSZ_PRO","STKSZ_ELITE"].includes(b.id));
-  showAds=!hasAnyBadge;
- }
- /* Web/PWA fallback banner: yükleme hatası / kapatma durumunda yuva zarif gizlenir */
- const banner=document.getElementById("adBanner");
- if(banner){banner.hidden=!showAds;if(!showAds){banner.remove();}}
- /* Native AdMob banner (Capacitor) */
- if(showAds){setTimeout(()=>{showAdMobBanner().catch(()=>{});},800);}
- else{hideAdMobBanner();}
-}
-/* ---- M61: Yönetici AdMob paneli (denetim + app-ads.txt + analitik) ---- */
-function admobDomainRoot(){try{const h=location.hostname||"";return (h&&h!=="localhost"&&h!=="127.0.0.1"&&location.protocol!=="file:")?"https://"+h:"";}catch(e){return "";}}
-function renderAdMobPanel(){
- const de=window.STKSZDataEngine;if(!de)return;
- const cfg=admobUserConfig();
- const audit=de.admobAudit({env:admobEnv(),publisherId:document.getElementById("admobPubInput")?.value||cfg.publisherId||"",bundleId:document.getElementById("admobBundleInput")?.value||cfg.bundleId||"",paymentProfile:true,appAdsTxtVerified:false,mediationReady:false});
- const auditEl=document.getElementById("admobAudit");if(auditEl){auditEl.innerHTML=`<div class="admob-audit-score">${audit.score}/100</div>`+audit.items.map(i=>`<div class="admob-audit-item ${i.ok?"ok":"warn"}"><span>${i.ok?"✔":"•"}</span>${esc(i.label)}<small>${esc(i.detail)}</small></div>`).join("");}
- const envEl=document.getElementById("admobEnvBar");if(envEl){const s=admobSnapshot();envEl.innerHTML=`<b>${esc(admobEnv().toUpperCase())}</b><span>${s?s.note:""}</span>`;}
- const adsEl=document.getElementById("appAdsBlock");if(adsEl){const domain=admobDomainRoot();const pub=document.getElementById("admobPubInput")?.value||cfg.publisherId||"";const built=de.buildAppAdsTxt(pub,[]);adsEl.innerHTML=built.ok?`<code>${esc(built.lines[0])}</code><small>${esc(domain?domain+"/app-ads.txt":"Kök alan yalnızca canlı (file:// değil) ortamda doğrulanır")}</small>`:`<small>${esc(built.error||"Yayıncı kimliği bekleniyor")}</small>`;}
- const repEl=document.getElementById("admobReporting");if(repEl){const r=de.admobReportingStubs();repEl.innerHTML=`<small>${esc(r.note)}</small><div class="admob-rep-grid"><span>Tahmini gelir: <b>${r.metrics.estimatedRevenue===null?"—":r.metrics.estimatedRevenue}</b></span><span>Gösterim: <b>${r.metrics.impressions===null?"—":r.metrics.impressions}</b></span><span>Tıklama: <b>${r.metrics.clicks===null?"—":r.metrics.clicks}</b></span><span>CTR: <b>${r.metrics.ctr===null?"—":r.metrics.ctr}</b></span><span>eCPM: <b>${r.metrics.ecpm===null?"—":r.metrics.ecpm}</b></span><span>Doluluk: <b>${r.metrics.fillRate===null?"—":r.metrics.fillRate}</b></span></div>`;}
-  /* prefill inputs */
-  const b=document.getElementById("admobBannerCfg");if(b&&!b.value)b.value=cfg.ADMOB_BANNER_ID||"";
-  const p=document.getElementById("admobPubInput");if(p&&!p.value)p.value=cfg.publisherId||"";
-  const bu=document.getElementById("admobBundleInput");if(bu&&!bu.value)bu.value=cfg.bundleId||"";
-  renderAdmobFlagGrid();
-  renderAdmobStoreIntegrity();
-  renderAdmobPrivacyCoverage();
-  renderAdmobPolicyDiag();
-}
-function saveAdmobConfig(){
- const de=window.STKSZDataEngine;if(!de)return;
- const cfg=admobUserConfig();
- cfg.publisherId=document.getElementById("admobPubInput")?.value.trim()||"";
- cfg.bundleId=document.getElementById("admobBundleInput")?.value.trim()||"";
- cfg.ADMOB_BANNER_ID=document.getElementById("admobBannerCfg")?.value.trim()||"";
- const dom=document.getElementById("admobDomainInput")?.value.trim().split(/\s+/).filter(Boolean)||[];
- if(dom.length>=1)cfg.developerDomain=dom[0];
- if(dom.length>=2)cfg.privacyUrl=dom[1];
- if(dom.length>=3)cfg.supportUrl=dom[2];
- storageSet("stkszAdmobConfig",JSON.stringify(cfg));
- showToast("AdMob & store yapılandırması kaydedildi.");
- renderAdMobPanel();renderAdmobStoreIntegrity();updateAdBanner();
-}
-async function runAppAdsVerification(){
- const de=window.STKSZDataEngine;if(!de)return;
- const out=document.getElementById("appAdsVerify");if(!out)return;
- const domain=admobDomainRoot();
- const pub=document.getElementById("admobPubInput")?.value.trim()||admobUserConfig().publisherId||"";
- if(!domain){out.innerHTML="<span style='color:#e0a06a'>Kök alan yalnızca canlı HTTPS ortamında doğrulanır (file:// doğrulanamaz).</span>";return;}
- if(!pub){out.innerHTML="<span style='color:#e0a06a'>Önce yayıncı kimliği girin.</span>";return;}
- out.innerHTML="Doğrulanıyor…";
- try{
-  const r=await de.verifyAppAdsTxt(domain,pub);
-  out.innerHTML=r.ok
-   ?"<span style='color:#99e9b7'>✔ app-ads.txt doğrulandı (HTTP 200, kök yol, SSL, biçim, yönlendirme, robots).</span>"
-   :(r.error?"<span style='color:#e0a06a'>"+esc(r.error)+"</span>":"<span style='color:#e0a06a'>Doğrulama başarısız: "+(r.checks?Object.entries(r.checks).filter(([k,v])=>v===false).map(([k])=>k).join(", "):"ağ")+"</span>");
-  }catch(e){out.innerHTML="<span style='color:#e0a06a'>Doğrulama hatası.</span>";}
-}
-/* ---- M61f (Item 20/21/22/26/27/28): anlık flag, rol testi, store, gizlilik, politika ---- */
-const ADMob_FLAG_ITEMS=[["feature_ads","Reklam (Global)"],["feature_ads_free_user","Free & Guest"],["feature_ads_banner","Banner"],["feature_ads_interstitial","Interstitial"],["feature_ads_native","Native"],["feature_ads_mediation","Mediation/Bidding"],["feature_ads_pro_free","PRO Üst Katman (Reklamlı)"],["feature_ads_elite_free","ELITE Üst Katman (Reklamlı)"]];
-function renderAdmobFlagGrid(){
- const de=window.STKSZDataEngine;const el=document.getElementById("admobFlagGrid");if(!de||!el)return;
- const flags=de.featureFlags();
- el.innerHTML=ADMob_FLAG_ITEMS.map(([k,label])=>`<button type="button" class="admob-flag-btn ${flags[k]?"on":""}" onclick="toggleAdFlag('${k}')"><span>${esc(label)}</span><b>${flags[k]?"AÇIK":"KAPALI"}</b></button>`).join("");
-}
-function toggleAdFlag(name){
- const de=window.STKSZDataEngine;if(!de)return;
- de.setFeatureFlag(name,!de.featureFlags()[name]);
- renderAdmobFlagGrid();updateAdBanner();
- showToast("Flag güncellendi: "+name);
-}
-function testAdRole(role){
- const de=window.STKSZDataEngine;const out=document.getElementById("admobRoleResult");if(!de||!out)return;
- const plan=de.adsUnitPlan(role,de.featureFlags());
- out.innerHTML="<b>"+esc(String(role).toUpperCase())+"</b> — "+(plan.show?"Reklam gösterilir":"Reklam YOK")+
-  "<br><small>Gerekçe: "+esc(plan.reason)+"</small>"+
-  "<br><small>Banner: "+(plan.units.banner?"✔":"–")+" · Interstitial: "+(plan.units.interstitial?"✔":"–")+" · Native: "+(plan.units.native?"✔":"–")+" · Mediation: "+(plan.mediation?"✔":"–")+"</small>"+
-  "<br><small>ENR/rozet imtiyazı koruması: "+(plan.entitlementOk?"uyumlu":"üst katman kapalı")+"</small>";
-}
-function renderAdmobStoreIntegrity(){
- const de=window.STKSZDataEngine;const el=document.getElementById("admobStoreIntegrity");if(!de||!el)return;
- const cfg=admobUserConfig();
- const c=de.storeIntegrityCheck({bundleId:cfg.bundleId||document.getElementById("admobBundleInput")?.value||"",appName:"STKSZ Capital",developerDomain:cfg.developerDomain||"",privacyUrl:cfg.privacyUrl||"",supportUrl:cfg.supportUrl||""});
- el.innerHTML=`<div class="admob-audit-score">${c.score}/100</div>`+c.items.map(i=>`<div class="admob-audit-item ${i.ok?"ok":"warn"}"><span>${i.ok?"✔":"•"}</span>${esc(i.label)}<small>${esc(i.detail)}</small></div>`).join("")+`<small>${esc(c.note)}</small>`;
-}
-function renderAdmobPrivacyCoverage(){
- const de=window.STKSZDataEngine;const el=document.getElementById("admobPrivacyCoverage");if(!de||!el)return;
- const c=de.privacyCoverageCheck();
- el.innerHTML=c.coverages.map(i=>`<div class="admob-audit-item ${i.ok?"ok":"warn"}"><span>${i.ok?"✔":"•"}</span>${esc(i.label)}<small>${esc(i.detail)}</small></div>`).join("");
-}
-function renderAdmobPolicyDiag(){
- const de=window.STKSZDataEngine;const el=document.getElementById("admobPolicyDiag");if(!de||!el)return;
- const s=de.adPolicyStatus();
- if(!s.count){el.innerHTML="<div class='admob-audit-item ok'><span>✔</span>Politika olayı kaydı yok — temiz.</div>";return;}
- el.innerHTML="<div class='admob-audit-score' style='font-size:16px'>"+s.count+" olay</div>"+
-  Object.entries(s.events).map(([e,c])=>`<div class="admob-audit-item warn"><span>•</span>${esc(e)}<small>${c} kez</small></div>`).join("")+
-  s.recent.slice(0,5).map(r=>`<div class="admob-audit-item"><span>·</span><small>${esc(r.ts)} · ${esc(r.event)}</small></div>`).join("");
-}
-function logAdPolicyTest(){
- const de=window.STKSZDataEngine;if(!de)return;
- de.logAdPolicyEvent('policy_manual_test','Test girişi — işlem gerekmez; yalnız diagnostik defteri.');
- renderAdmobPolicyDiag();
- showToast("Politika olayı kaydedildi.");
-}
-function clearAdPolicyDiagUI(){
- const de=window.STKSZDataEngine;if(!de)return;
- de.clearAdPolicyDiag();renderAdmobPolicyDiag();
- showToast("Politika diagnostik defteri temizlendi.");
 }
 /* ---- MODULE 62: Rapor Sistemi (portföy + piyasa + AI sentez + dışa aktar) ---- */
 let lastReportData=null; /* son üretilen rapor (text/html dışa aktarım için) */
@@ -3767,7 +3634,6 @@ function renderAdminPanelVisibility(){
  document.querySelectorAll("[data-elite-locked]").forEach(el=>{el.hidden=editorAccess;});
  applyGuestMode();
  try{updateHeaderInvestorChip();}catch(e){}
- try{updateAdBanner();}catch(e){}
  try{renderLockedFeatures();}catch(e){}
 }
 /* ---- Misafir modu: menü kartları üzerinde overlay + kilit ---- */
@@ -4919,11 +4785,32 @@ function renderAuthGate(){
   return;
  }
  gate.hidden=isAuthed();
- if(!isAuthed()){document.getElementById("authChoices").hidden=false;document.getElementById("authBiometric").hidden=true;const err=document.getElementById("authLoginError");if(err)err.hidden=true;const wrap=document.getElementById("authUserFormWrap");if(wrap)wrap.hidden=true;}
+ if(!isAuthed()){document.getElementById("authChoices").hidden=false;document.getElementById("authBiometric").hidden=true;const err=document.getElementById("authLoginError");if(err)err.hidden=true;const rerr=document.getElementById("authRegisterError");if(rerr)rerr.hidden=true;const wrap=document.getElementById("authUserFormWrap");if(wrap)wrap.hidden=true;const rwrap=document.getElementById("authRegisterFormWrap");if(rwrap)rwrap.hidden=true;}
 }
 function authRegister(provider){
  const label={google:"Google",apple:"Apple"}[provider]||provider;
- showToast(label+" ile giriş için OAuth yapılandırması gerekli (Client ID / Services ID). Şu anda \"Kullanıcı ile devam et\" seçeneğiyle giriş yapın.");
+ showToast(label+" ile kayıt/giriş için OAuth yapılandırması gerekli (Client ID / Services ID). Şu anda \"Hesap oluştur\" veya \"Kullanıcı adı + şifre\" seçenekleriyle devam edin.");
+}
+function toggleAuthRegisterForm(){const wrap=document.getElementById("authRegisterFormWrap");if(!wrap)return;const opening=wrap.hidden;wrap.hidden=!opening;if(opening){const first=wrap.querySelector("input");if(first)first.focus();}}
+async function authRegisterWithPassword(){
+ if(!authReady){showToast("Sistem yükleniyor, lütfen bekleyin...");return;}
+ const username=(document.getElementById("authRegUsername")?.value||"").trim().toLowerCase();
+ const password=document.getElementById("authRegPassword")?.value||"";
+ const password2=document.getElementById("authRegPassword2")?.value||"";
+ const errEl=document.getElementById("authRegisterError");
+ if(errEl)errEl.hidden=true;
+ if(username.length<3||!/^[a-z0-9_.-]+$/.test(username)){if(errEl){errEl.textContent="Kullanıcı adı en az 3 karakter olmalı; yalnız harf, sayı, nokta ve kısa çizgi kullanın.";errEl.hidden=false;}return;}
+ if(password.length<6){if(errEl){errEl.textContent="Şifre en az 6 karakter olmalı.";errEl.hidden=false;}return;}
+ if(password!==password2){if(errEl){errEl.textContent="Şifreler eşleşmiyor.";errEl.hidden=false;}return;}
+ const users=getUsers();
+ if(users[username]){if(errEl){errEl.textContent="Bu kullanıcı adı zaten kayıtlı. Lütfen \"Kullanıcı GİRİŞİ\" bölümünden giriş yapın.";errEl.hidden=false;}return;}
+ const hash=await hashPassword(password);
+ users[username]={passwordHash:hash,displayName:username,email:"",createdAt:nowTr(),provider:"local"};
+ saveUsers(users);
+ authState={mode:"account",provider:"password",username,email:"",name:username,createdAt:users[username].createdAt,quickLock:false};
+ authPersist();renderAuthGate();renderProfileAuth();try{renderAdminPanelVisibility();}catch(e){}
+ showToast("Hesap oluşturuldu. Hoş geldin, "+username+"!");
+ setTimeout(offerBiometricSetup,600);
 }
 async function authLoginWithPassword(){
  if(!authReady){showToast("Sistem yükleniyor, lütfen bekleyin...");return;}
