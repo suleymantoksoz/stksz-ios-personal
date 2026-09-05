@@ -113,6 +113,11 @@ main{max-width:1080px;margin:auto;padding:22px 18px}
 .legal-modal .modal-body{overflow:auto;max-height:calc(95vh - 100px)}
 .legal-modal h3{font-size:18px;margin-bottom:8px;color:#B87333}
 .legal-modal .consent-toggles{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.audit-block{background:#070a0b;border:1px solid #29343a;border-radius:10px;padding:12px 14px;margin:12px 0;line-height:1.55}
+.audit-block b{color:#B87333;display:block;margin-bottom:6px;font-size:13px}
+.audit-block ul{margin:0;padding-left:18px}
+.audit-block li{margin-bottom:4px;font-size:13px}
+.audit-block em{color:#9aa5ab}
 .consent-toggle{display:flex;align-items:center;gap:10px;padding:12px;background:#070a0b;border:1px solid #29343a;border-radius:10px;cursor:pointer}
 .consent-toggle input[type="checkbox"]{width:20px;height:20px;accent-color:#B87333}
 .gdpr-rights-list{list-style:none;padding:0;margin:12px 0}

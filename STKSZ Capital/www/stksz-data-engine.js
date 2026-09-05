@@ -430,6 +430,23 @@
     'paytr': { id: 'paytr', name: 'PayTR', kind: 'card', status: 'active', config: { currency: 'TRY', minAmount: 1 } },
     'paypal': { id: 'paypal', name: 'PayPal', kind: 'wallet', status: 'inactive', config: { currency: 'USD', minAmount: 1 } }
   });
+  /* Telegram ödeme sağlayıcı eylemleri — yalnız durum/durum dışı yanıt döner; ödeme akışı backend onaylıdır.
+     Yerel cihazda sağlayıcı yapılandırması yoktur ve uygulama asla sahte başarı üretmez. */
+  function telegramPaymentProviderStatus() {
+    return { available: false, configured: false, providers: Object.keys(TELEGRAM_PAYMENT_PROVIDERS), reason: 'Telegram ödeme sağlayıcısı yapılandırılmadı.' };
+  }
+  function telegramSelectProvider() {
+    return { ok: false, error: 'Ödeme sağlayıcısı seçimi yalnız backend üzerinden yapılır.' };
+  }
+  function telegramInitiateInvoice() {
+    return { ok: false, error: 'Fatura oluşturma yalnız backend üzerinden yapılır.' };
+  }
+  function telegramVerifyPayment() {
+    return { ok: false, error: 'Ödeme doğrulaması yalnız backend üzerinden yapılır.' };
+  }
+  function telegramPaymentWebhook() {
+    return { ok: false, error: 'Webhook yalnız sunucu tarafında çalışır.' };
+  }
   /* Push mesajlarındaki veri gizleme: hiçbir raw bakiye/pozisyon değeri gitmez */
   function maskedPushMessage(category) {
     const cat = String(category || '').toUpperCase();

@@ -157,7 +157,7 @@
   
   <div class="upload-box data-image-upload" id="dataImageUpload">
     <div class="source-total-strip" aria-label="Ayrı veri kaynakları">
-      <div><span>MİDAS TOPLAM</span><b id="uploadMidasTotal">VERİ YOK</b></div>
+      <div><span>MİDAS TOPLAM</span><b id="uploadMidasTotalLegacy">VERİ YOK</b></div>
     </div>
     <div class="ocr-source-tabs" role="tablist" aria-label="Görsel veri kaynağı">
       <button type="button" id="ocrSourceAuto" class="ocr-source-tab active" role="tab" aria-selected="true" onclick="setOcrSource('auto')">OTOMATİK</button>
@@ -2338,6 +2338,14 @@ function closeAssetDetail(){
    v144/M11: gezinilebilir kart listesi — tüm Midas varlıkları currentAssetResults'a yüklenir,
    böylece ok/kaydırma ile önceki/sonraki varlığa geçilebilir. */
 function openAssetDetailForSymbol(symbol){const clean=String(symbol||"").toUpperCase(),asset=data.assets.find(a=>a.s===clean);if(!asset)return;const active=activeAssets().filter(a=>a.s);const navList=active.length>1?active.map(a=>({kind:"asset",asset:a})):[{kind:"asset",asset}];currentAssetResults=navList;const idx=navList.findIndex(item=>item.asset.s===clean);openAssetDetail(idx<0?0:idx);attachAssetDetailSwipe();}
+/* Menüden "STKSZ EDİTÖR": ilk portföy varlığının detayını açar ve editör bölmesini gösterir. */
+function openStkszEditorFromMenu(){
+  const candidates=typeof activeAssets==="function"?activeAssets().filter(a=>a&&a.s):[];
+  const asset=candidates[0]||(Array.isArray(data.assets)?data.assets.find(a=>a&&a.s):null);
+  if(!asset){showToast("Portföyde varlık yok — önce varlık ekleyin.");return;}
+  openAssetDetailForSymbol(asset.s);
+  setTimeout(()=>{const zone=document.getElementById("stkszEditorZone");if(!zone)return;if(zone.hidden){const toggle=document.querySelector("#assetDetailPage [data-chart-editor]");if(toggle){try{toggle.click();}catch(e){zone.hidden=false;}}else{zone.hidden=false;}}},180);
+}
 function riskLevel(score){if(score<=34)return {key:"low",label:"Düşük"};if(score<=66)return {key:"medium",label:"Orta"};return {key:"high",label:"Yüksek"};}
 function riskAnalysis(){
  const assets=activeAssets();
@@ -3558,6 +3566,7 @@ function renderReportsPanel(){lastReportData=null;setExportEnabled(false);}
 /* ---- MODULE 63: STKSZ RADAR & YATIRIM PLATFORM ---- */
 let radarHub='opportunities';
 let radarData={};
+const radarHubContent=document.getElementById("radarHubContent");
 function setRadarHub(h){radarHub=h;document.querySelectorAll('.radar-hub-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes('setRadarHub(\''+h+'\')')));radarHubContent.innerHTML='';const hubs={opportunities:renderDailyOpportunities,affordable:renderAffordableAssets,foreign:renderForeignFlow,volume:renderVolumeSpikes,dividends:renderDividends,ipos:renderIPOs,technical:renderTechnicalBuy,fundamental:renderFundamentalBuy};const fn=hubs[h]||function(){radarHubContent.innerHTML='<div class="empty-state">Seçilen hub veri yok.</div>'};fn();}
 function renderDailyOpportunities(){
  const html=['<div class="radar-list">'];
@@ -3592,6 +3601,7 @@ function refreshRadarDaily(){
  radarHubContent.innerHTML='<div class="empty-state">Günlük taramalıyor... Lütfen bekleyin.</div>';
  setTimeout(()=>{setRadarHub(radarHub)}, 1500);
 }
+function renderRadarPanel(){ if(typeof setRadarHub==="function") setRadarHub(radarHub||"opportunities"); }
 function addComparison(sym){/* add symbol to comparison panel */}
 
 // Stock comparison & portfolio health
@@ -4069,6 +4079,23 @@ function showLegalModal(title, content){
   setTimeout(()=>modal.classList.add('show'), 10);
   modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
 }
+/* YÖNETİCİ DENETİM MERKEZİ: güvenlik denetimi + son aktivite + yasal kayıtlar (yalnız gerçek veri). */
+function openLegalAuditCenter(){
+  const rows=[];
+  const escSafe=typeof esc==="function"?esc:(x=>String(x));
+  try{
+    const de=window.STKSZDataEngine;
+    if(de&&typeof de.securityAudit==="function"){const audit=de.securityAudit();rows.push(`<div class="audit-block"><b>GÜVENLİK DENETİMİ · ${escSafe(audit.status||"—")}</b><ul>${(audit.checks||[]).map(c=>`<li>${escSafe(c.id)} → ${escSafe(c.ok?"OK":"SORUN")}${c.note?" <em>"+escSafe(c.note)+"</em>":""}</li>`).join("")}</ul></div>`);}
+  }catch(e){}
+  try{
+    const de=window.STKSZDataEngine;
+    if(de&&typeof de.getLegalAuditLog==="function"){const legal=de.getLegalAuditLog().slice(-15);if(legal.length)rows.push(`<div class="audit-block"><b>YASAL LOG (SON ${legal.length})</b><ul>${legal.map(entry=>`<li>${escSafe(entry.time||entry.at||"")} · ${escSafe(entry.category||entry.type||"—")} · ${escSafe(entry.severity||"—")} · ${escSafe(entry.message||entry.summary||entry.detail||"")}</li>`).join("")}</ul></div>`);}
+  }catch(e){}
+  const log=Array.isArray(data.activityLog)?data.activityLog.slice(-30):[];
+  rows.push(`<div class="audit-block"><b>SON AKTİVİTE (${log.length})</b>${log.length?`<ul>${log.map(entry=>`<li>${escSafe(entry.time||"")} — ${escSafe(entry.text||"")}</li>`).join("")}</ul>`:'<p class="help">İşlem geçmişi boş.</p>'}</div>`);
+  try{addActivity("DENETİM MERKEZİ görüntülendi",{category:"admin"});}catch(e){}
+  showLegalModal("YÖNETİCİ DENETİM MERKEZİ — STKSZ", rows.join("")||'<p class="help">Denetim verisi yok.</p>');
+}
 async function requestBrowserNotifications(){const state=document.getElementById("browserNotificationState");if(window.STKSZNative?.isNative?.()){const result=await window.STKSZNative.requestNotifications();if(state)state.textContent=result.granted?"iOS yerel bildirim izni verildi":"iOS bildirim izni verilmedi";return;}if(location.protocol==="file:"||!window.isSecureContext||!("Notification" in window)){if(state)state.textContent="Tek HTML/file:// üzerinde arka plan push desteklenmiyor";showToast("Gerçek Web Push için HTTPS, service worker ve sunucu gerekir.");return;}try{const permission=await Notification.requestPermission();renderNotificationState();if(permission==="granted"){await registerForPush();new Notification("STKSZ",{body:"Tarayıcı bildirimi yalnızca sayfa açıkken test edildi."});}}catch(error){if(state)state.textContent="Bildirim açılamadı";}}
 async function registerForPush(){
  if(!("serviceWorker" in navigator)||!("PushManager" in window))return;
@@ -4356,7 +4383,7 @@ function renderPortfolioHero(total,scoreData){
 function render(){
  const total=calc(),daily=dailyResults(),cumulative=cumulativeResults(),scoreData=scoreDetails(),grade=scoreGrade(scoreData.score);data.midasDaily=daily.net;
  const volumeValues=data.assets.map(asset=>finite(asset.volume)).filter(value=>value!==null),dailyVolume=finite(data.dailyVolume)??(volumeValues.length?volumeValues.reduce((a,b)=>a+b,0):null);
- setText("portfolioTotal",moneyOrNoData(total));setText("uploadMidasTotal",moneyOrNoData(total));setText("midasCashQuick",moneyOrNoData(data.midasCash));setText("midasDaily",signedMoneyOrNoData(daily.net));const dailyEl=document.getElementById("midasDaily");if(dailyEl)dailyEl.title=`Midas günlük kaynak: ${data.midasDailySource||"VERİ YOK"}`;setText("midasDailyPct",midasDailyPct()===null?"VERİ YOK":pct(midasDailyPct()));setText("midasDailyProfit",daily.profit===null?"VERİ YOK":signedMoney(daily.profit));setText("midasDailyLoss",daily.loss===null?"VERİ YOK":"-"+money(daily.loss));setText("homeDailyProfit",daily.profit===null?"VERİ YOK":signedMoney(daily.profit));setText("homeDailyLoss",daily.loss===null?"VERİ YOK":"-"+money(daily.loss));
+ setText("portfolioTotal",moneyOrNoData(total));setText("uploadMidasTotal",moneyOrNoData(total));setText("uploadMidasTotalLegacy",moneyOrNoData(total));setText("midasCashQuick",moneyOrNoData(data.midasCash));setText("midasDaily",signedMoneyOrNoData(daily.net));const dailyEl=document.getElementById("midasDaily");if(dailyEl)dailyEl.title=`Midas günlük kaynak: ${data.midasDailySource||"VERİ YOK"}`;setText("midasDailyPct",midasDailyPct()===null?"VERİ YOK":pct(midasDailyPct()));setText("midasDailyProfit",daily.profit===null?"VERİ YOK":signedMoney(daily.profit));setText("midasDailyLoss",daily.loss===null?"VERİ YOK":"-"+money(daily.loss));setText("homeDailyProfit",daily.profit===null?"VERİ YOK":signedMoney(daily.profit));setText("homeDailyLoss",daily.loss===null?"VERİ YOK":"-"+money(daily.loss));
  const activeCount=activeAssets().length;setText("assetCount",activeCount||"VERİ YOK");setText("assetCountPortfolio",activeCount||"VERİ YOK");setText("midasDailyVolume",dailyVolume===null?"VERİ YOK":countFmt(dailyVolume));
  setText("score",scoreData.valid?scoreData.score:scoreData.staleMarketData?"VERİ GÜNCEL DEĞİL":"VERİ YOK");setText("scoreGrade",scoreData.valid?grade.label:scoreData.staleMarketData?"VERİ GÜNCEL DEĞİL":"VERİ YOK");const gradeEl=document.getElementById("scoreGrade");if(gradeEl)gradeEl.className="score-grade "+grade.key;setText("scoreNarrative",scoreData.valid?scoreNarrative(scoreData):scoreData.decision);setText("scoreConfidence",scoreData.confidence+"%");setText("scoreRisk",scoreData.riskPct+"%");setText("scoreDecision",scoreData.decision);setText("portfolioDaily",signedMoneyOrNoData(daily.net));renderPortfolioHero(total,scoreData);
  const verifiedDailyPositions=data.assets.filter(asset=>asset.q>0&&asset.dailyVerified&&finite(asset.d)!==null);setText("positiveCount",verifiedDailyPositions.length?verifiedDailyPositions.filter(asset=>asset.d>0).length:"VERİ YOK");setText("negativeCount",verifiedDailyPositions.length?verifiedDailyPositions.filter(asset=>asset.d<0).length:"VERİ YOK");setText("realizedProfit",moneyOrNoData(cumulative.realizedProfit));setText("realizedLoss",cumulative.realizedLoss===null?"VERİ YOK":"-"+money(cumulative.realizedLoss));setText("realizedNet",signedMoneyOrNoData(cumulative.realizedNet));setText("unrealizedProfitTotal",moneyOrNoData(cumulative.unrealizedProfit));setText("unrealizedLossTotal",cumulative.unrealizedLoss===null?"VERİ YOK":"-"+money(cumulative.unrealizedLoss));setText("transactionCount",valueOrNoData(autoTransactionCount(),countFmt));refreshPlManualFlags();
@@ -5390,6 +5417,7 @@ function loadTesseract(){
 function validImageFile(file){return Boolean(file&&["image/jpeg","image/png"].includes(file.type)&&file.size<=15*1024*1024);}
 function fileToDataUrl(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});}
 function parseLocaleNumber(value){
+ if(typeof value==="number")return Number.isFinite(value)?value:null;
  let text=String(value??"").replace(/[^\d,.-]/g,"");if(!text)return null;
  const negative=text.startsWith("-");text=text.replace(/-/g,"");
  if(text.includes(",")&&text.includes("."))text=text.replace(/\./g,"").replace(",",".");
