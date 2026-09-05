@@ -9,6 +9,7 @@
     "sync:android": "cap sync android",
     "open:ios": "cap open ios",
     "open:android": "cap open android",
+    "ios:verify": "node scripts/ios-cap-verify.js",
     "serve": "python3 -m http.server 8080 --directory www"
   },
   "keywords": [

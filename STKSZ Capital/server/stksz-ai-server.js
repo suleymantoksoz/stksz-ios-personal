@@ -910,7 +910,58 @@ async function handleTelegramAndSessions(req, res, path, body) {
         onarma protokolü (PASSIVE).
    =================================================================== */
 const STKSZ_BOT_USERNAME = process.env.STKSZ_BOT_USERNAME || 'Stksz_Capitalbot';
-const PAYMENT_MODE = 'PASSIVE'; /* varsayılan: ödeme altyapısı hazır, gerçek kasa bağlı değil */
+const PAYMENT_MODE = (process.env.PAYMENT_MODE === 'ACTIVE' ? 'ACTIVE' : 'PASSIVE'); /* ACTIVE yalnız gerçek provider secret'ı tanımlıysa anlamlıdır; sekreter asla istemciye gitmez */
+/* ---- 64-A.1: Provider standardizasyonu + iki ayrı ödeme kanalı (Telegram Stars vs klasik) ----
+   Değerler asla dönmez; yalnız VAR/YOK (configured) bilgisi çıkar. Provider secret'ları
+   yalnız sunucu ortamında (env / vault) tutulur. */
+const PAYMENT_PROVIDER_KEYS = { stripe: 'TG_PAYMENT_STRIPE_TOKEN', iyzico: 'TG_PAYMENT_IYZICO_TOKEN', paytr: 'TG_PAYMENT_PAYTR_TOKEN', paypal: 'TG_PAYMENT_PAYPAL_TOKEN' };
+const PAYMENT_PROVIDER_REGISTRY = [
+  { provider: 'telegram_stars', channel: 'stars', label: 'Telegram Stars', providerName: 'Telegram/BotFather', paymentTypes: ['stars'], currencies: ['XTR'], countries: ['*'], status: 'active', priority: 1, health: 'config_gated', note: 'Gerçek zamanlı ücretlendirme; TG_BOT_TOKEN varlığına bağlıdır.' },
+  { provider: 'stripe', channel: 'card', label: 'Stripe', providerName: 'Stripe', paymentTypes: ['card'], currencies: ['USD', 'EUR', 'TRY'], countries: ['US', 'GB', 'EEA', 'TR'], status: 'config_gated', priority: 2, health: 'config_gated', note: 'Klasik kart kanalı; secret env ile gelir.' },
+  { provider: 'iyzico', channel: 'local', label: 'iyzico', providerName: 'iyzico', paymentTypes: ['card'], currencies: ['TRY'], countries: ['TR'], status: 'config_gated', priority: 3, health: 'config_gated', note: 'Türkiye yerel kart kanalı.' },
+  { provider: 'paytr', channel: 'local', label: 'PayTR', providerName: 'PayTR', paymentTypes: ['card'], currencies: ['TRY'], countries: ['TR'], status: 'config_gated', priority: 4, health: 'config_gated', note: 'Türkiye yerel kart kanalı.' },
+  { provider: 'paypal', channel: 'wallet', label: 'PayPal', providerName: 'PayPal', paymentTypes: ['wallet'], currencies: ['USD'], countries: ['US', 'EEA', 'GB'], status: 'inactive', priority: 9, health: 'unavailable', note: 'Destek kapalı.' }
+];
+function paymentProviderConfigured(provider) {
+  const key = PAYMENT_PROVIDER_KEYS[provider];
+  return typeof key === 'string' && Boolean(process.env[key]);
+}
+function paymentProvidersStatus() {
+  const providers = PAYMENT_PROVIDER_REGISTRY.map(p => {
+    const configured = p.provider === 'telegram_stars' ? Boolean(TG_BOT_TOKEN) : paymentProviderConfigured(p.provider);
+    const active = p.provider === 'telegram_stars' && Boolean(TG_BOT_TOKEN);
+    return { provider: p.provider, channel: p.channel, label: p.label, providerName: p.providerName, paymentTypes: p.paymentTypes, currencies: p.currencies, countries: p.countries, status: p.status === 'inactive' ? 'inactive' : (active ? 'active' : (configured ? 'configured' : 'not_configured')), priority: p.priority, configured, health: configured && p.health !== 'unavailable' ? 'ok' : p.health };
+  });
+  const channels = [
+    { id: 'stars', label: 'Telegram Stars', kind: 'stars', status: Boolean(TG_BOT_TOKEN) ? 'active' : 'not_configured', providers: providers.filter(p => p.channel === 'stars').map(p => p.provider) },
+    { id: 'classic', label: 'Klasik Ödeme (Kredi Kartı / Lokal Gateway)', kind: 'classic', status: providers.some(p => p.channel !== 'stars' && p.configured) ? 'configured' : 'not_configured', providers: providers.filter(p => p.channel !== 'stars').map(p => p.provider) }
+  ];
+  return { mode: PAYMENT_MODE, providers, channels };
+}
+function paymentErrorClass(code) {
+  /* 64-A.2: hata sınıflandırması — timeout / rate-limit / network / invalid_response ödeme dışı kilidler */
+  const s = String(code || '').toUpperCase();
+  if (/(^|[_\s])TIMEOUT|ETIMEDOUT|ECONNRESET/.test(s)) return 'timeout';
+  if (/(^|[_\s])RATE[_\- ]?LIMIT/.test(s)) return 'rate_limit';
+  if (/(^|[_\s])NETWORK|OFFLINE|ENOTFOUND|ECONNREFUSED/.test(s)) return 'network';
+  if (/(^|[_\s])INVALID|UNVERIFIED|BAD_RESPONSE/.test(s)) return 'invalid_response';
+  return 'unknown';
+}
+/* ---- sipariş kayıt defteri — her sipariş durum/kanal/sağlayıcı/otel bilgisiyle tutulur ---- */
+function refundMark(providerPaymentId, userId, reason) {
+  const all = paymentOrdersLoad();
+  const rec = all[providerPaymentId];
+  if (!rec || rec.userId !== userId) return { ok: false, code: 'not_found', error: 'Sipariş bulunamadı veya size ait değil (tenant izole).' };
+  if (rec.status === 'refunded') return { ok: false, code: 'already_refunded', error: 'Bu ödeme zaten iade edilmiş.' };
+  rec.status = 'refunded';
+  rec.refundedAt = new Date().toISOString();
+  rec.refundReason = String(reason || 'iade talebi');
+  paymentOrdersSave(all);
+  const revoked = rec.granted || rec.productId;
+  if (rec.kind === 'subscription') cancelSubscriptionsFor(userId, rec.badge); else revokeBadge(userId, rec.badge || rec.granted);
+  auditLog({ type: 'payment_refunded', userId, providerPaymentId, productId: rec.productId, reason: rec.refundReason, revoked, note: 'Üyelik/rozet backend tarafında geri alındı; istemci kilitlenir.' });
+  return { ok: true, revoked, status: 'refunded' };
+}
 /* ---- ödeme sipariş kayıt defteri (userId → orders) — replay/double-process koruması ---- */
 function paymentOrdersPath() { return pathMod.join(SYNC_DIR, 'payment-orders.json'); }
 function paymentOrdersLoad() { try { return JSON.parse(fs.readFileSync(paymentOrdersPath(), 'utf8')); } catch (e) { return {}; } }
@@ -932,6 +983,27 @@ function applySubscription(userId, product) {
   doc.subscriptions.push({ product: product.id, badge: product.badge, startedAt: new Date(now).toISOString(), expiresAt: new Date(now + periodMs).toISOString(), active: true });
   entitlementsSave(userId, doc);
   return product.badge;
+}
+function revokeBadge(userId, badge) {
+  const doc = entitlementsLoad(userId);
+  doc.badges = (doc.badges || []).filter(b => b.badge !== badge);
+  entitlementsSave(userId, doc);
+  return badge;
+}
+function cancelSubscriptionsFor(userId, badge) {
+  const doc = entitlementsLoad(userId);
+  doc.subscriptions = (doc.subscriptions || []).map(s => s.badge === badge ? { ...s, active: false, cancelledAt: new Date().toISOString() } : s);
+  entitlementsSave(userId, doc);
+  return true;
+}
+function subscriptionMaintenance(userId) {
+  /* 64-A.3 SUBSCRIPTION_CHECK: süresi dolan abonelikler otomatik devre dışı (iade/dolma → yetki düşer) */
+  const doc = entitlementsLoad(userId);
+  const now = Date.now();
+  let change = false;
+  doc.subscriptions = (doc.subscriptions || []).map(s => { if (s.active && new Date(s.expiresAt).getTime() <= now) { change = true; return { ...s, active: false, expiredAt: new Date(now).toISOString() }; } return s; });
+  if (change) { entitlementsSave(userId, doc); auditLog({ type: 'subscription_expired', userId, note: 'Süresi dolan abonelikler yetki düşürümüyle devre dışı bırakıldı.' }); }
+  return doc;
 }
 /* ---- kullanıcı başına bildirim tercihleri (opt-in kategoriler) ---- */
 const NOTIF_CATEGORIES = ['PORTFOLIO_CHANGES', 'PRICE_ALERTS', 'NEWS', 'OPPORTUNITIES', 'SYSTEM_STATUS', 'SECURITY'];
@@ -963,17 +1035,31 @@ async function handleTelegramPaymentAndSecurity(req, res, path, body) {
     }), note: 'PASSIVE altyapı — gerçek ödeme kapısı bağlanana dek fatura yalnız önizlemedir.' });
     return true;
   }
-  /* ---- M58: fatura oluştur (yalnız önizleme; PASSIVE — gerçek kasa yok) ---- */
+  /* ---- 64-A.1: provider kataloğu + kanal durumu (yalnız VAR/YOK, değer asla) ---- */
+  if (path === '/api/payment/providers' && req.method === 'GET') {
+    send(res, 200, Object.assign({ ok: true }, paymentProvidersStatus()));
+    return true;
+  }
+  /* ---- M58: fatura oluştur (yalnız önizleme; PASSIVE — gerçek kasa yok) ----
+     64-A.3: sipariş, kanal + sağlayıcı + tutar + durum ile kayıt defterine yazılır. */
   if (path === '/api/payment/invoice' && req.method === 'POST') {
     const reqUser = requireUser(req);
     if (!reqUser) { send(res, 401, { ok: false, error: 'Ödeme için geçerli kimlik gerekli (tenant izole).' }); return true; }
-    const PRODUCTS = { STKSZ_PRO: { label: 'STKSZ PRO', kind: 'one_time', priceTRX: 99 }, STKSZ_ELITE: { label: 'STKSZ ELITE', kind: 'one_time', priceTRX: 299 }, PREMIUM_BADGE: { label: 'PREMIUM BADGE', kind: 'one_time', priceTRX: 149 }, AI_PRO: { label: 'AI PRO', kind: 'one_time', priceTRX: 199 }, GRAPHIC_PREMIUM: { label: 'GRAPHIC PREMIUM', kind: 'one_time', priceTRX: 119 }, MONTHLY: { label: 'STKSZ PRO · Aylık', kind: 'subscription', period: 'month', priceTRX: 39 }, YEARLY: { label: 'STKSZ PRO · Yıllık', kind: 'subscription', period: 'year', priceTRX: 349 } };
+    const PRODUCTS = { STKSZ_PRO: { label: 'STKSZ PRO', kind: 'one_time', priceTRX: 99, badge: 'STKSZ_PRO' }, STKSZ_ELITE: { label: 'STKSZ ELITE', kind: 'one_time', priceTRX: 299, badge: 'STKSZ_ELITE' }, PREMIUM_BADGE: { label: 'PREMIUM BADGE', kind: 'one_time', priceTRX: 149, badge: 'PREMIUM' }, AI_PRO: { label: 'AI PRO', kind: 'one_time', priceTRX: 199, badge: 'AI_PRO' }, GRAPHIC_PREMIUM: { label: 'GRAPHIC PREMIUM', kind: 'one_time', priceTRX: 119, badge: 'GRAFIK_USTASI' }, MONTHLY: { label: 'STKSZ PRO · Aylık', kind: 'subscription', period: 'month', priceTRX: 39, badge: 'STKSZ_PRO' }, YEARLY: { label: 'STKSZ PRO · Yıllık', kind: 'subscription', period: 'year', priceTRX: 349, badge: 'STKSZ_PRO' } };
     const pid = String(body.product || '').toUpperCase();
     const p = PRODUCTS[pid];
     if (!p) { send(res, 400, { ok: false, error: 'Geçersiz ürün.' }); return true; }
+    const channelId = String(body.channel || 'stars');
+    const providerId = String(body.provider || '');
+    const channelOk = channelId === 'stars' || channelId === 'classic';
+    const providerOk = !providerId || PAYMENT_PROVIDER_REGISTRY.some(r => r.provider === providerId && r.channel === channelId);
+    if (!channelOk || !providerOk) { send(res, 400, { ok: false, error: 'Geçersiz ödeme kanalı/sağlayıcısı.' }); return true; }
     const invoiceId = 'inv-' + crypto.randomBytes(6).toString('hex');
-    auditLog({ type: 'payment_invoice_created', userId: reqUser.userId, product: pid, invoiceId, note: 'PASSIVE — yalnız önizleme, kasa bağlı değil.' });
-    send(res, 200, { ok: true, mode: PAYMENT_MODE, invoiceId, product: pid, label: p.label, amountTRX: p.priceTRX, verifiedServerSide: true, checkout: p.kind === 'subscription' ? { recurrence: p.period } : null, note: 'PASSIVE: gerçek Telegram Stars ödemesi kapı bağlanınca aktif; şimdi yalnız fatura önizlemesi.' });
+    const all = paymentOrdersLoad();
+    all[invoiceId] = { id: invoiceId, userId: reqUser.userId, productId: pid, label: p.label, amountTRX: p.priceTRX, kind: p.kind, period: p.period || null, badge: p.badge, channel: channelId, provider: providerId || null, status: 'created', createdAt: new Date().toISOString() };
+    paymentOrdersSave(all);
+    auditLog({ type: 'payment_invoice_created', userId: reqUser.userId, product: pid, invoiceId, channel: channelId, provider: providerId || null, note: 'PASSIVE: fatura önizleme; gerçek kasa bağlı değil.' });
+    send(res, 200, { ok: true, mode: PAYMENT_MODE, invoiceId, product: pid, label: p.label, amountTRX: p.priceTRX, channel: channelId, provider: providerId || null, verifiedServerSide: true, checkout: p.kind === 'subscription' ? { recurrence: p.period } : null, note: 'PASSIVE: gerçek Telegram Stars ödemesi kapı bağlanınca aktif; şimdi yalnız fatura önizlemesi.' });
     return true;
   }
   /* ---- M58: ödeme doğrulama (successful_payment — yalnız BACKEND) ---- */
@@ -995,10 +1081,12 @@ async function handleTelegramPaymentAndSecurity(req, res, path, body) {
     }
     /* Rozet/abonelik aktivasyonu YALNIZ backend authority ugular */
     const granted = p.kind === 'subscription' ? applySubscription(userId, p) : grantBadge(userId, p.badge);
-    all[providerPaymentId] = { userId, productId, granted, at: new Date().toISOString() };
+    const expiresAt = p.kind === 'subscription' ? String((entitlementsLoad(userId).subscriptions.filter(s => s.active && s.badge === p.badge).pop() || {}).expiresAt || '') : null;
+    const prior = body.invoice_id ? all[body.invoice_id] : null;
+    all[providerPaymentId] = { id: providerPaymentId, userId, productId, label: p.label || prior && prior.label, amountTRX: prior ? prior.amountTRX : p.priceTRX, kind: p.kind, period: p.period || null, badge: p.badge, channel: body.channel || (prior && prior.channel) || 'stars', provider: body.provider || (prior && prior.provider) || null, invoiceId: body.invoice_id || null, granted, expiresAt, status: 'verified', verifiedAt: new Date().toISOString(), at: new Date().toISOString() };
     paymentOrdersSave(all);
-    auditLog({ type: 'payment_success', userId, productId, granted, providerPaymentId, result: 'rozet/abonelik aktif — backend authority.' });
-    send(res, 200, { ok: true, granted, mode: PAYMENT_MODE, verified: true, note: 'Ödeme doğrulandı; rozet/abonelik backend tarafından tanındı.' });
+    auditLog({ type: 'payment_success', userId, productId, granted, providerPaymentId, kind: p.kind, period: p.period || null, expiresAt, result: 'rozet/abonelik aktif — backend authority.' });
+    send(res, 200, { ok: true, granted, mode: PAYMENT_MODE, verified: true, productId, kind: p.kind, expiresAt, note: 'Ödeme doğrulandı; rozet/abonelik backend tarafından tanındı.' });
     return true;
   }
   /* ---- M58: kullanıcının kendi siparişleri (tenant izole — yalnız kendi) ---- */
@@ -1018,6 +1106,71 @@ async function handleTelegramPaymentAndSecurity(req, res, path, body) {
     const now = Date.now();
     const subs = (doc.subscriptions || []).filter(s => s.active && new Date(s.expiresAt).getTime() > now);
     send(res, 200, { ok: true, badges: doc.badges || [], subscriptions: subs.map(s => ({ product: s.product, badge: s.badge, expiresAt: s.expiresAt })) });
+    return true;
+  }
+  /* ---- 64-A.3: SUBSCRIPTION_CHECK — süre/refah bakımı + durum özeti ---- */
+  if (path === '/api/payment/check' && req.method === 'GET') {
+    const reqUser = requireUser(req);
+    if (!reqUser) { send(res, 401, { ok: false, error: 'Abonelik kontrolü için geçerli kimlik gerekli.' }); return true; }
+    const doc = subscriptionMaintenance(reqUser.userId);
+    const now = Date.now();
+    const badges = doc.badges || [];
+    const subs = (doc.subscriptions || []).filter(s => s.active && new Date(s.expiresAt).getTime() > now);
+    const all = paymentOrdersLoad();
+    const mine = Object.keys(all).filter(k => all[k].userId === reqUser.userId).map(k => ({ id: k, status: all[k].status || 'created', productId: all[k].productId, amountTRX: all[k].amountTRX, channel: all[k].channel, provider: all[k].provider, kind: all[k].kind, expiresAt: all[k].expiresAt || null, at: all[k].verifiedAt || all[k].createdAt || all[k].at || null }));
+    send(res, 200, { ok: true, mode: PAYMENT_MODE, badges: badges.map(b => b.badge), subscriptions: subs.map(s => ({ product: s.product, badge: s.badge, expiresAt: s.expiresAt })), orders: mine, maintenance: 'subscriptions:expiry:auto_downgrade' });
+    return true;
+  }
+  /* ---- 64-A.3: Telegram ödeme webhook (pre_checkout_query / successful_payment) ----
+     PASSIVE: asla üyelik açmaz; yalnız kayıt (audit + order ledger 'rejected'). */
+  if (path === '/api/payment/webhook' && req.method === 'POST') {
+    const kind = String(body.kind || '');
+    const invoiceId = String(body.invoice_id || '');
+    const providerPaymentId = String(body.provider_payment_id || '').trim();
+    const secretProof = String(body.secret_proof || '');
+    const webhookSecret = process.env.TG_PAYMENT_WEBHOOK_SECRET || '';
+    if (PAYMENT_MODE !== 'ACTIVE' || !TG_BOT_TOKEN || !webhookSecret) {
+      auditLog({ type: 'payment_webhook_rejected', kind, invoiceId, providerPaymentId: providerPaymentId.slice(0, 12), reason: 'passive_locked', note: 'Webhook alındı fakat PASSIVE; hiçbir üyelik açılmadı.' });
+      const all = paymentOrdersLoad();
+      if (invoiceId && all[invoiceId]) { all[invoiceId].status = 'rejected'; all[invoiceId].rejectedReason = 'passive_locked'; paymentOrdersSave(all); }
+      send(res, 200, { ok: false, code: 'passive_locked', mode: PAYMENT_MODE, reason: 'Ödeme webhook alındı; PASSIVE modda gerçek kasa bağlı değil — ruženi/üyelik kesinlikle AÇILMADI.', seeded: invoiceId ? 'order_status=rejected' : null });
+      return true;
+    }
+    if (!webhookSecret && PAYMENT_MODE === 'ACTIVE') { send(res, 500, { ok: false, code: 'webhook_secret_missing', error: 'TG_PAYMENT_WEBHOOK_SECRET tanımlı değil; webhook kabul edilmez.' }); return true; }
+    if (secretProof !== webhookSecret) { auditLog({ type: 'payment_webhook_bad_signature', kind, invoiceId, note: 'Webhook imzası doğrulanamadı.' }); send(res, 401, { ok: false, code: 'bad_signature', error: 'Webhook imzası yanlış.' }); return true; }
+    if (kind === 'pre_checkout_query') {
+      auditLog({ type: 'payment_pre_checkout_ok', invoiceId, note: 'CANLI ön kontrol onaylandı.' });
+      send(res, 200, { ok: true, answerPreCheckoutQuery: true });
+      return true;
+    }
+    if (kind === 'successful_payment') {
+      if (!providerPaymentId) { send(res, 400, { ok: false, error: 'provider_payment_id gerekli.' }); return true; }
+      const all = paymentOrdersLoad();
+      if (all[providerPaymentId]) { auditLog({ type: 'payment_replay_blocked', kind: 'webhook', providerPaymentId, note: 'Aynı ödeme tekrar işlenmeye çalışıldı.' }); send(res, 409, { ok: false, error: 'Bu ödeme zaten işlendi (replay engellendi).', code: 'replay_blocked' }); return true; }
+      const prior = invoiceId ? all[invoiceId] : null;
+      if (!prior) { auditLog({ type: 'payment_webhook_unknown_invoice', invoiceId, note: 'Bilinmeyen fatura; üyelik açılmadı.' }); send(res, 404, { ok: false, code: 'unknown_invoice', error: 'Bilinmeyen fatura; üyelik açılmadı.' }); return true; }
+      const P = { STKSZ_PRO: { badge: 'STKSZ_PRO', kind: 'one_time' }, STKSZ_ELITE: { badge: 'STKSZ_ELITE', kind: 'one_time' }, PREMIUM_BADGE: { badge: 'PREMIUM', kind: 'one_time' }, AI_PRO: { badge: 'AI_PRO', kind: 'one_time' }, GRAPHIC_PREMIUM: { badge: 'GRAFIK_USTASI', kind: 'one_time' }, MONTHLY: { badge: 'STKSZ_PRO', kind: 'subscription', period: 'month' }, YEARLY: { badge: 'STKSZ_PRO', kind: 'subscription', period: 'year' } };
+      const p = P[prior.productId];
+      if (!p) { send(res, 400, { ok: false, error: 'Ürün eşleşmedi.' }); return true; }
+      const granted = p.kind === 'subscription' ? applySubscription(prior.userId, p) : grantBadge(prior.userId, p.badge);
+      const expiresAt = p.kind === 'subscription' ? String((entitlementsLoad(prior.userId).subscriptions.filter(s => s.active && s.badge === p.badge).pop() || {}).expiresAt || '') : null;
+      all[providerPaymentId] = { id: providerPaymentId, userId: prior.userId, productId: prior.productId, label: prior.label, amountTRX: prior.amountTRX, kind: p.kind, period: p.period || null, badge: p.badge, channel: prior.channel, provider: prior.provider, invoiceId, granted, expiresAt, status: 'verified', source: 'webhook', verifiedAt: new Date().toISOString() };
+      paymentOrdersSave(all);
+      auditLog({ type: 'payment_success_webhook', userId: prior.userId, productId: prior.productId, providerPaymentId, granted, result: 'CANLI ödeme doğrulandı; rozet/abonelik backend tarafında.' });
+      send(res, 200, { ok: true, granted, verified: true, expiresAt, note: 'successful_payment doğrulandı; üyelik backend authority ile aktif.' });
+      return true;
+    }
+    send(res, 400, { ok: false, error: 'Geçersiz webhook türü.' });
+    return true;
+  }
+  /* ---- 64-A.3: iade/iptal → üyelik ve yetkiler otomatik düşer ---- */
+  if (path === '/api/payment/refund' && req.method === 'POST') {
+    const reqUser = requireUser(req);
+    if (!reqUser) { send(res, 401, { ok: false, error: 'İade için geçerli kimlik gerekli.' }); return true; }
+    const providerPaymentId = String(body.provider_payment_id || '').trim();
+    if (!providerPaymentId) { send(res, 400, { ok: false, error: 'provider_payment_id gerekli.' }); return true; }
+    const result = refundMark(providerPaymentId, reqUser.userId, String(body.reason || ''));
+    send(res, result.ok ? 200 : 400, Object.assign({ ok: result.ok }, result));
     return true;
   }
   /* ---- M59: bildirim tercihleri (opt-in; tenant izole) ---- */
