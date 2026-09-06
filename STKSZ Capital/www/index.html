@@ -503,10 +503,49 @@
       <div class="enr-stat"><div class="l">TOPLAM KÂR</div><div class="v sensitive-mask" id="enrProfit">••••••••</div></div>
       <div class="enr-stat"><div class="l">RİSK SEVİYESİ</div><div class="v sensitive-mask" id="enrRisk">••••••••</div></div>
     </div>
-    <p class="enr-trading-note">NOT: ⚠️ 16:00-19:00 saatleri arasında ENR alış işlemleri gerçekleştirilememektedir.</p>
+<p class="enr-trading-note">NOT: ⚠️ 16:00-19:00 saatleri arasında ENR alış işlemleri gerçekleştirilememektedir.</p>
   </article>
 
-</section>
+  <!-- Kişisel hesap / görsel yükleme ve OCR analizi -->
+  <div class="section-title" style="margin-top:24px">HESAPLARIM / KİŞİSEL VARLIK TAKİBİ</div>
+  <article class="card" id="personalAccountCard">
+    <div class="card-header">
+      <div class="card-header-title">GÖRSEL YÜKLE VE ANALİZ ET</div>
+      <div class="card-header-help">Banka, aracı kurum, fon, hisse, kripto, nakit ekran görüntüleri desteklenir</div>
+    </div>
+    <div class="card-content">
+      <p class="help" style="margin-bottom:12px;">JPG/PNG ekran görüntüsü seçin. STKSZ AI (Gemini Vision + Tesseract OCR) görseli analiz edip varlıkları tespit edecek.</p>
+      
+      <input type="file" id="accountImageInput" accept="image/*" style="display:none" onchange="handleAccountImageUpload(event)">
+      
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" class="btn primary" onclick="document.getElementById('accountImageInput').click()">📷 GÖRSEL SEÇ VE ANALİZ ET</button>
+        <button type="button" class="btn secondary" onclick="clearAccountSnapshots()">GEÇMİŞİ TEMİZLE</button>
+      </div>
+    </div>
+    
+    <!-- YÜKLEME ÖN İZLEME VE ONAY ALANI -->
+    <div id="uploadPreviewArea" style="display:none; margin-top:16px; padding:12px; border:1px dashed var(--line-gold); border-radius:8px; background:rgba(212,175,55,0.05);">
+      <div style="font-weight:700; color:var(--accent-gold); margin-bottom:8px;">ALGILANAN HESAP & VARLIKLAR</div>
+      <div id="parsedResultContent" style="font-size:13px; margin-bottom:12px; line-height:1.6;"></div>
+      
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" class="btn primary" id="confirmSnapshotBtn" onclick="confirmAccountSnapshot()">KAYDI ONAYLA VE KAYDET</button>
+        <button type="button" class="btn secondary" onclick="cancelSnapshotPreview()">İPTAL</button>
+      </div>
+    </div>
+  </article>
+
+  <!-- DİNAMİK VARLIK KARTLARI -->
+  <div id="dynamicAssetCardsContainer" class="cards-grid" style="margin-top:16px; display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px;">
+    <!-- JS ile doldurulacak: ENR, TP2, Nakit, ASELS, BTC, vb. -->
+  </div>
+
+  <!-- GEÇMİŞ SNAPSHOT VE KARŞILAŞTIRMA -->
+  <div id="snapshotHistorySection" style="margin-top:24px;">
+    <div class="section-title" style="font-size:14px; font-weight:700; color:var(--text);">GEÇMİŞ HESAP DEĞİŞİMLERİ & SNAPSHOT'LAR</div>
+    <div id="snapshotHistoryList" style="margin-top:8px;"></div>
+  </div>
 
 <section class="page" id="page-news">
   <div class="news-toolbar">
@@ -9224,22 +9263,361 @@ function buildHealthReport(){
  body.innerHTML=reportCover("Portföy Sağlık Raporu",h&&h.score!==null?reportDataBadge("live"):reportDataBadge("empty"),h&&h.score!==null?reportRows(rep.kv):'<div class="empty-state">VERİ YETERSİZ — KARAR YOK. Skor için doğrulanmış pozisyon ve güncel fiyat gerekir.</div>',rep.disclaimer);
 }
 function buildScenarioForecastReport(){
- const body=document.getElementById("scenarioReportBody");
- if(!body)return;
- if(!reportElite()){body.innerHTML=reportLock("Senaryo & Tahmin raporu ELITE üyeliği gerektirir.");return;}
- const de=window.STKSZDataEngine,port=gatherPortfolioData();
- const res=(de&&de.m63PortfolioScenarios)?de.m63PortfolioScenarios(port):null;
- const db=de&&de.forecastDb?de.forecastDb():[];
- const stats=de&&de.m63ForecastPeriodStats?de.m63ForecastPeriodStats(db,"month"):null;
- const hasS=res&&res.ok&&res.scenarios.length;
- const rep={type:"m63-scenario",title:"Senaryo & Tahmin Raporu",generatedAt:new Date().toISOString(),dataStatus:hasS?{state:"live",label:"Portföy değeri + tahmin DB"}:{state:"empty",label:"VERİ YETERSİZ — KARAR YOK"},kv:[],disclaimer:(de&&de.RADAR_63_DISCLAIMER)||reportDisclaimer()};
- if(hasS){res.scenarios.forEach(s=>rep.kv.push(["Senaryo · "+s.label+" ("+(s.changePct>0?"+":"")+s.changePct+"%)",money(s.estValue)+" · fark "+signedMoney(s.delta)]));}
- if(stats&&stats.total){rep.kv.push(["Tahmin toplamı (30 gün)",String(stats.total)]);rep.kv.push(["İsabet oranı",stats.hitRatePct===null?"VERİ YOK":stats.hitRatePct+"%"]);rep.kv.push(["Açık tahmin",String(stats.pending)]);}
- if(!hasS&&(!stats||!stats.total)){if(rep.kv.length===0)rep.dataStatus={state:"empty",label:"VERİ YETERSİZ — KARAR YOK"};}
- lastReportData=rep;
- body.innerHTML=reportCover("Senaryo & Tahmin Raporu",(hasS||(stats&&stats.total))?reportDataBadge("live"):reportDataBadge("empty"),rep.kv.length?reportRows(rep.kv):'<div class="empty-state">VERİ YETERSİZ — KARAR YOK. Senaryo için güncel portföy değeri, tahmin istatistiği için kayıtlı tahmin gerekir. Senaryolar varsayımsal simülasyondur; tavsiye değildir.</div>',rep.disclaimer);
+  const body=document.getElementById("scenarioReportBody");
+  if(!body)return;
+  if(!reportElite()){body.innerHTML=reportLock("Senaryo & Tahmin raporu ELITE üyeliği gerektirir.");return;}
+  const de=window.STKSZDataEngine,port=gatherPortfolioData();
+  const res=(de&&de.m63PortfolioScenarios)?de.m63PortfolioScenarios(port):null;
+  const db=de&&de.forecastDb?de.forecastDb():[];
+  const stats=de&&de.m63ForecastPeriodStats?de.m63ForecastPeriodStats(db,"month"):null;
+  const hasS=res&&res.ok&&res.scenarios.length;
+  const rep={type:"m63-scenario",title:"Senaryo & Tahmin Raporu",generatedAt:new Date().toISOString(),dataStatus:hasS?{state:"live",label:"Portföy değeri + tahmin DB"}:{state:"empty",label:"VERİ YETERSİZ — KARAR YOK"},kv:[],disclaimer:(de&&de.RADAR_63_DISCLAIMER)||reportDisclaimer()};
+  if(hasS){res.scenarios.forEach(s=>rep.kv.push(["Senaryo · "+s.label+" ("+(s.changePct>0?"+":"")+s.changePct+"%)",money(s.estValue)+" · fark "+signedMoney(s.delta)]));}
+  if(stats&&stats.total){rep.kv.push(["Tahmin toplamı (30 gün)",String(stats.total)]);rep.kv.push(["İsabet oranı",stats.hitRatePct===null?"VERİ YOK":stats.hitRatePct+"%"]);rep.kv.push(["Açık tahmin",String(stats.pending)]);}
+  if(!hasS&&(!stats||!stats.total)){if(rep.kv.length===0)rep.dataStatus={state:"empty",label:"VERİ YETERSİZ — KARAR YOK"};}
+  lastReportData=rep;
+  body.innerHTML=reportCover("Senaryo & Tahmin Raporu",(hasS||(stats&&stats.total))?reportDataBadge("live"):reportDataBadge("empty"),rep.kv.length?reportRows(rep.kv):'<div class="empty-state">VERİ YETERSİZ — KARAR YOK. Senaryo için güncel portföy değeri, tahmin istatistiği için kayıtlı tahmin gerekir. Senaryolar varsayımsal simülasyondur; tavsiye değildir.</div>',rep.disclaimer);
+}
+
+/* =====================================================================
+   KİŞİSEL HESAP / GÖRSEL YÜKLEME VE OCR ANALİZİ
+   ===================================================================== */
+
+let pendingAccountSnapshot = null;
+
+function handleAccountImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  if (!file.type.startsWith('image/')) {
+    showToast('Lütfen bir görsel dosyası seçin (JPG/PNG).');
+    return;
+  }
+  
+  if (file.size > 15 * 1024 * 1024) {
+    showToast('Dosya boyutu 15MB\'dan büyük olamaz.');
+    return;
+  }
+  
+  showToast('Görsel analiz ediliyor... Bu işlem birkaç saniye sürebilir.');
+  document.getElementById('uploadPreviewArea').style.display = 'none';
+  
+  // Call the real AI engine
+  if (window.STKSZAccountEngine && typeof window.STKSZAccountEngine.processAccountImage === 'function') {
+    window.STKSZAccountEngine.processAccountImage(file).then(result => {
+      if (result.ok && result.snapshot) {
+        pendingAccountSnapshot = result.snapshot;
+        renderSnapshotPreview(result.snapshot, result.comparison);
+        document.getElementById('uploadPreviewArea').style.display = 'block';
+        showToast('Analiz tamamlandı. Sonuçları kontrol edip onaylayın.');
+      } else {
+        document.getElementById('uploadPreviewArea').style.display = 'none';
+        showToast('Analiz başarısız: ' + (result.error || 'VERİ YETERSİZ — KARAR YOK'));
+      }
+    }).catch(err => {
+      showToast('Analiz hatası: ' + err.message);
+      console.error('[Account Upload]', err);
+    });
+  } else {
+    showToast('AI motoru yüklenmedi. Sayfayı yenileyin.');
+  }
+}
+
+function cancelSnapshotPreview() {
+  pendingAccountSnapshot = null;
+  document.getElementById('uploadPreviewArea').style.display = 'none';
+  document.getElementById('accountImageInput').value = '';
+}
+
+function confirmAccountSnapshot() {
+  if (!pendingAccountSnapshot) {
+    showToast('Onaylanacak veri yok.');
+    return;
+  }
+  
+  // Save snapshot using the account engine
+  if (window.STKSZAccountEngine && typeof window.STKSZAccountEngine.saveSnapshot === 'function') {
+    window.STKSZAccountEngine.saveSnapshot(pendingAccountSnapshot);
+    showToast('Hesap snapshot\'ı kaydedildi.');
+  }
+  
+  // Render asset cards and history
+  renderDynamicAssetCards();
+  renderSnapshotHistory();
+  
+  pendingAccountSnapshot = null;
+  document.getElementById('uploadPreviewArea').style.display = 'none';
+  document.getElementById('accountImageInput').value = '';
+  showToast('Hesap snapshot\'ı onaylandı ve kaydedildi.');
+}
+
+function clearAccountSnapshots() {
+  if (!confirm('Tüm hesap geçmişi ve snapshot\'lar silinecek. Emin misiniz?')) return;
+  
+  if (window.STKSZAccountEngine && typeof window.STKSZAccountEngine.saveSnapshot === 'function') {
+    localStorage.removeItem('stksz_account_snapshots_v2');
+    showToast('Tüm hesap geçmişi temizlendi.');
+  }
+  renderDynamicAssetCards();
+  renderSnapshotHistory();
+}
+
+function renderSnapshotPreview(snapshot, comparison) {
+  const container = document.getElementById('parsedResultContent');
+  if (!container) return;
+  
+  let html = `
+    <div style="margin-bottom:8px;"><strong>Kurum:</strong> ${esc(snapshot.institution || 'Bilinmiyor')}</div>
+    <div style="margin-bottom:8px;"><strong>Toplam Değer:</strong> ${moneyOrNoData(snapshot.totalValue)}</div>
+    <div style="margin-bottom:8px;"><strong>Nakit:</strong> ${moneyOrNoData(snapshot.cashBalance)}</div>
+    <div style="margin-bottom:8px;"><strong>Varlık Sayısı:</strong> ${snapshot.assets ? snapshot.assets.length : 0}</div>
+  `;
+  
+  if (snapshot.assets && snapshot.assets.length > 0) {
+    html += '<div style="margin-top:8px;"><strong>Tespit Edilen Varlıklar:</strong><ul style="margin:4px 0; padding-left:20px;">';
+    snapshot.assets.forEach(a => {
+      const riskColor = a.riskLevel?.includes('DÜŞÜK') ? 'var(--positive)' : 
+                        a.riskLevel?.includes('ORTA') ? 'var(--warning)' : 'var(--muted)';
+      html += `<li style="margin:2px 0;"><b>${esc(a.symbol)}</b> (${esc(a.name || '-')}) — ${moneyOrNoData(a.currentValue)} ${a.quantity ? '· ' + fmt(a.quantity) + ' ' + (a.symbol || '') : ''} <span style="color:${riskColor}; font-size:11px;">${esc(a.riskLevel || '')}</span></li>`;
+    });
+    html += '</ul></div>';
+  }
+  
+  if (snapshot.comparison && snapshot.comparison.hasPrevious) {
+    const c = snapshot.comparison;
+    html += '<div style="margin-top:12px; padding:8px; background:rgba(212,175,55,0.1); border-radius:6px; border:1px solid var(--line-gold);"><strong>ÖNCEKİ SNAPSHOT İLE KARŞILAŞTIRMA:</strong><ul style="margin:4px 0; padding-left:20px;">';
+    
+    if (c.cashDelta !== 0) {
+      html += `<li>Nakit: ${c.cashDelta > 0 ? '+' : ''}${money(c.cashDelta)} (${c.cashDelta > 0 ? 'artış' : 'azalış'})</li>`;
+    }
+    if (c.totalDelta !== 0) {
+      html += `<li>Toplam: ${c.totalDelta > 0 ? '+' : ''}${money(c.totalDelta)}</li>`;
+    }
+    if (c.assetChanges && c.assetChanges.length > 0) {
+      c.assetChanges.forEach(ac => {
+        const color = ac.type === 'NEW' ? 'var(--positive)' : ac.type === 'REMOVED' ? 'var(--negative)' : 'var(--warning)';
+        const prefix = ac.type === 'NEW' ? 'YENİ: ' : ac.type === 'REMOVED' ? 'ÇIKARILDI: ' : 'DEĞİŞTİ: ';
+        html += `<li style="color:${color};">${prefix}${esc(ac.name)} (${esc(ac.symbol || '')}) ${ac.type === 'CHANGE' ? money(ac.previous) + ' → ' + money(ac.current) : money(Math.abs(ac.delta))}</li>`;
+      });
+    }
+    if (c.possibleMovementNote) {
+      html += `<li style="color:var(--warning);">${c.possibleMovementNote}</li>`;
+    }
+    html += '</ul></div>';
+  }
+  
+  document.getElementById('parsedResultContent').innerHTML = html;
+}
+
+function renderDynamicAssetCards() {
+  const container = document.getElementById('dynamicAssetCardsContainer');
+  if (!container) return;
+  
+  // Get latest snapshot
+  const history = window.STKSZAccountEngine ? window.STKSZAccountEngine.getSnapshots() : [];
+  const latest = history.length > 0 ? history[0] : null;
+  
+  if (!latest || !latest.assets || latest.assets.length === 0) {
+    container.innerHTML = '<div class="empty-state" style="grid-column:1/-1; text-align:center; padding:24px; color:var(--muted);">Henüz kayıtlı hesap verisi yok. Görsel yükleyip analiz edin.</div>';
+    return;
+  }
+  
+  let html = '';
+  latest.assets.forEach(asset => {
+    const riskClass = asset.riskLevel?.includes('DÜŞÜK') ? 'risk-low' : 
+                      asset.riskLevel?.includes('ORTA') ? 'risk-medium' : 'risk-high';
+    const riskColor = asset.riskLevel?.includes('DÜŞÜK') ? 'var(--positive)' : 
+                      asset.riskLevel?.includes('ORTA') ? 'var(--warning)' : 'var(--negative)';
+    
+    html += `
+      <article class="card asset-card" style="cursor:pointer;" onclick="openAccountDetail('${esc(asset.id)}')">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <b style="color:var(--accent-gold);">${esc(asset.symbol)}</b>
+          <span class="risk-badge ${riskClass}" style="font-size:10px; padding:2px 6px; border-radius:4px; background:${riskColor}22; color:${riskColor}; border:1px solid ${color}44;">${esc(asset.riskLevel || 'ORTA')}</span>
+        </div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">${esc(asset.name || asset.symbol)}</div>
+        <div style="font-size:16px; font-weight:800; color:var(--text);">${moneyOrNoData(asset.currentValue)}</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px;">
+          ${asset.quantity ? fmt(asset.quantity) + ' ' + esc(asset.symbol) : ''} 
+          ${asset.institution ? ' · ' + esc(asset.institution) : ''}
+        </div>
+        ${asset.dailyPnl !== undefined && asset.dailyPnl !== null ? 
+          `<div style="margin-top:4px; font-size:12px; color:${asset.dailyPnl >= 0 ? 'var(--positive)' : 'var(--negative)'};">
+            Günlük: ${signedMoney(asset.dailyPnl)} (${asset.dailyPnlPercent !== null && asset.dailyPnlPercent !== undefined ? fmt(asset.dailyPnlPct) + '%' : '—'})
+          </div>` : ''}
+      </article>
+    `;
+  });
+  
+  document.getElementById('dynamicAssetCardsContainer').innerHTML = html;
+}
+
+function renderSnapshotHistory() {
+  const container = document.getElementById('snapshotHistoryList');
+  if (!container) return;
+  
+  const history = window.STKSZAccountEngine ? window.STKSZAccountEngine.getSnapshots() : [];
+  
+  if (!history.length) {
+    container.innerHTML = '<p class="help" style="text-align:center; padding:16px;">Henüz kaydedilmiş snapshot yok.</p>';
+    return;
+  }
+  
+  let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+  
+  history.forEach((snap, index) => {
+    const date = new Date(snap.timestamp);
+    const dateStr = date.toLocaleDateString('tr-TR', {day:'2-digit', month:'2-digit', year:'numeric'});
+    const timeStr = date.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+    const assetCount = snap.assets ? snap.assets.length : 0;
+    const comparison = index < history.length - 1 ? window.STKSZAccountEngine.compareWithPrevious ? window.STKSZAccountEngine.compareWithPrevious(snap) : null : null;
+    
+    html += `
+      <article class="card" style="cursor:pointer;" onclick="openSnapshotDetail('${esc(snap.id)}')">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+          <div>
+            <div style="font-weight:700; color:var(--accent-gold);">${esc(snap.institution || 'Bilinmeyen Hesap')}</div>
+            <div style="font-size:12px; color:var(--muted);">${dateStr} ${timeStr} · ${snap.assets?.length || 0} varlık · ${moneyOrNoData(snap.totalValue)}</div>
+          </div>
+          <div style="text-align:right; min-width:80px;">
+            <div style="font-weight:700; color:var(--text);">${moneyOrNoData(snap.totalValue)}</div>
+            <div style="font-size:11px; color:var(--muted);">${dateStr} ${timeStr}</div>
+          </div>
+        </div>
+        ${comparison && comparison.hasPrevious && comparison.assetChanges && comparison.assetChanges.length > 0 ? 
+          `<div style="margin-top:8px; padding:8px; background:rgba(212,175,55,0.08); border-radius:6px; border:1px solid var(--line-gold); font-size:11px;">
+            <strong>Değişim:</strong> ${comparison.assetChanges.map(c => {
+              const color = c.type === 'NEW' ? 'var(--positive)' : c.type === 'REMOVED' ? 'var(--negative)' : 'var(--warning)';
+              return `<span style="color:${color};">${c.type === 'NEW' ? '+' : c.type === 'REMOVED' ? '-' : ''}${c.name} (${money(Math.abs(c.delta))})</span>`;
+            }).join(', ')}
+          </div>` : ''}
+      </article>
+    `;
+  });
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function openAccountDetail(assetId) {
+  const history = window.STKSZAccountEngine ? window.STKSZAccountEngine.getSnapshots() : [];
+  const latest = history.length > 0 ? history[0] : null;
+  if (!latest) return;
+  
+  const asset = latest.assets?.find(a => a.id === assetId);
+  if (!asset) return;
+  
+  // Simple modal-like detail view
+  const detailHtml = `
+    <div style="padding:16px; max-width:400px;">
+      <h3 style="color:var(--accent-gold); margin-bottom:16px;">${esc(asset.symbol)} — ${esc(asset.name || asset.symbol)}</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+        <div><span style="color:var(--muted); font-size:12px;">GÜNCEL DEĞER</span><br><b>${moneyOrNoData(asset.currentValue)}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">MİKTAR</span><br><b>${asset.quantity ? fmt(asset.quantity) + ' ' + esc(asset.symbol) : 'VERİ YOK'}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">MALİYET</span><br><b>${moneyOrNoData(asset.cost)}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">TÜR</span><br><b>${esc(asset.type || '—')}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">KURUM</span><br><b>${esc(asset.institution || '—')}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">RİSK</span><br><b style="color:${asset.riskLevel?.includes('DÜŞÜK')?'var(--positive)':asset.riskLevel?.includes('ORTA')?'var(--warning)':'var(--negative)'}">${esc(asset.riskLevel || 'ORTA')}</b></div>
+      </div>
+      ${asset.dailyPnl !== undefined && asset.dailyPnl !== null ? `
+        <div style="padding:12px; background:rgba(212,175,55,0.1); border-radius:8px; border:1px solid var(--line-gold);">
+          <div style="font-size:12px; color:var(--muted);">GÜNLÜK PERFORMANS</div>
+          <div style="font-size:18px; font-weight:800; color:${asset.dailyPnl >= 0 ? 'var(--positive)' : 'var(--negative)'}">${signedMoney(asset.dailyPnl)}</div>
+          <div style="font-size:12px; color:var(--muted);">${asset.dailyPnlPercent !== null ? fmt(asset.dailyPnlPct) + '%' : '—'}</div>
+        </div>` : ''}
+      <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--line); font-size:11px; color:var(--muted);">
+        Son güncelleme: ${latest.timestamp ? new Date(latest.timestamp).toLocaleString('tr-TR') : '—'}
+      </div>
+    </div>
+  `;
+  
+  // Use existing modal system or create simple overlay
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,.8); display:flex; align-items:center; justify-content:center; z-index:1000;';
+  modal.innerHTML = `
+    <div class="modal-box" style="background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:24px; max-width:440px; width:90%; max-height:90vh; overflow:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="margin:0; color:var(--accent-gold);">Hesap Detayı</h3>
+        <button class="modal-close" onclick="this.closest('.modal').remove()" style="background:none; border:none; color:var(--muted); font-size:24px; cursor:pointer;">×</button>
+      </div>
+      ${detailHtml}
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.hidden = false;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function openSnapshotDetail(snapshotId) {
+  const history = window.STKSZAccountEngine ? window.STKSZAccountEngine.getSnapshots() : [];
+  const snap = history.find(s => s.id === snapshotId);
+  if (!snap) return;
+  
+  const comparison = window.STKSZAccountEngine.compareWithPrevious ? window.STKSZAccountEngine.compareWithPrevious(snap) : null;
+  
+  const detailHtml = `
+    <div style="padding:16px; max-width:400px;">
+      <h3 style="color:var(--accent-gold); margin-bottom:16px;">Snapshot Detayı</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+        <div><span style="color:var(--muted); font-size:12px;">KURUM</span><br><b>${esc(snap.institution || '—')}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">TARİH</span><br><b>${new Date(snap.timestamp).toLocaleString('tr-TR')}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">TOPLAM DEĞER</span><br><b>${moneyOrNoData(snap.totalValue)}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">NAKİT</span><br><b>${moneyOrNoData(snap.cashBalance)}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">VARLIK SAYISI</span><br><b>${snap.assets?.length || 0}</b></div>
+        <div><span style="color:var(--muted); font-size:12px;">GÜVEN</span><br><b>${Math.round((snap.confidence || 0) * 100)}%</b></div>
+      </div>
+      ${snap.assets && snap.assets.length > 0 ? `
+        <h4 style="color:var(--accent-gold); margin:16px 0 8px;">Varlıklar</h4>
+        <div style="max-height:200px; overflow:auto;">
+          ${snap.assets.map(a => `
+            <div style="padding:8px; background:var(--panel); border:1px solid var(--line); border-radius:8px; margin-bottom:6px;">
+              <div style="display:flex; justify-content:space-between;">
+                <b style="color:var(--accent-gold);">${esc(a.symbol)}</b>
+                <span>${moneyOrNoData(a.currentValue)}</span>
+              </div>
+              <div style="font-size:11px; color:var(--muted);">${esc(a.name)} · ${a.quantity ? fmt(a.quantity) : '—'} · ${esc(a.institution || '—')}</div>
+            </div>
+          `).join('')}
+        </div>` : ''}
+      ${comparison && comparison.hasPrevious ? `
+        <div style="margin-top:16px; padding:12px; background:rgba(212,175,55,0.1); border:1px solid var(--line-gold); border-radius:8px;">
+          <div style="font-weight:700; color:var(--accent-gold); margin-bottom:8px;">ÖNCEKİ SNAPSHOT İLE KARŞILAŞTIRMA</div>
+          ${comparison.cashDelta !== 0 ? `<div>Nakit: ${comparison.cashDelta > 0 ? '+' : ''}${money(comparison.cashDelta)}</div>` : ''}
+          ${comparison.totalDelta !== 0 ? `<div>Toplam: ${comparison.totalDelta > 0 ? '+' : ''}${money(comparison.totalDelta)}</div>` : ''}
+          ${comparison.assetChanges && comparison.assetChanges.length > 0 ? `
+            <div style="margin-top:8px;">Varlık Değişimleri:
+              ${comparison.assetChanges.map(c => {
+                const color = c.type === 'NEW' ? 'var(--positive)' : c.type === 'REMOVED' ? 'var(--negative)' : 'var(--warning)';
+                const prefix = c.type === 'NEW' ? 'YENİ: ' : c.type === 'REMOVED' ? 'ÇIKARILDI: ' : 'DEĞİŞTİ: ';
+                return `<div style="color:${color}; margin:2px 0;">${prefix}${c.name} (${c.symbol}) ${c.type === 'CHANGE' ? money(c.previous) + ' → ' + money(c.current) : money(Math.abs(c.delta))}</div>`;
+              }).join('')}
+            </div>
+          ` : ''}
+          ${comparison.possibleMovementNote ? `<div style="margin-top:8px; color:var(--warning); font-size:12px;">${comparison.possibleMovementNote}</div>` : ''}
+        </div>
+      ` : ''}
+    </div>
+  `;
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,.8); display:flex; align-items:center; justify-content:center; z-index:1000;';
+  modal.innerHTML = `
+    <div class="modal-box" style="background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:24px; max-width:440px; width:90%; max-height:90vh; overflow:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="margin:0; color:var(--accent-gold);">Snapshot Detayı</h3>
+        <button class="modal-close" onclick="this.closest('.modal').remove()" style="background:none; border:none; color:var(--muted); font-size:24px; cursor:pointer;">×</button>
+      </div>
+      ${detailHtml}
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.hidden = false;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
 </script>
 </body>
 </html>
+

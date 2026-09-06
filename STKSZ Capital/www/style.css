@@ -1,6 +1,6 @@
 :root{
   --bg:#050607;--panel:#0b0f11;--panel2:#0f1417;--line:#1d252a;
-  --text:#f4f7f8;--muted:#89949a;--green:#D0904E;--red:#ff4d4d;--positive:#00df78;
+  --text:#f4f7f8;--muted:#89949a;--copper:#D0904E;--gold:#CFAE5F;--red:#ff4d4d;--positive:#00a859;
   --yellow:#e7b51e;--blue:#4b9cff;--accent:#D0904E;
 }
 *{box-sizing:border-box}
@@ -327,7 +327,7 @@ main{max-width:1080px;margin:auto;padding:22px 18px}
 }
 
 /* STKSZ profesyonel mobil kart görünümü — mevcut işlevlerin üzerinde */
-:root{--card:#0a0f11;--card-soft:#0c1215;--line-soft:#202b30;--green-glow:rgba(184,115,51,.16);--yellow-glow:rgba(231,181,30,.14);--red-glow:rgba(255,77,77,.13)}
+:root{--card:#0a0f11;--card-soft:#0c1215;--line-soft:#202b30;--green-glow:rgba(184,115,51,.08);--yellow-glow:rgba(231,181,30,.1);--red-glow:rgba(255,77,77,.1)}
 main{padding-top:18px}
 .card,.metric-card,.settings-block,.holding-card,.risk-card,.plan-card,.featured-card{box-shadow:0 8px 24px rgba(0,0,0,.16)}
 .section-title{display:flex;align-items:center;gap:7px;font-size:13px;color:#bcc6ca;letter-spacing:2.2px}
@@ -551,7 +551,7 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .portfolio-asset-picker{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:9px 1px 11px;scrollbar-width:thin}
 .portfolio-asset-chip{flex:0 0 auto;min-width:78px;max-width:125px;scroll-snap-align:start;border:1px solid #24312c;background:#0a0f0d;color:#c0ccc6;border-radius:11px;padding:8px 10px;text-align:left}
 .portfolio-asset-chip b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.portfolio-asset-chip small{display:block;color:#78877f;font-size:8px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.portfolio-asset-chip.active{border-color:#00a85d;background:#082218;color:#72f8b5;box-shadow:0 0 12px rgba(0,223,120,.09)}
+.portfolio-asset-chip.active{border-color:var(--accent-copper);background:#082218;color:var(--accent-gold);box-shadow:0 0 12px rgba(208,144,78,.09)}
 .single-holding{margin-top:2px}.single-holding .holding-card{margin:0}
 .holding-note{margin-top:8px;border-left:2px solid #315444;padding:7px 9px;color:#aebbb5;font-size:10px;line-height:1.45}
 .manual-asset-action{border-color:#6c5a13!important;background:#332a0b!important}
@@ -607,7 +607,7 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .nav{align-items:stretch}.nav button{display:flex;flex:1 1 0;min-width:0;min-height:58px;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:7px 3px;line-height:1;border-radius:12px}.nav button.active{background:rgba(184,115,51,.055)}
 .nav-icon{display:block;font-size:22px;line-height:1;color:inherit}.nav-label{display:block;font-size:9px;line-height:1.1;white-space:nowrap}
 .portfolio-asset-picker{gap:9px;padding:10px 1px 12px}.portfolio-asset-card{width:138px}.portfolio-asset-card .portfolio-asset-chip{width:138px;min-width:138px;max-width:138px;min-height:92px;padding:11px 9px 9px;padding-right:33px;background:linear-gradient(145deg,#0b1210,#070b09);border-color:#293830;overflow:hidden}
-.asset-chip-symbol{display:block;font-size:15px;line-height:1.1;color:#edf7f2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-chip-name{display:block;margin-top:5px;color:#77877f;font-size:8.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-chip-bottom{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:9px}.asset-chip-bottom small{margin:0!important;color:#aebdb6!important;font-size:9px!important}.asset-chip-signal{max-width:64px;border:1px solid #35433d;border-radius:999px;padding:3px 5px;color:#aab6b0;font-size:6.5px;font-style:normal;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-chip-signal.buy{color:var(--green);border-color:#087647}.asset-chip-signal.sell{color:var(--red);border-color:#682222}.asset-chip-signal.hold{color:var(--yellow);border-color:#6c5a13}.portfolio-asset-chip.active{border-color:#00b765;background:linear-gradient(145deg,#08301f,#07140e);box-shadow:inset 0 0 0 1px rgba(0,223,120,.12),0 0 16px rgba(0,223,120,.10)}.portfolio-asset-chip.active .asset-chip-symbol{color:#61f7ad}
+.asset-chip-symbol{display:block;font-size:15px;line-height:1.1;color:#edf7f2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-chip-name{display:block;margin-top:5px;color:#77877f;font-size:8.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-chip-bottom{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:9px}.asset-chip-bottom small{margin:0!important;color:#aebdb6!important;font-size:9px!important}.asset-chip-signal{max-width:64px;border:1px solid #35433d;border-radius:999px;padding:3px 5px;color:#aab6b0;font-size:6.5px;font-style:normal;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.asset-chip-signal.buy{color:var(--green);border-color:#087647}.asset-chip-signal.sell{color:var(--red);border-color:#682222}.asset-chip-signal.hold{color:var(--yellow);border-color:#6c5a13}.portfolio-asset-chip.active{border-color:var(--accent-copper);background:linear-gradient(145deg,#08301f,#07140e);box-shadow:inset 0 0 0 1px rgba(208,144,78,.12),0 0 16px rgba(208,144,78,.10)}.portfolio-asset-chip.active .asset-chip-symbol{color:var(--accent-gold)}
 .day-summary-modern{padding:0;overflow:hidden;border-color:#234438;background:linear-gradient(145deg,#07100d,#050807);box-shadow:0 10px 28px rgba(0,0,0,.22),inset 0 0 22px rgba(0,223,120,.025)}
 .day-summary-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid #1b2d26;background:linear-gradient(90deg,rgba(0,223,120,.07),transparent)}.day-summary-head>div{display:flex;align-items:center;gap:8px}.day-summary-head b{font-size:12px;letter-spacing:1px}.day-summary-head small{color:#718078;font-size:8px;text-align:right}.day-summary-dot{width:9px;height:9px;border-radius:50%;background:var(--yellow);box-shadow:0 0 9px rgba(231,181,30,.35)}.day-summary-dot.positive{background:var(--green);box-shadow:0 0 9px rgba(0,223,120,.5)}.day-summary-dot.negative{background:var(--red);box-shadow:0 0 9px rgba(255,77,77,.45)}
 .day-summary-rows{display:grid}.day-summary-row{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(0,1.2fr);gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid #16221d}.day-summary-row:last-child{border-bottom:0}.day-summary-row span{color:#899891;font-size:10px;font-weight:800;letter-spacing:.6px}.day-summary-row b{text-align:right;font-size:12px;line-height:1.4;overflow-wrap:anywhere}.day-summary-row b.positive{color:var(--green)}.day-summary-row b.negative{color:var(--red)}.day-summary-row b.neutral{color:var(--yellow)}
@@ -1016,7 +1016,7 @@ select option:checked{background-color:#0b3f26;color:#aef7d3}
 select:disabled{opacity:.5}
 body[data-theme="light"] select{background-color:#fff;color:#22352c;border-color:#c4d2ca;color-scheme:light}
 body[data-theme="light"] select option{background-color:#fff;color:#22352c}
-input[type="checkbox"],input[type="radio"]{accent-color:#00df78}
+input[type="checkbox"],input[type="radio"]{accent-color:var(--accent-copper)}
 
 /* --- 4) İnce rötuşlar --- */
 .provider-facts{display:grid;gap:5px;font-size:10px;color:#8fa198}
@@ -1051,6 +1051,38 @@ input[type="checkbox"],input[type="radio"]{accent-color:#00df78}
 .theme-switch-row{min-height:44px}
 @media(max-width:700px){
   .menu-view-head.sticky{top:calc(var(--fixed-header-height,86px) + 4px);min-height:52px}
+}
+
+/* Personal Account Card - Mobile Responsive */
+@media(max-width:700px){
+  #personalAccountCard .card-header{flex-direction:column; align-items:stretch; gap:8px;}
+  #personalAccountCard .card-header-title{font-size:14px;}
+  #personalAccountCard .card-header-help{font-size:11px; margin-left:0;}
+  #personalAccountCard .btn{width:100%; justify-content:center;}
+  #personalAccountCard .card-content .btn{width:100%;}
+  #personalAccountCard .card-content > div[style*="display:flex"]{flex-direction:column;}
+  #uploadPreviewArea{padding:10px;}
+  #parsedResultContent{font-size:12px;}
+  #uploadPreviewArea .btn{width:100%;}
+  .asset-card{padding:12px;}
+  .asset-card b{font-size:14px;}
+  .asset-card .risk-badge{font-size:9px; padding:2px 5px;}
+}
+
+@media(max-width:430px){
+  #personalAccountCard .card-header-title{font-size:13px;}
+  #personalAccountCard .card-header-help{font-size:10px;}
+  .card-header{padding:12px;}
+  .card-content{padding:0;}
+  .asset-card{padding:10px;}
+  .asset-card b{font-size:13px;}
+}
+
+@media(max-width:380px){
+  #personalAccountCard .card-header-title{font-size:12px;}
+  .card{padding:12px;}
+  .btn{padding:10px 14px; font-size:12px;}
+  #parsedResultContent{font-size:11px;}
 }
 /* file:// / masaüstü fallback: değişken hesaplanamazsa bile bar içerikten kopmaz */
 @supports not (top:env(safe-area-inset-top)){
@@ -1987,7 +2019,7 @@ body[data-theme="light"] .account-tab{background:#f2f6f3;color:#3a4a42}
   --card:#252A34;--card-soft:#252A34;--line-soft:#333A47;
   --card-bg:#252A34;--card-line:rgba(255,255,255,0.06);--card-line-strong:#B87333;
   --title-color:#9CA3AF;
-  --green-glow:rgba(0,230,118,.14);--red-glow:rgba(255,92,92,.12);--yellow-glow:rgba(231,181,30,.12);
+  --green-glow:rgba(0,230,118,.08);--red-glow:rgba(255,92,92,.1);--yellow-glow:rgba(231,181,30,.1);
   --neu-shadow:0 10px 28px rgba(0,0,0,.38),0 2px 8px rgba(0,0,0,.28);
   --neu-light:inset 0 1px 0 rgba(255,255,255,.07),inset 1px 0 0 rgba(255,255,255,.03);
 }
@@ -2869,24 +2901,24 @@ body[data-theme="light"] .risk-card{background:#f8f9fa;border-color:#e2e8e4}
 
 /* --- NAV AI BUTTON: kept copper by default --- */
 
-/* ---绿 POSITIVE K/Z INDICATORS: kept green (universal finance convention) --- */
-.news-dot.positive{background:#00df78!important;color:#00df78!important}
-.day-summary-dot.positive{background:#00df78!important}
-.day-summary-row b.positive{color:#00df78!important}
-.result-card.positive:before{background:#00df78!important;box-shadow:0 0 8px rgba(0,223,120,.4)!important}
-.asset-chip-signal.buy{color:#00df78!important;border-color:#087647!important}
-.score-num{color:#00df78!important}
-.live{color:#00df78!important}
-.confidence.certain{color:#00df78!important}
-.status-grade.good{color:#00df78!important}
-.risk-dot.low{background:#00df78!important}
-.risk-fill.low{background:#00df78!important}
-.portfolio-overview .daily-chip{color:#00df78!important}
-.portfolio-overview .daily-chip.positive{color:#00df78!important}
-body:not([data-theme="light"]) .portfolio-overview .daily-chip.positive{color:#00df78!important}
-body:not([data-theme="light"]) .result-card.positive:before{background:#00df78!important}
-body:not([data-theme="light"]) .day-summary-dot.positive{background:#00df78!important}
-body:not([data-theme="light"]) .asset-chip-signal.buy{color:#00df78!important}
+/* --- POSITIVE K/Z INDICATORS: using muted positive green (--positive) --- */
+.news-dot.positive{background:var(--positive)!important;color:var(--positive)!important}
+.day-summary-dot.positive{background:var(--positive)!important}
+.day-summary-row b.positive{color:var(--positive)!important}
+.result-card.positive:before{background:var(--positive)!important;box-shadow:0 0 8px var(--positive-glow)!important}
+.asset-chip-signal.buy{color:var(--positive)!important;border-color:#087647!important}
+.score-num{color:var(--positive)!important}
+.live{color:var(--positive)!important}
+.confidence.certain{color:var(--positive)!important}
+.status-grade.good{color:var(--positive)!important}
+.risk-dot.low{background:var(--positive)!important}
+.risk-fill.low{background:var(--positive)!important}
+.portfolio-overview .daily-chip{color:var(--positive)!important}
+.portfolio-overview .daily-chip.positive{color:var(--positive)!important}
+body:not([data-theme="light"]) .portfolio-overview .daily-chip.positive{color:var(--positive)!important}
+body:not([data-theme="light"]) .result-card.positive:before{background:var(--positive)!important}
+body:not([data-theme="light"]) .day-summary-dot.positive{background:var(--positive)!important}
+body:not([data-theme="light"]) .asset-chip-signal.buy{color:var(--positive)!important}
 body:not([data-theme="light"]) .bist-provider-meta b[data-source-state="connected"]{color:#00df78!important}
 body:not([data-theme="light"]) .confidence.certain{color:#00df78!important}
 
@@ -3070,12 +3102,27 @@ body[data-theme="light"] .header-investor-chip{border-color:rgba(140,82,32,.3);b
 /* 50 TL: RGB Neon badge */
 .badge-shop-50{border:1px solid #5a3e1e;background:linear-gradient(145deg,#0e0b08,#090706)}
 .badge-shop-50 .badge-shop-icon{width:48px;height:48px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-size:22px;position:relative}
-.badge-neon-rgb{animation:neon-rotate 3s linear infinite;border:2px solid transparent;border-image:linear-gradient(var(--neon-angle),#ff0040,#ff8800,#ffcc00,#00ff88,#0088ff,#8800ff,#ff0040) 1;border-radius:50%;background:rgba(0,0,0,.3)}
-.badge-shop-50 .badge-shop-price{color:#ff6b6b}
-@keyframes neon-rotate{0%{--neon-angle:0deg}100%{--neon-angle:360deg}}
-@property --neon-angle{syntax:"<angle>";initial-value:0deg;inherits:false}
-.badge-shop-50 .badge-shop-icon{border:3px solid #ff4060;box-shadow:0 0 12px rgba(255,64,96,.4),0 0 24px rgba(0,136,255,.3),0 0 36px rgba(255,204,0,.2);animation:neon-glow 2s ease-in-out infinite alternate}
-@keyframes neon-glow{0%{box-shadow:0 0 12px rgba(255,64,96,.5),0 0 24px rgba(0,136,255,.35),0 0 36px rgba(255,204,0,.25)}50%{box-shadow:0 0 16px rgba(0,255,136,.45),0 0 30px rgba(255,64,96,.3),0 0 40px rgba(0,136,255,.25)}100%{box-shadow:0 0 14px rgba(0,136,255,.5),0 0 28px rgba(255,204,0,.35),0 0 38px rgba(255,64,96,.25)}}
+/* Copper Gold badge styles - replacing neon effects */
+.badge-neon-rgb,
+.badge-shop-50 .badge-shop-icon{
+  color: var(--accent-copper) !important;
+  background: linear-gradient(145deg, #181d2a, #0f1417) !important;
+  border: 1px solid var(--accent-copper) !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+.badge-shop-50 .badge-shop-icon{color: var(--accent-copper)}
+
+/* Copper Gold badge pulse (replacing neon-rotate) */
+@keyframes copper-pulse{0%{opacity:1}50%{opacity:.8}100%{opacity:1}}
+.badge-shop-50 .badge-shop-icon{animation:copper-pulse 3s ease-in-out infinite alternate}
+
+/* Copper Gold glow (replacing neon-glow) */
+.badge-shop-50 .badge-shop-icon{border-color: var(--accent-copper);box-shadow:0 0 8px rgba(184,115,51,.2),0 0 16px rgba(184,115,51,.1),0 0 24px rgba(184,115,51,.05)}
+
+/* Remove neon keyframes and property (already removed above) */
+.badge-shop-50 .badge-shop-price{color: var(--muted)}}
 
 /* 100 TL: Premium Gold badge */
 .badge-shop-100{border:1px solid #8C5220;background:linear-gradient(145deg,#1a1208,#140e07);box-shadow:inset 0 0 30px rgba(184,115,51,.06)}

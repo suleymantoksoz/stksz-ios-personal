@@ -353,7 +353,500 @@
               portfolioReturn: +portfolioReturn.toFixed(2),
               alpha: +alpha.toFixed(2),
               outperforms: alpha > 0
-            };
+};
+
+// Account Asset Class
+class AccountAsset {
+  constructor(opts = {}) {
+    this.id = opts.id || 'asset_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    this.name = opts.name || 'Bilinmeyen Varlık';
+    this.symbol = opts.symbol || '';
+    this.quantity = opts.quantity || 0;
+    this.currentValue = opts.currentValue || 0;
+    this.cost = opts.cost || 0;
+    this.type = opts.type || 'asset'; // fund, stock, crypto, cash, commodity
+    this.institution = opts.institution || 'Bilinmeyen Kurum';
+    this.riskLevel = opts.riskLevel || 'VERİ YETERSİZ — KARAR YOK';
+  }
+}
+
+// STKSZ Account Engine - Kişisel Hesap ve Görsel Analiz Motoru
+const STKSZAccountEngine = {
+  storageKey: 'stksz_account_snapshots_v2',
+  // Server endpoint for AI vision
+  visionEndpoint: '/api/ai/vision',
+  // Use relative URL for same-origin, or configurable for deployed backend
+  apiBase: (typeof window !== 'undefined' && window.location && window.location.origin) || '',
+
+  getSnapshots() {
+    const data = localStorage.getItem(this.storageKey);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveSnapshot(snapshot) {
+    const history = this.getSnapshots();
+    history.unshift(snapshot);
+    if (history.length > 50) history.pop();
+    localStorage.setItem(this.storageKey, JSON.stringify(history));
+  },
+
+  // REAL: Ekran görüntüsünü yükle ve AI/Vision ile analiz et
+  async processAccountImage(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      return { ok: false, error: 'Geçersiz dosya biçimi. Lütfen bir görsel seçin.' };
+    }
+
+    const base64 = await this._fileToBase64(file);
+    
+    // 1. Try server-side Gemini Vision (best accuracy for financial docs)
+    let extraction = await this._callVisionApi(base64, file.type);
+    
+    if (!extraction.ok) {
+      // 2. Fallback: Client-side Tesseract OCR (existing Midas/ENR pipeline)
+      const tesseractResult = await this._tesseractOcrFallback(extraction.file);
+      if (tesseractResult.ok) {
+        return this._buildSnapshotFromOcr(tesseractResult);
+      }
+      return { ok: false, error: 'VERİ YETERSİZ — KARAR YOK', details: 'Görsel analiz edilemedi. OCR ve AI vision başarısız.' };
+    }
+
+    return this._buildSnapshotFromVision(extraction);
+  },
+
+  _fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+
+  // Call server /api/ai/vision with Gemini Vision
+  async _callVisionApi(base64, mimeType) {
+    try {
+      const url = this.apiBase + this.visionEndpoint;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, mimeType })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return { ok: false, error: err.error || 'Vision API hatası', file: null };
+      }
+      const data = await res.json();
+      if (!data.ok || !data.out?.extraction) {
+        return { ok: false, error: data.out?.error || 'Vision yanıt vermedi', file: null };
+      }
+      return { ok: true, extraction: data.out.extraction, file: null };
+    } catch (e) {
+      return { ok: false, error: 'Sunucuya bağlanılamadı: ' + e.message, file: null };
+    }
+  },
+
+  // Fallback: Client-side Tesseract OCR using existing Midas/ENR pipeline
+  async _tesseractOcrFallback(file) {
+    try {
+      // Use existing Tesseract loader from index.html
+      const Tesseract = await this._loadTesseract();
+      if (!Tesseract) {
+        return { ok: false, error: 'Tesseract yüklenemedi' };
+      }
+      
+      // Preprocess image for financial documents
+      const processed = await this._preprocessImageForOcr(file);
+      const result = await Tesseract.recognize(processed, 'tur+eng', {
+        logger: m => m.status === 'recognizing text' && console.log('[OCR]', Math.round(m.progress * 100) + '%')
+      });
+      
+      const text = result?.data?.text || '';
+      const confidence = finite(result?.data?.confidence) ?? 0;
+      
+      if (!text.trim() || confidence < 30) {
+        return { ok: false, error: 'OCR güvenilir metin üretemedi' };
+      }
+      
+      // Use existing Midas/ENR detection and parsing
+      const detected = detectOcrSource ? detectOcrSource(text) : this._detectSource(text);
+      let parsed = null;
+      
+      if (detected === 'midas' && typeof parseMidasOcr === 'function') {
+        parsed = parseMidasOcr(text, confidence);
+      } else if (detected === 'enr' && typeof parseEnrOcr === 'function') {
+        parsed = parseEnrOcr(text, confidence);
+      } else {
+        // Generic financial document parsing
+        parsed = this._parseGenericFinancial(text, confidence);
+      }
+      
+      if (!parsed || !parsed.assets?.length) {
+        return { ok: false, error: 'OCR finansal varlık çıkaramadı' };
+      }
+      
+      return { ok: true, parsed, rawText: text, confidence };
+    } catch (e) {
+      return { ok: false, error: 'OCR hatası: ' + e.message };
+    }
+  },
+
+  _loadTesseract() {
+    return new Promise((resolve) => {
+      if (window.Tesseract) return resolve(window.Tesseract);
+      if (window.tesseractPromise) return window.tesseractPromise.then(resolve);
+      
+      const TESSERACT_CDN_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+      const fallbacks = [TESSERACT_CDN_URL, 'https://unpkg.com/tesseract.js@5/dist/tesseract.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js'];
+      
+      const loadScript = (urls) => {
+        if (!urls.length) return resolve(null);
+        const s = document.createElement('script');
+        s.src = urls[0];
+        s.onload = () => resolve(window.Tesseract);
+        s.onerror = () => loadScript(urls.slice(1));
+        document.head.appendChild(s);
+      };
+      loadScript(fallbacks);
+    });
+  },
+
+  async _preprocessImageForOcr(file) {
+    // Use existing preprocessImageForOcr from index.html if available
+    if (typeof preprocessImageForOcr === 'function') {
+      return preprocessImageForOcr(file);
+    }
+    // Fallback: return file as-is
+    return file;
+  },
+
+  _detectSource(text) {
+    const t = String(text || '').toLowerCase();
+    if (/(midas|pozisyonum|toplam\s+midas|midas\s+portf)/i.test(text)) return 'midas';
+    if (/(enpara|enpara\.com|enr\s+fon|tp2\s+fon)/i.test(text)) return 'enr';
+    return 'generic';
+  },
+
+  _parseGenericFinancial(text, confidence) {
+    // Generic financial document parsing for Turkish banks/brokers
+    const lines = String(text || '').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const assets = [];
+    let cash = 0;
+    let institution = 'Bilinmeyen Kurum';
+    
+    // Detect institution
+    const bankKeywords = {
+      'garanti': 'Garanti BBVA',
+      'akbank': 'Akbank',
+      'isbank': 'İş Bankası',
+      'yapikredi': 'Yapı Kredi',
+      'denizbank': 'DenizBank',
+      'hsbc': 'HSBC',
+      'ziraat': 'Ziraat Bankası',
+      'vakıfbank': 'VakıfBank',
+      'ing': 'ING',
+      'enpara': 'Enpara',
+      'qnb': 'QNB Finansbank',
+      'teb': 'TEB',
+      'odeabank': 'Odea Bank'
+    };
+    
+    const textLower = String(text || '').toLowerCase();
+    for (const [key, name] of Object.entries(bankKeywords)) {
+      if (textLower.includes(key)) {
+        institution = name;
+        break;
+      }
+    }
+    
+    // Parse lines for assets and cash
+    const knownSymbols = new Set([
+      'ENR', 'TP2', 'ASELS', 'TUPRS', 'THYAO', 'GARAN', 'AKBNK', 'YKBNK', 'ISCTR', 'HALKB',
+      'SISE', 'EREGL', 'KCHOL', 'KOZAL', 'KOZAA', 'PETKM', 'TOASO', 'FROTO', 'SASA',
+      'BTC', 'ETH', 'USDT', 'USDC', 'TRY', 'USD', 'EUR', 'XAU', 'XAG'
+    ]);
+    
+    for (const line of lines) {
+      const upper = line.toUpperCase();
+      
+      // Detect cash
+      const cashMatch = line.match(/(nakit|cash|bakiye|balance)[^\d]*([\d.,\s]+)/i);
+      if (cashMatch && cash === 0) {
+        const val = this._parseTurkishNumber(cashMatch[2]);
+        if (val > 0) cash = val;
+      }
+      
+      // Detect assets
+      for (const symbol of knownSymbols) {
+        const pattern = new RegExp(`\\b${symbol.replace('.', '\\.')}\\b`, 'i');
+        if (pattern.test(upper)) {
+          // Try to extract quantity and value from same line
+          const qMatch = line.match(/(\d+[.,]?\d*)\s*(adet|lot|pay|ad)/i);
+          const vMatch = line.match(/([\d.,\s]+)\s*(TL|USD|EUR|TRY)/i);
+          
+          const quantity = qMatch ? this._parseTurkishNumber(qMatch[1]) : 0;
+          const value = vMatch ? this._parseTurkishNumber(vMatch[1]) : 0;
+          
+          // Check if already added
+          const existing = assets.find(a => a.symbol === symbol);
+          if (!existing) {
+            assets.push(new AccountAsset({
+              symbol,
+              name: symbol,
+              quantity: quantity || 1,
+              currentValue: value || 0,
+              type: this._guessAssetType(symbol),
+              institution,
+              cost: 0
+            }));
+          }
+        }
+      }
+    }
+    
+    return {
+      institution,
+      cashBalance: cash,
+      totalValue: assets.reduce((a, b) => a + b.currentValue, 0) + cash,
+      confidence: Math.min(confidence / 100, 0.85),
+      assets
+    };
+  },
+
+  _guessAssetType(symbol) {
+    if (['BTC', 'ETH', 'USDT', 'USDC'].includes(symbol)) return 'crypto';
+    if (['TRY', 'USD', 'EUR', 'XAU', 'XAG'].includes(symbol)) return 'cash';
+    if (['ENR', 'TP2'].includes(symbol)) return 'fund';
+    return 'stock';
+  },
+
+  _parseTurkishNumber(str) {
+    if (!str) return 0;
+    // Handle Turkish format: 1.234,56 or 1,234.56
+    const clean = String(str).replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+    const num = parseFloat(clean);
+    return isFinite(num) ? num : 0;
+  },
+
+  // Build snapshot from Vision API response
+  _buildSnapshotFromVision(visionResult) {
+    const extraction = visionResult.extraction;
+    const assets = [];
+    let cash = extraction.cashTRY || 0;
+    let institution = 'AI Tespit Edilen Kurum';
+    
+    // Parse positions
+    if (Array.isArray(extraction.positions)) {
+      for (const p of extraction.positions) {
+        if (!p.symbol || !p.confidence) continue;
+        const isHighConf = p.confidence === 'yüksek';
+        const asset = new AccountAsset({
+          symbol: String(p.symbol).toUpperCase(),
+          name: p.symbol,
+          quantity: finite(p.quantity) || 0,
+          currentValue: finite(p.marketValue) || 0,
+          cost: finite(p.averageCost) ? finite(p.averageCost) * finite(p.quantity) : 0,
+          type: this._guessAssetType(p.symbol),
+          institution: 'AI Tespit Edilen Kurum',
+          riskLevel: p.confidence === 'düşük' ? 'DÜŞÜK GÜVEN' : p.confidence === 'orta' ? 'ORTA' : 'YÜKSEK'
+        });
+        if (isHighConf || p.confidence === 'orta') {
+          assets.push(asset);
+        }
+      }
+    }
+    
+    // Parse trades as potential positions
+    if (Array.isArray(extraction.trades)) {
+      for (const t of extraction.trades) {
+        if (!t.symbol || t.confidence === 'düşük') continue;
+        const existing = assets.find(a => a.symbol === t.symbol.toUpperCase());
+        if (!existing) {
+          assets.push(new AccountAsset({
+            symbol: t.symbol.toUpperCase(),
+            name: t.symbol.toUpperCase(),
+            quantity: finite(t.quantity) || 0,
+            currentValue: finite(t.totalAmount) || 0,
+            cost: finite(t.price) ? finite(t.price) * finite(t.quantity) : 0,
+            type: this._guessAssetType(t.symbol),
+            institution: 'AI Tespit Edilen İşlem',
+            riskLevel: t.confidence === 'orta' ? 'ORTA' : 'YÜKSEK'
+          }));
+        }
+      }
+    }
+    
+    // Add cash as asset if > 0
+    if (cash > 0) {
+      assets.push(new AccountAsset({
+        symbol: 'TRY',
+        name: 'Nakit TL',
+        quantity: cash,
+        currentValue: cash,
+        cost: cash,
+        type: 'cash',
+        institution: 'Tespit Edilen Hesap',
+        riskLevel: 'DÜŞÜK'
+      }));
+    }
+    
+    const totalValue = assets.reduce((a, b) => a + b.currentValue, 0) + cash;
+    
+    return {
+      ok: true,
+      snapshot: {
+        id: 'snap_' + Date.now(),
+        timestamp: new Date().toISOString(),
+        institution,
+        cashBalance: cash,
+        totalValue,
+        assets,
+        confidence: 0.9
+      }
+    };
+  },
+
+  // Build snapshot from Tesseract OCR result
+  _buildSnapshotFromOcr(ocrResult) {
+    const parsed = ocrResult.parsed;
+    const assets = [];
+    let cash = ocrResult.cash || 0;
+    let institution = parsed.institution || 'OCR Tespit Edilen Kurum';
+    
+    if (Array.isArray(parsed.assets)) {
+      for (const a of parsed.assets) {
+        if (!a.symbol) continue;
+        assets.push(new AccountAsset({
+          symbol: String(a.symbol).toUpperCase(),
+          name: a.name || a.symbol,
+          quantity: finite(a.quantity) || 0,
+          currentValue: finite(a.currentValue) || 0,
+          cost: finite(a.cost) || 0,
+          type: a.type || this._guessAssetType(a.symbol),
+          institution: a.institution || institution,
+          riskLevel: a.confidence !== undefined && a.confidence < 0.7 ? 'DÜŞÜK GÜVEN' : 'ORTA'
+        }));
+      }
+    }
+    
+    // Add cash
+    if (cash > 0) {
+      assets.push(new AccountAsset({
+        symbol: 'TRY',
+        name: 'Nakit TL',
+        quantity: cash,
+        currentValue: cash,
+        cost: cash,
+        type: 'cash',
+        institution,
+        riskLevel: 'DÜŞÜK'
+      }));
+    }
+    
+    const totalValue = assets.reduce((a, b) => a + b.currentValue, 0) + cash;
+    
+    return {
+      ok: true,
+      snapshot: {
+        id: 'snap_' + Date.now(),
+        timestamp: new Date().toISOString(),
+        institution,
+        cashBalance: cash,
+        totalValue,
+        assets,
+        confidence: ocrResult.confidence || 0.7
+      }
+    };
+  },
+
+  // Snapshotlar Arası Karşılaştırma & Fark (Delta) Tespiti
+  compareWithPrevious(newSnapshot) {
+    const history = this.getSnapshots();
+    if (history.length === 0) {
+      return { hasPrevious: false, message: 'İlk hesap kaydı oluşturuldu.' };
+    }
+
+    const prev = history[0];
+    const cashDelta = newSnapshot.cashBalance - prev.cashBalance;
+    const totalDelta = newSnapshot.totalValue - prev.totalValue;
+
+    const assetChanges = [];
+    const prevAssetMap = new Map(prev.assets.map(a => [a.symbol + '|' + a.institution, a]));
+    const newAssetMap = new Map(newSnapshot.assets.map(a => [a.symbol + '|' + a.institution, a]));
+
+    // Eklenen ve değişen
+    for (const [key, newA] of newAssetMap) {
+      const oldA = prevAssetMap.get(key);
+      if (!oldA) {
+        assetChanges.push({ type: 'NEW', name: newA.name, symbol: newA.symbol, delta: newA.currentValue, institution: newA.institution });
+      } else {
+        const diff = newA.currentValue - oldA.currentValue;
+        if (Math.abs(diff) > 0.01) {
+          assetChanges.push({ type: 'CHANGE', name: newA.name, symbol: newA.symbol, previous: oldA.currentValue, current: newA.currentValue, delta: diff, institution: newA.institution });
+        }
+      }
+    }
+
+    // Çıkarılan
+    for (const [key, oldA] of prevAssetMap) {
+      if (!newAssetMap.has(key)) {
+        assetChanges.push({ type: 'REMOVED', name: oldA.name, symbol: oldA.symbol, delta: -oldA.currentValue, institution: oldA.institution });
+      }
+    }
+
+    return {
+      hasPrevious: true,
+      previousTimestamp: prev.timestamp,
+      cashDelta,
+      totalDelta,
+      assetChanges,
+      possibleMovementNote: (cashDelta < 0 && totalDelta >= 0) ? 'OLASI HAREKET: Nakit çıkışı ile varlık alımı yapılmış olabilir.' : null
+    };
+  }
+};
+
+  // Snapshotlar Arası Karşılaştırma & Fark (Delta) Tespiti
+  compareWithPrevious(newSnapshot) {
+    const history = this.getSnapshots();
+    if (history.length === 0) {
+      return { hasPrevious: false, message: 'İlk hesap kaydı oluşturuldu.' };
+    }
+
+    const prev = history[0]; // En son kaydedilen snapshot
+    const cashDelta = newSnapshot.cashBalance - prev.cashBalance;
+    const totalDelta = newSnapshot.totalValue - prev.totalValue;
+
+    // Varlık Bazlı Değişimler
+    const assetChanges = [];
+    newSnapshot.assets.forEach(newA => {
+      const oldA = prev.assets.find(a => a.symbol === newA.symbol || a.name === newA.name);
+      if (!oldA) {
+        assetChanges.push({ type: 'NEW', name: newA.name, delta: newA.currentValue });
+      } else {
+        const diff = newA.currentValue - oldA.currentValue;
+        if (diff !== 0) {
+          assetChanges.push({ type: 'CHANGE', name: newA.name, previous: oldA.currentValue, current: newA.currentValue, delta: diff });
+        }
+      }
+    });
+
+    // Satılan / Eksilen Varlıklar
+    prev.assets.forEach(oldA => {
+      const exists = newSnapshot.assets.some(a => a.symbol === oldA.symbol || a.name === oldA.name);
+      if (!exists) {
+        assetChanges.push({ type: 'REMOVED', name: oldA.name, delta: -oldA.currentValue });
+      }
+    });
+
+    return {
+      hasPrevious: true,
+      previousTimestamp: prev.timestamp,
+      cashDelta,
+      totalDelta,
+      assetChanges,
+      possibleMovementNote: (cashDelta < 0 && totalDelta >= 0) ? 'OLASI HAREKET: Nakit çıkışı ile varlık alımı yapılmış olabilir.' : null
+    };
+  }
+};
           }
         });
       }
