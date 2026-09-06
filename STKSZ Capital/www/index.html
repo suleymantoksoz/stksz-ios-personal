@@ -1465,6 +1465,11 @@
       <p class="help">Fiyat, para birimi, vergiler, yenileme döngüsü, otomatik yenileme durumu, iptal politikası, iade şartları, satıcı varlığı ve ödeme sağlayıcı detayları.</      <div class="toolbar"><button type="button" class="btn" onclick="openSubscriptionTerms()">ABONELİK KOŞULLARI</button></div>
     </div>
     <div class="menu-form-card">
+      <div class="section-title">KULLANIM KOŞULLARI (TERMS OF USE)</div>
+      <p class="help">Hizmet kapsamı, finansal bilgi niteliği, yatırım danışmanlığı olmadığı beyanı, veri doğruluğu, kullanıcı sorumluluğu, AI çıktıları, üçüncü taraf servisler, hesap güvenliği, fikri mülkiyet, kabul edilebilir kullanım, sorumluluk sınırları, uygulanabilir hukuk.</p>
+      <div class="toolbar"><button type="button" class="btn" onclick="openTermsOfUse()">KULLANIM KOŞULLARI</button></div>
+    </div>
+    <div class="menu-form-card">
       <div class="section-title">ORTAKLIK AÇIKLAMASI</div>
       <p class="help">Affiliate/referans linklerinden ticari gelir elde edilebileceği beyanı ve STKSZ Skoru üzerindeki etkisizlik beyanı.</      <div class="toolbar"><button type="button" class="btn" onclick="openAffiliateDisclosure()">ORTAKLIK AÇIKLAMASI</button></div>
     </div>
@@ -2224,14 +2229,14 @@ let weatherCache=safeJson(storageGet("stkszWeatherCache"),null);if(weatherCache&
 const formatNumber=(value,min=2,max=2)=>{const n=Math.min(min,max),x=Math.max(min,max);return new Intl.NumberFormat("tr-TR",{minimumFractionDigits:n,maximumFractionDigits:x}).format(Number(value)||0);};
 const fmt=value=>formatNumber(value,2,2);
 const money=value=>appMoney(value);
-const signedMoney=value=>(Number(value)>=0?"+":"-")+"₺"+fmt(Math.abs(Number(value)||0));
-const signedTL=value=>(Number(value)>=0?"+":"-")+fmt(Math.abs(Number(value)||0))+" TL";
+const signedMoney=value=>{if(value===null||value===undefined||!Number.isFinite(Number(value)))return"VERİ YOK";return(Number(value)>=0?"+":"-")+"₺"+fmt(Math.abs(Number(value)));};
+const signedTL=value=>{if(value===null||value===undefined||!Number.isFinite(Number(value)))return"VERİ YOK";return(Number(value)>=0?"+":"-")+fmt(Math.abs(Number(value)))+" TL";};
 const pct=value=>(Number(value)>=0?"+":"")+fmt(value)+"%";
 const plainPct=value=>fmt(value)+"%";
 const countFmt=value=>new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0}).format(Number(value)||0);
 const valueOrNoData=(value,formatter=fmt)=>value===null||value===undefined||!Number.isFinite(Number(value))?"VERİ YOK":formatter(Number(value));
 const moneyOrNoData=value=>valueOrNoData(finite(value),money);
-const signedMoneyOrNoData=value=>value===null||value===undefined||!Number.isFinite(Number(value))?"VERİ YOK":signedMoney(Number(value));
+const signedMoneyOrNoData=value=>value===null||value===undefined||!Number.isFinite(Number(value))?"VERİ YOK — KARAR YOK":signedMoney(Number(value));
 function isMobileDevice(){return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||Math.min(screen.width||9999,innerWidth||9999)<=820;}
 function randomBytes(length=32){const bytes=new Uint8Array(length);crypto.getRandomValues(bytes);return bytes;}
 function bytesToBase64(bytes){let binary="";new Uint8Array(bytes).forEach(byte=>binary+=String.fromCharCode(byte));return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");}
@@ -5331,12 +5336,13 @@ function openGdprRights(){showGdprRightsModal();}
 function openCookiePolicy(){showLegalModal("ÇEREZ / TAKİP POLİTİKASİ", "Çerez ve takip politikası içeriği...");}
 function openRiskDisclosure(){showLegalModal("YATIRIM RİSK BİLDİRİMİ", "Bu uygulama yatırım tavsiyesi vermez. Tüm yatırım kararları ve riskler kullanıcıya aittir. STKSZ Capital lisanslı bir aracı kurum/yatırım danışmanı DEĞİLDİR.");}
 function openSubscriptionTerms(){
- const de=window.STKSZDataEngine;
- const product=typeof de?.paymentProducts==="function"?de.paymentProducts().find(p=>p.kind==="subscription"):null;
- const v=product&&de&&typeof de.validateSubscriptionDisclosure==="function"?de.validateSubscriptionDisclosure(product):{ok:true,missing:[]};
- const html=`<p class="help">Fiyat, para birimi, vergiler, yenileme döngüsü, otomatik yenileme, iptal politikası, iade şartları, satıcı varlığı ve ödeme sağlayıcı detayları burada listelenir.</p>${product?`<div class="source-fact"><b>${esc(product.name)}</b> · ${esc(product.price||"—")} ${esc(product.currency||"")}</div>${v&&v.missing&&v.missing.length?`<p class="help">Eksik zorunlu açıklama alanları: ${esc(v.missing.join(", "))} — bu alanlar yayın öncesi doldurulmalıdır.</p>`:""}`:"<p class='help'>Abonelik ürünü tanımlı değil — abonelik satışı şu an kapalıdır.</p>"}`;
- showLegalModal("ABONELİK / İADE KOŞULLARI", html);
+  const de=window.STKSZDataEngine;
+  const product=typeof de?.paymentProducts==="function"?de.paymentProducts().find(p=>p.kind==="subscription"):null;
+  const v=product&&de&&typeof de.validateSubscriptionDisclosure==="function"?de.validateSubscriptionDisclosure(product):{ok:true,missing:[]};
+  const html=`<p class="help">Fiyat, para birimi, vergiler, yenileme döngüsü, otomatik yenileme, iptal politikası, iade şartları, satıcı varlığı ve ödeme sağlayıcı detayları burada listelenir.</p>${product?`<div class="source-fact"><b>${esc(product.name)}</b> · ${esc(product.price||"—")} ${esc(product.currency||"")}</div>${v&&v.missing&&v.missing.length?`<p class="help">Eksik zorunlu açıklama alanları: ${esc(v.missing.join(", "))} — bu alanlar yayın öncesi doldurulmalıdır.</p>`:""}`:"<p class='help'>Abonelik ürünü tanımlı değil — abonelik satışı şu an kapalıdır.</p>"}`;
+  showLegalModal("ABONELİK / İADE KOŞULLARI", html);
 }
+function openTermsOfUse(){showLegalModal("KULLANIM KOŞULLARI (TERMS OF USE)", "Hizmet kapsamı, finansal bilgi niteliği, yatırım danışmanlığı olmadığı beyanı, veri doğruluğu, kullanıcı sorumluluğu, AI çıktıları, üçüncü taraf servisler, hesap güvenliği, fikri mülkiyet, kabul edilebilir kullanım, sorumluluk sınırları, uygulanabilir hukuk. STKSZ Capital lisanslı bir aracı kurum/portföy yönetim şirketi DEĞİLDİR. Tüm yatırım kararları ve riskler kullanıcıya aittir. Uygulama \"olduğu gibi\" ve \"mevcut olduğu gibi\" sunulur; ticari elverişlilik, belirli bir amaç için uygunluk, kusursuzluk veya kesintisizlik konusunda garanti verilmez.");}
 function openAffiliateDisclosure(){showLegalModal("ORTAKLIK AÇIKLAMASI", "Bu uygulama affiliate/referans linklerinden ticari gelir elde edebilir. Bu durum STKSZ Skoru/analizlerini etkilemez.");}
 function openAiDisclosure(){showLegalModal("YAPAY ZEKA AÇIKLAMASI", "AI çıktıları otomatik analiz niteliğindedir; doğruluk/getiri garantisi vermez. Yatırım tavsiyesi DEĞİLDİR. Kullanıcı kendi sorumluluğundadır.");}
 function openBrokerTerms(){showLegalModal("ARACI KURUM KOŞULLARI", "Broker/API entegrasyonları teknik bir köprüdür. STKSZ Capital lisanslı bir aracı kurum/portföy yönetim şirketi DEĞİLDİR. Kullanıcı kendi riskindedir.");}
@@ -9565,7 +9571,7 @@ function openSnapshotDetail(snapshotId) {
   const snap = history.find(s => s.id === snapshotId);
   if (!snap) return;
   
-  const comparison = window.STKSZAccountEngine.compareWithPrevious ? window.STKSZAccountEngine.compareWithPrevious(snap) : null;
+  const comparison = window.STKSZAccountEngine.compareWithPrevious ? window.STKSZAccountEngine.compareWithPrevious(snap, snapshotId) : null;
   
   const detailHtml = `
     <div style="padding:16px; max-width:400px;">

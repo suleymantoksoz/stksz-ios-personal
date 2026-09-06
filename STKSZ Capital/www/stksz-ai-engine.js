@@ -758,20 +758,34 @@ const STKSZAccountEngine = {
     };
   },
 
-  // Snapshotlar Arası Karşılaştırma & Fark (Delta) Tespiti
-  compareWithPrevious(newSnapshot) {
+// Snapshotlar Arası Karşılaştırma & Fark (Delta) Tespiti
+  compareWithPrevious(newSnapshot, targetSnapshotId) {
     const history = this.getSnapshots();
     if (history.length === 0) {
       return { hasPrevious: false, message: 'İlk hesap kaydı oluşturuldu.' };
     }
 
-    const prev = history[0];
-    const cashDelta = newSnapshot.cashBalance - prev.cashBalance;
-    const totalDelta = newSnapshot.totalValue - prev.totalValue;
+    // Find the target snapshot to compare (default to newest if not specified)
+    let targetSnapshot = newSnapshot;
+    if (targetSnapshotId) {
+      const target = history.find(s => s.id === targetSnapshotId);
+      if (!target) return { hasPrevious: false, message: 'Hedef snapshot bulunamadı.' };
+      targetSnapshot = target;
+    }
+
+    // Find the predecessor of the target snapshot (the next older snapshot)
+    const targetIndex = history.findIndex(s => s.id === targetSnapshot.id);
+    if (targetIndex === -1 || targetIndex + 1 >= history.length) {
+      return { hasPrevious: false, message: 'Önceki snapshot bulunamadı (en eski kayıt).' };
+    }
+
+    const prev = history[targetIndex + 1];
+    const cashDelta = targetSnapshot.cashBalance - prev.cashBalance;
+    const totalDelta = targetSnapshot.totalValue - prev.totalValue;
 
     const assetChanges = [];
     const prevAssetMap = new Map(prev.assets.map(a => [a.symbol + '|' + a.institution, a]));
-    const newAssetMap = new Map(newSnapshot.assets.map(a => [a.symbol + '|' + a.institution, a]));
+    const newAssetMap = new Map(targetSnapshot.assets.map(a => [a.symbol + '|' + a.institution, a]));
 
     // Eklenen ve değişen
     for (const [key, newA] of newAssetMap) {
@@ -801,7 +815,6 @@ const STKSZAccountEngine = {
       assetChanges,
       possibleMovementNote: (cashDelta < 0 && totalDelta >= 0) ? 'OLASI HAREKET: Nakit çıkışı ile varlık alımı yapılmış olabilir.' : null
     };
-}
   },
 
     /* Risk-Adjusted Metrics */
