@@ -9335,6 +9335,12 @@ function confirmAccountSnapshot() {
     return;
   }
   
+  const btn = document.getElementById('confirmSnapshotBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'KAYDEDİLİYOR...';
+  }
+  
   // Save snapshot using the account engine
   if (window.STKSZAccountEngine && typeof window.STKSZAccountEngine.saveSnapshot === 'function') {
     window.STKSZAccountEngine.saveSnapshot(pendingAccountSnapshot);
@@ -9349,6 +9355,11 @@ function confirmAccountSnapshot() {
   document.getElementById('uploadPreviewArea').style.display = 'none';
   document.getElementById('accountImageInput').value = '';
   showToast('Hesap snapshot\'ı onaylandı ve kaydedildi.');
+  
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = 'KAYDI ONAYLA VE KAYDET';
+  }
 }
 
 function clearAccountSnapshots() {

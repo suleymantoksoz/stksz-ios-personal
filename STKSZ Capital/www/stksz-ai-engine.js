@@ -801,57 +801,8 @@ const STKSZAccountEngine = {
       assetChanges,
       possibleMovementNote: (cashDelta < 0 && totalDelta >= 0) ? 'OLASI HAREKET: Nakit çıkışı ile varlık alımı yapılmış olabilir.' : null
     };
-  }
-};
-
-  // Snapshotlar Arası Karşılaştırma & Fark (Delta) Tespiti
-  compareWithPrevious(newSnapshot) {
-    const history = this.getSnapshots();
-    if (history.length === 0) {
-      return { hasPrevious: false, message: 'İlk hesap kaydı oluşturuldu.' };
-    }
-
-    const prev = history[0]; // En son kaydedilen snapshot
-    const cashDelta = newSnapshot.cashBalance - prev.cashBalance;
-    const totalDelta = newSnapshot.totalValue - prev.totalValue;
-
-    // Varlık Bazlı Değişimler
-    const assetChanges = [];
-    newSnapshot.assets.forEach(newA => {
-      const oldA = prev.assets.find(a => a.symbol === newA.symbol || a.name === newA.name);
-      if (!oldA) {
-        assetChanges.push({ type: 'NEW', name: newA.name, delta: newA.currentValue });
-      } else {
-        const diff = newA.currentValue - oldA.currentValue;
-        if (diff !== 0) {
-          assetChanges.push({ type: 'CHANGE', name: newA.name, previous: oldA.currentValue, current: newA.currentValue, delta: diff });
-        }
-      }
-    });
-
-    // Satılan / Eksilen Varlıklar
-    prev.assets.forEach(oldA => {
-      const exists = newSnapshot.assets.some(a => a.symbol === oldA.symbol || a.name === oldA.name);
-      if (!exists) {
-        assetChanges.push({ type: 'REMOVED', name: oldA.name, delta: -oldA.currentValue });
-      }
-    });
-
-    return {
-      hasPrevious: true,
-      previousTimestamp: prev.timestamp,
-      cashDelta,
-      totalDelta,
-      assetChanges,
-      possibleMovementNote: (cashDelta < 0 && totalDelta >= 0) ? 'OLASI HAREKET: Nakit çıkışı ile varlık alımı yapılmış olabilir.' : null
-    };
-  }
-};
-          }
-        });
-      }
-      return { portfolioReturn: +portfolioReturn.toFixed(2), benchmarks: results };
-    },
+}
+  },
 
     /* Risk-Adjusted Metrics */
     calculateRiskMetrics(portfolioData) {
