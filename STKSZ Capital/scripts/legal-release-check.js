@@ -227,9 +227,6 @@ function scanForAdMobInSource() {
   const allFiles = walkDir(SRC);
   log(`Taranan dosya sayısı: ${allFiles.length}`);
   
-  // Debug: list all scanned files
-  allFiles.forEach(f => log(`  [DEBUG] Scanning: ${path.relative(SRC, f)}`));
-  
   for (const file of allFiles) {
     try {
       const relPath = path.relative(SRC, file);
@@ -310,7 +307,7 @@ function main() {
   log('\n5. Terms of Use erişilebilirliği...');
   if (!checkTermsAccessible()) hasError = true;
   
-  // 6. AdMob dependency kontrolü (package.json, gradle, podfile)
+  // 6. AdMob dependency kontrolü (package.json, package-lock.json, gradle, podfile)
   log('\n6. AdMob dependency kontrolü...');
   const pkg = readFile('package.json');
   if (pkg && /admob/i.test(pkg)) {
@@ -318,6 +315,14 @@ function main() {
     hasError = true;
   } else {
     pass('package.json AdMob içermiyor');
+  }
+  
+  const pkgLock = readFile('package-lock.json');
+  if (pkgLock && /admob/i.test(pkgLock)) {
+    fail('package-lock.json içinde AdMob referansı bulundu');
+    hasError = true;
+  } else {
+    pass('package-lock.json AdMob içermiyor');
   }
   
   const gradle = readFile('android/app/build.gradle');
