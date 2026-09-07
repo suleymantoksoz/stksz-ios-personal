@@ -67,6 +67,30 @@ localStorage kaydında tutulur; depoya veya sunucuya asla yazılmaz.
 
 AlgoLab (31.12.2025) ve Midas public API yok; gerçek emir kapısı kapalıdır.
 
+## Üretim yapılandırması (Release)
+
+Yayın öncesi dış servisler ve legal değerler için şablon: **`.env.example`**
+(kopyalayıp `.env` yapın — `.env` asla commit edilmez, `.gitignore` korur).
+
+| Değişken | Amaç |
+|---|---|
+| `GEMINI_API_KEY` | Google Gemini AI backend (`server/stksz-ai-server.js`). Yalnız sunucu/barındırma panelinde "environment secret" olarak tanımlanır. |
+| `ENV_GOOGLE_CLIENT_ID` | Google Sign-In OAuth Client ID (Web). |
+| `ENV_APPLE_CLIENT_ID` | Apple Sign-In Services ID (Web). |
+
+Kontroller:
+
+```bash
+npm run check:legal-release         # Legal uygunluk kapısı (her zaman)
+npm run check:production-config     # Geliştirme modu — uyarı verir, bloke etmez
+PRODUCTION_RELEASE=true npm run check:production-config  # Yayın kapısı — eksikse exit 1
+```
+
+AI özellikleri için `server/stksz-ai-server.js` ücretsiz barındırmada
+(Render/Railway/Fly.io/Cloudflare Workers) `GEMINI_API_KEY` + `PORT` ile
+çalıştırılır. Google/Apple girişi için ilgili geliştirici panellerinden
+Client/Services ID alınır; eksik yapılandırma uygulamada açıkça belirtilir.
+
 ## Veri ilkesi
 
 Doğrulanmamış veri gösterilmez; kaynak yoksa **VERİ YOK** yazılır, sahte değer

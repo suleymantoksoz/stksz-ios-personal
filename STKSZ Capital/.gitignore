@@ -35,3 +35,8 @@ uploads/
 .cache/
 .venv/
 __pycache__/
+
+# Gizli ortam değişkenleri (asla commit edilmez — .env.example şablonu commit edilir)
+.env
+.env.*
+!.env.example

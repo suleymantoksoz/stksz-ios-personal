@@ -11,6 +11,7 @@
     "open:android": "cap open android",
     "ios:verify": "node scripts/ios-cap-verify.js",
     "check:legal-release": "node scripts/legal-release-check.js",
+    "check:production-config": "node scripts/production-config-check.js",
     "serve": "python3 -m http.server 8080 --directory www"
   },
   "keywords": [
