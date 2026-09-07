@@ -37,13 +37,104 @@ const REQUIRED_SAFETY_PHRASE = 'VERİ YETERSİZ — KARAR YOK';
 const ADMOB_PATTERNS = [
   /admob/i,
   /google-admob/i,
-  /com\.google\.android\.gms\.ads/i
+  /com\.google\.android\.gms\.ads/i,
+  /@capacitor-community\/admob/i,
+  /AdMob\.initialize/i,
+  /GADApplicationIdentifier/i,
+  /com\.google\.android\.gms\.ads\.APPLICATION_ID/i,
+  /Google-Mobile-Ads-SDK/i,
+  /play-services-ads/i,
+  /MobileAds\.initialize/i,
+  /AdRequest\.Builder/i,
+  /AdView/i,
+  /InterstitialAd/i,
+  /RewardedAd/i,
+  /AdListener/i,
+  /AdRequest/i,
+  /AdSize/i,
+  /AdMobAdView/i
+];
+
+const EXCLUDE_DIRS = [
+  'node_modules',
+  'Pods',
+  'build',
+  'DerivedData',
+  '.git',
+  '.gradle',
+  '.idea',
+  '.vscode',
+  'dist',
+  'coverage',
+  '.nyc_output',
+  'temp',
+  'tmp'
+];
+
+const SCAN_EXTENSIONS = [
+  '.js', '.ts', '.tsx', '.jsx', '.html', '.json',
+  '.gradle', '.xml', '.xml', '.plist', '.podspec',
+  '.java', '.kt', '.swift', '.m', '.mm', '.h'
+];
+
+const EXCLUDE_FILES = [
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml'
+];
+
+const NEGATIVE_CONTEXT_PATTERNS = [
+  /yok/i,
+  /yoktur/i,
+  /kalmamış/i,
+  /kaldır/i,
+  /removed/i,
+  /absent/i,
+  /yoktur/i,
+  /kaldırıldı/i,
+  /removed/i,
+  /deleted/i,
+  /deprecated/i
 ];
 
 function log(msg) { console.log('[LEGAL-GATE]', msg); }
 function error(msg) { console.error('[LEGAL-GATE ERROR]', msg); }
 function pass(msg) { console.log('✅', msg); }
 function fail(msg) { console.error('❌', msg); }
+
+function shouldExcludeDir(dirName) {
+  return EXCLUDE_DIRS.some(ex => dirName === ex);
+}
+
+function shouldExcludeFile(fileName) {
+  return EXCLUDE_FILES.some(ex => fileName === ex);
+}
+
+function shouldScanFile(fileName) {
+  if (shouldExcludeFile(fileName)) return false;
+  return SCAN_EXTENSIONS.some(ext => fileName.endsWith(ext));
+}
+
+function walkDir(dir, fileList = []) {
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (!shouldExcludeDir(entry.name)) {
+          walkDir(fullPath, fileList);
+        }
+      } else if (entry.isFile()) {
+        if (shouldScanFile(entry.name)) {
+          fileList.push(fullPath);
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore permission errors etc.
+  }
+  return fileList;
+}
 
 function readFile(relPath) {
   const full = path.join(SRC, relPath);
@@ -129,6 +220,62 @@ function checkTermsAccessible() {
   return true;
 }
 
+function scanForAdMobInSource() {
+  log('\n7. AdMob aktif entegrasyon taraması (tüm kaynak kod)...');
+  let hasError = false;
+  
+  const allFiles = walkDir(SRC);
+  log(`Taranan dosya sayısı: ${allFiles.length}`);
+  
+  // Debug: list all scanned files
+  allFiles.forEach(f => log(`  [DEBUG] Scanning: ${path.relative(SRC, f)}`));
+  
+  for (const file of allFiles) {
+    try {
+      const relPath = path.relative(SRC, file);
+      const content = fs.readFileSync(file, 'utf8');
+      if (relPath.includes('test-fixture')) {
+        log(`  [DEBUG] Scanning test fixture: ${relPath}`);
+        log(`  [DEBUG] Test fixture content preview: ${content.substring(0, 200)}`);
+        ADMOB_PATTERNS.forEach(p => {
+          if (p.test(content)) {
+            log(`  [DEBUG] Pattern matched in test fixture: ${p}`);
+          }
+        });
+      }
+      
+      for (const pattern of ADMOB_PATTERNS) {
+        if (pattern.test(content)) {
+          const lines = content.split('\n');
+          for (let i = 0; i < lines.length; i++) {
+            if (ADMOB_PATTERNS.some(p => p.test(lines[i]))) {
+              const contextLines = [
+                lines[Math.max(0, i-2)],
+                lines[i],
+                lines[i+1] || ''
+              ].join('\n');
+              
+              const negContext = NEGATIVE_CONTEXT_PATTERNS.some(p => p.test(contextLines.join('\n')));
+              
+              if (!negContext) {
+                fail(`Aktif AdMob entegrasyonu tespit edildi: ${relPath} (satır ${i+1})`);
+                return false;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Skip unreadable files
+    }
+  }
+  
+  if (!hasError) {
+    pass('AdMob aktif entegrasyonu tespit edilmedi (tüm kaynak kod taranmış)');
+  }
+  return !hasError;
+}
+
 function main() {
   log('STKSZ Capital Legal Release Gate başlıyor...');
   log(`Kaynak kök: ${SRC}`);
@@ -188,6 +335,10 @@ function main() {
   } else {
     pass('Podfile AdMob içermiyor');
   }
+  
+  // 7. AdMob aktif entegrasyon taraması (tüm kaynak kod)
+  log('\n7. AdMob aktif entegrasyon taraması (tüm kaynak kod)...');
+  if (!scanForAdMobInSource()) hasError = true;
   
   // Sonuç
   log('\n=== SONUÇ ===');
