@@ -63,7 +63,12 @@ jobs:
         working-directory: STKSZ Capital
         run: npm ci || npm install --no-fund --no-audit
 
-      # ── 5) Capacitor: yalnizca web varliklarini kopyala (Podfile'a dokunma) ──
+      # ── 5) Legal Release Gate ──
+      - name: Legal Release Gate
+        working-directory: STKSZ Capital
+        run: npm run check:legal-release
+
+      # ── 6) Capacitor: yalnizca web varliklarini kopyala (Podfile'a dokunma) ──
       - name: Capacitor copy ios
         working-directory: STKSZ Capital
         run: npx cap copy ios

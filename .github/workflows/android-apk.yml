@@ -68,7 +68,12 @@ jobs:
         working-directory: STKSZ Capital
         run: npm ci
 
-      # ── 7) Capacitor sync + copy ──
+      # ── 7) Legal Release Gate ──
+      - name: Legal Release Gate
+        working-directory: STKSZ Capital
+        run: npm run check:legal-release
+
+      # ── 8) Capacitor sync + copy ──
       - name: Capacitor sync & copy
         working-directory: STKSZ Capital
         run: |
