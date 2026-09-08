@@ -17,9 +17,9 @@ setTimeout(()=>{try{
  t("Nakit kırılımı (v93)", d.getElementById("cashLineTl").textContent.includes("963,75"));
  t("Sanal cüzdan motoru (v94)", (()=>{w.eval("window.STKSZVirtualWallet.init(100000)");return w.eval("window.STKSZVirtualWallet.executeOrder({symbol:'TCELL',side:'AL',quantity:3,price:103}).ok")===true;})());
  t("SANAL AL/SAT detayda (v95)", (()=>{w.eval("openAssetDetailForSymbol('TCELL')");return !!d.querySelector(".vw-buy-btn");})());
- t("AI + GÖRSEL butonu (v97)", !!d.getElementById("aiImageBtn")&&!!d.getElementById("aiImageFile"));
- t("Ayrı yükleme alanı AI'ya yönlendirildi (v97)", !!d.querySelector(".ai-upload-redirect")&&d.getElementById("legacyOcrWrap").hidden===true);
- t("Legacy OCR aç/kapat çalışır", (()=>{w.eval("toggleLegacyOcr()");return d.getElementById("legacyOcrWrap").hidden===false;})());
+t("AI + GÖRSEL butonu (v97)", !!d.getElementById("aiImageBtn")&&!!d.getElementById("aiImageFile"));
+  t("Tek içe aktarma merkezi (FAZ3)", !!d.querySelector(".ai-upload-redirect")&&!!d.getElementById("portfolioImportCard")&&typeof w.eval("openImportCenter")==="function");
+  t("Legacy OCR UI kaldırıldı (FAZ3)", !d.getElementById("legacyOcrWrap")&&!d.getElementById("dataImageUpload"));
  t("uploadMidasTotal hâlâ render ediliyor", d.getElementById("uploadMidasTotal").textContent.includes("₺"));
  t("AI overlay + öneri işleyicisi", w.eval("typeof aiHandleImage")==="function"&&w.eval("typeof aiRenderVisionResult")==="function");
  t("Piyasa Verileri menü paneli izole açılır",(()=>{w.eval("openUnifiedMenu();openMenuPanel('menuMarketData')");const panel=d.getElementById("menuMarketData"),api=d.getElementById("menuApiKeys");w.eval("closeMenuPanel();closeUnifiedMenu()");return panel?.hidden===true&&api?.hidden===true;})());

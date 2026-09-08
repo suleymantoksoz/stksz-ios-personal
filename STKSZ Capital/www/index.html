@@ -169,35 +169,14 @@
         <div class="cash-line cash-line-sub"><span>Döviz TL karşılığı</span><b id="cashLineFxTl">—</b></div>
       </div>
     </div>
-    <span class="data-badge">MIDAS</span>
+    <span class="data-badge">ANA HESAP</span>
   </article>
 
-  <div class="section-title">GÖRSEL İLE VERİ GÜNCELLEME</div>
+  <div class="section-title">HESAP / PORTFÖY İÇE AKTAR</div>
   <div class="card ai-upload-redirect">
-    <div class="source-total-strip" aria-label="Ayrı veri kaynakları"><div><span>MİDAS TOPLAM</span><b id="uploadMidasTotal">VERİ YOK</b></div></div>
-    <p class="help">📷 Görsel yükleme artık TEK MERKEZDEN yapılır: <b>STKSZ AI</b>. İşlem dekontu, portföy ekranı, temettü bildirimi veya finansal tablo görselini AI sohbetine yükleyin; AI verileri çıkarır ve onayınızla işler.</p>
-    <div class="toolbar"><button type="button" class="btn primary" onclick="openStkszAi();setTimeout(()=>document.getElementById('aiImageFile')?.click(),350)">🤖 STKSZ AI İLE GÖRSEL YÜKLE</button></div>
-    <p class="help" style="margin-top:6px">Klasik OCR akışına (ENR/Enpara dahili görselleri için) gerek duyarsanız: <button type="button" class="btn small" onclick="toggleLegacyOcr()">ESKİ OCR ALANINI AÇ/KAPAT</button></p>
-  </div>
-  <div id="legacyOcrWrap" hidden>
-  
-  <div class="upload-box data-image-upload" id="dataImageUpload">
-    <div class="source-total-strip" aria-label="Ayrı veri kaynakları">
-      <div><span>MİDAS TOPLAM</span><b id="uploadMidasTotalLegacy">VERİ YOK</b></div>
-    </div>
-    <div class="ocr-source-tabs" role="tablist" aria-label="Görsel veri kaynağı">
-      <button type="button" id="ocrSourceAuto" class="ocr-source-tab active" role="tab" aria-selected="true" onclick="setOcrSource('auto')">OTOMATİK</button>
-      <button type="button" id="ocrSourceMidas" class="ocr-source-tab" role="tab" aria-selected="false" onclick="setOcrSource('midas')">MIDAS</button>
-      <button type="button" id="ocrSourceEnr" class="ocr-source-tab" role="tab" aria-selected="false" onclick="setOcrSource('enr')">ENR / ENPARA</button>
-    </div>
-    <b id="dataUploadTitle">Otomatik kaynak tespiti</b>
-    <p class="help" id="dataUploadHelp">JPG veya PNG görseli seç. Sistem Midas ile ENR / Enpara kaynağını ayırt etmeye çalışır; güvenle ayırt edemezse veri yazmaz.</p>
-    <button type="button" class="btn primary" id="dataUploadButton" onclick="document.getElementById('midasFile').click()">GÖRSEL YÜKLE / GÜNCELLE</button>
-    <input id="midasFile" type="file" accept="image/jpeg,image/png" hidden onchange="prepareDataOcr(this.files[0])">
-    <img id="midasPreview" class="preview" alt="Yüklenen veri görseli önizlemesi">
-    <div id="ocrStatus" class="help" style="margin-top:12px" aria-live="polite">Kaynak seçildikten sonra görsel yüklenebilir.</div>
-  </div>
-
+    <div class="source-total-strip" aria-label="Ayrı veri kaynakları"><div><span>TOPLAM PORTFÖY</span><b id="uploadMidasTotal">VERİ YOK</b></div></div>
+    <p class="help">📥 Tüm içe aktarmalar TEK MERKEZDEN yapılır: <b>görsel · CSV · PDF · metin</b>. Sistem kaynağı (kurumu) otomatik tespit eder, sonucu önizler ve açık onayınız olmadan hiçbir kaydı yazmaz. Kurum tanınamazsa veya veri yetersizse veri yazılmaz (VERİ YETERSİZ — KARAR YOK).</p>
+    <div class="toolbar"><button type="button" class="btn primary" onclick="openImportCenter()">📥 İÇE AKTAR'A GİT (GÖRSEL · CSV · PDF · METİN)</button></div>
   </div>
 
   <!-- ===== FAZ 3: MULTİ-KAYNAK PORTFÖY IMPORT (Tasks 88-90) ===== -->
@@ -229,7 +208,7 @@
           </select>
         </label>
       </div>
-      <p class="help" id="importImageHelp">Portföy ekran görüntüsü, işlem dekontu veya pozisyon tablosu yükleyin. Sistem ayarcı formatını tespit edip sembol/lot/maliyetleri çıkarır.</p>
+      <p class="help" id="importImageHelp">Portföy ekran görüntüsü, işlem dekontu veya pozisyon tablosu yükleyin. Sistem önce sunucu görüntü-analizine (Gemini Vision), sunucuya erişilemezse yerel OCR'a düşer; kurumu otomatik tespit eder. Kurum bilinmiyor veya veri güvensizse sonuç yazılmaz — önce önizlemeye gelir.</p>
       <div class="import-dropzone" id="importImageDropzone" onclick="document.getElementById('importImageFile').click()">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="10.2" r="1.7"/><path d="m5 18 4.6-4.6a1.5 1.5 0 0 1 2.1 0L18 19.5"/></svg>
         <span>GÖRSEL SÜRÜKLE-BIRAK / SEÇ (JPG/PNG/WebP, max 8MB)</span>
@@ -305,7 +284,7 @@
 
   <div id="ocrReview" class="ocr-review card" hidden>
     <div class="ocr-review-head">
-      <div><div class="kicker">OCR ÖNİZLEME · ONAY BEKLİYOR</div><h3 style="margin:7px 0">Midas verilerini kontrol et</h3><div id="ocrConfidence" class="help"></div></div>
+      <div><div class="kicker">OCR ÖNİZLEME · ONAY BEKLİYOR</div><h3 style="margin:7px 0">Algılanan verileri kontrol et</h3><div id="ocrConfidence" class="help"></div></div>
       <span class="data-badge">MEVCUT VERİ HENÜZ DEĞİŞMEDİ</span>
     </div>
     <label class="check-row ocr-authoritative"><input id="ocrReplacePortfolio" type="checkbox" checked> Bu görüntü tam Midas portföy listesidir; görüntüde OLMAYAN varlıklar portföyden OTOMATİK çıkarılır. (Kısmi görüntü yüklediysen işareti kaldır.)</label>
@@ -333,13 +312,22 @@
     <div id="enrOcrFields" class="ocr-summary-grid"></div>
   </div>
 
-  <div class="section-title">MİDAS PORTFÖYÜ</div>
+  <div class="section-title">PORTFÖY / HESAPLAR</div>
   <div class="card portfolio-selected-card">
     <div class="portfolio-overview">
-      <div><div class="label">TOPLAM MİDAS</div><div class="total-value" id="portfolioTotal">VERİ YOK</div></div>
+      <div><div class="label">TOPLAM PORTFÖY</div><div class="total-value" id="portfolioTotal">VERİ YOK</div></div>
       <div class="daily-chip" id="portfolioDaily">VERİ YOK</div>
     </div>
-    <div class="toolbar portfolio-provider-actions"><button type="button" class="btn primary" onclick="goMidas()">MIDAS'A GİT →</button></div>
+    <div class="toolbar portfolio-provider-actions"><button type="button" class="btn primary" id="providerActionButton" onclick="providerAction()">HESAP SAĞLAYICI →</button></div>
+    <div class="portfolio-picker-label"><span>SEÇİLİ HESAP</span><small>Kurumdan bağımsız hesaplar; ENR/TP2 hassas ve aggregate dışıdır</small><select id="pfAccountSelect" class="pf-account-select" onchange="onPfAccountChange(this.value)"><option value="primary">Seçili Hesap</option></select></div>
+    <div class="portfolio-picker-label"><span>KART DÜZENİ</span><small>Görünür kartları filtrele / sırala</small><button type="button" class="btn small" onclick="pfToggleCardPanel()">⚙ DÜZENLE</button></div>
+    <div id="pfCardOptionsPanel" class="card" hidden>
+      <div class="form-grid">
+        <label class="field"><span class="label">Sıralama</span><select id="pfCardSort" onchange="pfSetCardPrefs({sort:this.value})"><option value="value_desc">Değer (büyükten küçüğe)</option><option value="value_asc">Değer (küçükten büyüğe)</option><option value="symbol_asc">Sembol (A→Z)</option></select></label>
+        <label class="field"><span class="label">Görünürlük</span><select id="pfCardFilter" onchange="pfSetCardPrefs({favoritesOnly:this.value==='favorites'})"><option value="all">Tüm aktif kartlar</option><option value="favorites">Yalnız favoriler</option></select></label>
+      </div>
+      <p class="help">Tercihler hesaba özel değil, bu cihazda kalıcı saklanır. Filtre kartları sadece gizler; veri silinmez.</p>
+    </div>
     <div class="portfolio-picker-label"><span>VARLIKLARIM</span><small>Bir varlık seç veya yeni ekle</small><button type="button" class="btn small primary add-asset-btn" onclick="openAddAsset()">＋ VARLIK EKLE</button></div>
     <div id="portfolioAssetPicker" class="portfolio-asset-picker" role="listbox" aria-label="Varlıklarım"></div>
     <div class="portfolio-picker-label favorites-label"><span>FAVORİLER</span><small>Portföy + Fırsatlar + aramadan yıldızladıkların</small></div>
@@ -347,16 +335,16 @@
     <div id="assetList" class="holdings-list single-holding" aria-live="polite"></div>
   </div>
 
-  <div class="section-title">GÜNLÜK SONUÇLAR · MİDAS</div>
+  <div class="section-title">GÜNLÜK SONUÇLAR</div>
   <div class="result-grid">
     <div class="result-card positive"><div class="result-label">GÜNLÜK KÂR</div><div class="result-value green" id="midasDailyProfit">VERİ YOK</div><div class="result-help">Pozitif günlük pozisyon değişimlerinin toplamı (otomatik).</div></div>
     <div class="result-card negative"><div class="result-label">GÜNLÜK ZARAR</div><div class="result-value red" id="midasDailyLoss">VERİ YOK</div><div class="result-help">Negatif günlük pozisyon değişimlerinin mutlak toplamı (otomatik).</div></div>
     <div class="result-card attention"><div class="result-label">GÜNLÜK İŞLEM ADEDİ</div><div class="result-value" id="transactionCount">VERİ YOK</div><div class="result-help">Doğrulanmış OCR işlem kayıtlarından otomatik hesaplanır.</div></div>
     <div class="result-card"><div class="result-label">GÜNLÜK HACİM</div><div class="result-value" id="midasDailyVolume">VERİ YOK</div><div class="result-help">API/OCR hacim alanı bulunursa gösterilir.</div></div>
-    <div class="result-card"><div class="result-label">AKTİF VARLIK</div><div class="result-value" id="assetCountPortfolio">—</div><div class="result-help">Adedi sıfırdan büyük Midas pozisyonları.</div></div>
+    <div class="result-card"><div class="result-label">AKTİF VARLIK</div><div class="result-value" id="assetCountPortfolio">—</div><div class="result-help">Adedi sıfırdan büyük aktif pozisyonlar.</div></div>
   </div>
 
-  <div class="section-title">KÜMÜLATİF SONUÇLAR · MİDAS</div>
+  <div class="section-title">KÜMÜLATİF SONUÇLAR</div>
   <div class="result-grid">
     <div class="result-card positive"><div class="result-label">GERÇEKLEŞMİŞ KÂR</div><div class="result-value green" id="realizedProfit">VERİ YOK</div><div class="result-help">Satışla kesinleşen kârların toplamı (otomatik).</div></div>
     <div class="result-card negative"><div class="result-label">GERÇEKLEŞMİŞ ZARAR</div><div class="result-value red" id="realizedLoss">VERİ YOK</div><div class="result-help">Satışla kesinleşen zararların mutlak toplamı (otomatik).</div></div>
@@ -366,17 +354,17 @@
     
   </div>
 
-  <div class="section-title">MİDAS PORTFÖY DAĞILIMI</div>
+  <div class="section-title">PORTFÖY DAĞILIMI</div>
   <div class="card">
     <div id="midasDistribution" class="allocation-list"></div>
-    <p class="help">Portföy ağırlığı = ilgili Midas varlık grubunun güncel değerinin Midas portföy toplamına oranı.</p>
+    <p class="help">Portföy ağırlığı = ilgili varlık grubunun güncel değerinin portföy toplamına oranı.</p>
   </div>
 
   <div id="pendingDividendsSection">
   <div class="section-title">BEKLEYEN TEMETTİ</div>
   <div class="card">
     <div id="pendingDividends" class="data-list"><div class="empty-state">VERİ YOK</div></div>
-    <p class="help">Yalnızca OCR veya manuel olarak doğrulanmış Midas kaydı gösterilir.</p>
+    <p class="help">Yalnızca OCR veya manuel olarak doğrulanmış işlem kaydı gösterilir.</p>
   </div>
   </div>
 
@@ -414,7 +402,7 @@
     <!-- GENEL BAKIŞ -->
     <div class="insights-panel" id="insightsPanelOverview" data-tab="overview">
       <div class="insights-grid-4" id="insightsOverviewGrid">
-        <div class="insight-card"><div class="insight-label">PORTFÖY DEĞERİ</div><div class="insight-value" id="insightTotalValue">VERİ YOK</div><div class="insight-sub">Toplam Midas + Nakit</div></div>
+        <div class="insight-card"><div class="insight-label">PORTFÖY DEĞERİ</div><div class="insight-value" id="insightTotalValue">VERİ YOK</div><div class="insight-sub">Toplam Portföy + Nakit</div></div>
         <div class="insight-card"><div class="insight-label">GÜNLÜK K/Z</div><div class="insight-value" id="insightDailyPnl">VERİ YOK</div><div class="insight-sub">Günlük net sonuç</div></div>
         <div class="insight-card"><div class="insight-label">TOPLAM K/Z</div><div class="insight-value" id="insightTotalPnl">VERİ YOK</div><div class="insight-sub">Kâr/Zarar % dahil</div></div>
         <div class="insight-card"><div class="insight-label">RİSK SEVİYESİ</div><div class="insight-value" id="insightRiskLevel">VERİ YOK</div><div class="insight-sub">Yoğunlaşma + Volatilite</div></div>
@@ -478,10 +466,10 @@
 
   <div class="section-title">EMİRLER / VALÖR</div>
   <div class="card">
-    <div class="orders-card-head"><small class="help" style="margin:0">Midas OCR otomatik doldurur; elle de düzenlenebilir.</small><button type="button" class="btn small edit-icon-btn" onclick="openOrdersEditor()" title="Manuel düzenle" aria-label="Emirleri manuel düzenle"><span class="pen-ic"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Z"/><path d="m13.5 7.5 3 3"/></svg></span></button></div>
+    <div class="orders-card-head"><small class="help" style="margin:0">Kaynak görsel OCR otomatik doldurur; elle de düzenlenebilir.</small><button type="button" class="btn small edit-icon-btn" onclick="openOrdersEditor()" title="Manuel düzenle" aria-label="Emirleri manuel düzenle"><span class="pen-ic"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Z"/><path d="m13.5 7.5 3 3"/></svg></span></button></div>
     <div id="pendingOrders" class="data-list"><div class="empty-state">Bekleyen emir verisi yok.</div></div>
     <div id="valorAmounts" class="valor-amounts" hidden><span>T1: <b id="valorT1Value">VERİ YOK</b></span><span>T2: <b id="valorT2Value">VERİ YOK</b></span></div>
-    <div id="settlementInfo" class="info-line">⚪ T+2 / Valör: Midas görselinden henüz okunmadı</div>
+    <div id="settlementInfo" class="info-line">⚪ T+2 / Valör: görselden henüz okunmadı</div>
   </div>
 
   <div class="section-title">ENR — AYRI KAYIT</div>
@@ -490,7 +478,7 @@
       <div>
         <div class="enr-name">ENR</div>
         <div class="enr-price privacy-value" id="enrPrivateTotal">••••••••</div>
-        <div class="help">Hassas ENR verisi Midas toplamı, günlük sonucu, STKSZ CORE, risk veya raporlara eklenmez.</div>
+        <div class="help">Hassas ENR verisi Toplam Portföy, günlük sonuç, STKSZ CORE, risk veya raporlara eklenmez.</div>
         <div id="enrSecurityState" class="enr-security-state" aria-live="polite">Cihaz biyometrik doğrulama desteği kontrol ediliyor…</div>
         <div id="enrAuthChoice" class="enr-auth-choice" role="group" aria-label="ENR doğrulama yöntemi"><span>Doğrulama:</span><button type="button" data-auth-method="auto" onclick="setEnrAuthMethod('auto')">🔐 Biyometrik (önerilen)</button><button type="button" data-auth-method="pin" onclick="setEnrAuthMethod('pin')">🔢 Her zaman PIN</button></div>
       </div>
@@ -594,7 +582,7 @@
 <section class="page" id="page-status">
   <div class="news-toolbar"><div class="section-title">STKSZ DURUM RAPORU</div><button type="button" class="btn primary" onclick="generateReport()">RAPOR OLUŞTUR</button></div>
   <div class="hero status-hero">
-    <div><div class="kicker">MİDAS PORTFÖY DURUMU</div><div class="status-grade" id="statusWord">—</div><div class="score-narrative" id="statusNarrative">Durum açıklaması hazırlanıyor.</div></div>
+    <div><div class="kicker">PORTFÖY DURUMU</div><div class="status-grade" id="statusWord">—</div><div class="score-narrative" id="statusNarrative">Durum açıklaması hazırlanıyor.</div></div>
     <div class="status-score-wrap"><div class="score-num" id="statusScore">—</div><div class="score-label">/ 100</div></div>
   </div>
   <div class="section-title">STRATEJİ</div>
@@ -608,7 +596,7 @@
     <div class="core-current"><div class="core-score-values"><div><span>MEVCUT STKSZ CORE</span><b id="coreCurrentScore">—</b></div><div><span>STKSZ SCORE</span><b id="coreScoreAlias">—</b></div></div><p id="coreScoreFormation">Skor oluşumu hesaplanıyor.</p></div>
     <div class="score-summary pro" aria-label="STKSZ CORE güven risk karar özeti">
       <div><span>GÜVEN</span><b id="statusConfidence">—</b><small>Güncel ve doğrulanmış veri kapsamı.</small></div>
-      <div><span>RİSK</span><b id="statusRiskPct">—</b><small>Midas portföyünün birleşik risk oranı.</small></div>
+      <div><span>RİSK</span><b id="statusRiskPct">—</b><small>Seçili hesabın birleşik risk oranı.</small></div>
       <div><span>KARAR</span><b id="statusDecision">—</b><small>Skor, güven ve risk eşiklerinin ortak sonucu.</small></div>
     </div>
     <details class="score-method core-method" open>
@@ -740,7 +728,7 @@
   </div>
 
   <div class="section-title">NAKİT PLANI · YALNIZCA MİDAS</div>
-  <div class="card" style="position:relative"><button type="button" class="pl-edit-btn" onclick="openPlEditor('ipoCash')" aria-label="Halka arz nakdini manuel düzenle" title="Manuel düzenle"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Z"/><path d="m13.5 7.5 3 3"/></svg></button><div id="cashPlan" class="market-mini"><div><span>Halka Arz Nakit <span class="pl-manual-flag" data-manual-flag="ipoCash" hidden>MANUEL</span></span><b id="ipoCashNeeded">₺0,00</b></div><div><span>Hisse Alım Nakit</span><b id="stockCashNeeded">₺0,00</b></div><div><span>Toplam Gerekli Nakit</span><b id="totalCashNeeded">₺0,00</b></div><div><span>Midas Nakit</span><b id="cashPlanMidas">VERİ YOK</b></div></div><p class="help" id="cashPlanNote">Halka arz nakdi: takvimdeki doğrulanmış katılım tutarlarının toplamı. Plan yoksa ₺0,00 gösterilir; <span class="pen-ic"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Z"/><path d="m13.5 7.5 3 3"/></svg></span> ile manuel girilebilir.</p></div>
+  <div class="card" style="position:relative"><button type="button" class="pl-edit-btn" onclick="openPlEditor('ipoCash')" aria-label="Halka arz nakdini manuel düzenle" title="Manuel düzenle"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Z"/><path d="m13.5 7.5 3 3"/></svg></button><div id="cashPlan" class="market-mini"><div><span>Halka Arz Nakit <span class="pl-manual-flag" data-manual-flag="ipoCash" hidden>MANUEL</span></span><b id="ipoCashNeeded">₺0,00</b></div><div><span>Hisse Alım Nakit</span><b id="stockCashNeeded">₺0,00</b></div><div><span>Toplam Gerekli Nakit</span><b id="totalCashNeeded">₺0,00</b></div><div><span>Nakit</span><b id="cashPlanMidas">VERİ YOK</b></div></div><p class="help" id="cashPlanNote">Halka arz nakdi: takvimdeki doğrulanmış katılım tutarlarının toplamı. Plan yoksa ₺0,00 gösterilir; <span class="pen-ic"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Z"/><path d="m13.5 7.5 3 3"/></svg></span> ile manuel girilebilir.</p></div>
 
   <div class="section-title">STRES TESTİ & ÇEŞİTLENDİRME</div>
   <div id="stressTestPanel" class="stress-test-panel"><div class="empty-state">Portföyde yeterli varlık yok.</div></div>
@@ -1348,7 +1336,7 @@
         <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuMarketData')"><span><b>PİYASA VERİLERİ</b><small>Provider tercihi ve otomatik güncelleme</small></span><i>→</i></button></div>
         <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuNewsSources')"><span><b>HABER KAYNAKLARI</b><small>Marketaux bağlantı durumu</small></span><i>→</i></button></div>
         <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuSourceAccuracy')"><span><b>KAYNAK DOĞRULUĞU</b><small>Aktif kaynak ve gecikme bilgisi</small></span><i>→</i></button></div>
-        <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuOcrSettings')"><span><b>GÖRSEL / OCR</b><small>Midas ve ENR görsel yükleme</small></span><i>→</i></button></div>
+        <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuOcrSettings')"><span><b>GÖRSEL / OCR</b><small>Görsel · CSV · PDF içe aktarma</small></span><i>→</i></button></div>
         <div class="menu-nav-card"><button type="button" class="menu-nav-trigger" onclick="openMenuPanel('menuFxData')"><span><b>DÖVİZ / ALTIN</b><small>Ücretsiz canlı kur ve altın</small></span><i>→</i></button></div>
       </div>
 
@@ -1536,7 +1524,7 @@
 
   <section class="menu-view menu-subpage" id="menuOcrSettings" data-menu-parent="menuApiKeys" hidden>
     <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>API YÖNETİMİ</small><h2>GÖRSEL / OCR</h2></div><span></span></div>
-    <div class="menu-form-card"><p class="help">JPG/PNG görseli, Portföy sayfasındaki kaynak tespiti ve kullanıcı onayı olmadan hiçbir kaydı değiştirmez.</p><button type="button" class="btn blue" onclick="openDataUpload()">GÖRSEL YÜKLE / GÜNCELLE</button></div>
+    <div class="menu-form-card"><p class="help">Görsel, CSV, PDF veya metin tek merkezden içe aktarılır. Sistem kurumu otomatik tespit eder; önizleme ve açık onay olmadan hiçbir kayıt değiştirilmez. Kurum bilinmiyor veya veri yetersizse veri yazılmaz (VERİ YETERSİZ — KARAR YOK).</p><button type="button" class="btn blue" onclick="openImportCenter()">📥 İÇE AKTAR MERKEZİNİ AÇ</button></div>
     <div class="menu-form-card">
       <div class="section-title">SOSYAL MEDYA / PAYLAŞIM DOĞRULAMA</div>
       <p class="help">Bir sosyal medya paylaşımındaki veya bir metindeki finansal iddiaları, portföydeki doğrulanmış veri ve standart BIST sembolleriyle karşılaştırır. Sonuç yatırım tavsiyesi değildir.</p>
@@ -1651,7 +1639,7 @@
 
   <section class="menu-view menu-subpage" id="menuAbout" data-menu-parent="menuHome" hidden>
     <div class="menu-view-head sticky modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeMenuPanel()">← GERİ</button><div><small>MENÜ</small><h2>HAKKINDA</h2></div><span></span></div>
-    <div class="menu-form-card"><h3>STKSZ Komuta Merkezi</h3><p class="help">Öncelik sırası: veri doğruluğu, kullanıcı onayı, risk kontrolü ve analiz. Veri yoksa veri üretilmez. ENR verileri Midas toplamı, skor, risk ve raporlardan ayrı tutulur.</p><div class="source-fact">Sürüm: <span id="menuBuildInfo">v1</span> <small id="menuBuildDetail" style="opacity:.45"></small></div><div class="toolbar"><a class="btn btn-link" href="legal/privacy.html">Gizlilik Politikası</a><a class="btn btn-link" href="legal/support.html">Destek</a></div></div>
+    <div class="menu-form-card"><h3>STKSZ Komuta Merkezi</h3><p class="help">Öncelik sırası: veri doğruluğu, kullanıcı onayı, risk kontrolü ve analiz. Veri yoksa veri üretilmez. ENR verileri Toplam Portföy, skor, risk ve raporlardan ayrı tutulur.</p><div class="source-fact">Sürüm: <span id="menuBuildInfo">v1</span> <small id="menuBuildDetail" style="opacity:.45"></small></div><div class="toolbar"><a class="btn btn-link" href="legal/privacy.html">Gizlilik Politikası</a><a class="btn btn-link" href="legal/support.html">Destek</a></div></div>
   </section>
 
   <section class="menu-view menu-subpage" id="menuCurrency" data-menu-parent="menuHome" hidden>
@@ -1710,7 +1698,7 @@
 
 <div class="modal" id="cashModal" role="dialog" aria-modal="true" aria-labelledby="cashModalTitle">
  <div class="modal-box compact-modal-box">
-  <div class="modal-head modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeCashEditor()">KAPAT</button><div><h2 id="cashModalTitle">Midas Nakit Güncelle</h2></div><span></span></div>
+  <div class="modal-head modal-action-bar"><button type="button" class="btn btn-close-action" onclick="closeCashEditor()">KAPAT</button><div><h2 id="cashModalTitle">Nakit Güncelle</h2></div><span></span></div>
   <div class="field"><label>Midas kullanılabilir nakit (TL)</label><input id="manualCashOnly" type="number" step="0.01" min="0" placeholder="VERİ YOK"></div>
   <div class="field"><label>USD nakit ($)</label><input id="manualCashUsd" type="number" step="0.01" min="0" placeholder="0"></div>
   <div class="field"><label>EUR nakit (€)</label><input id="manualCashEur" type="number" step="0.01" min="0" placeholder="0"></div>
@@ -1948,6 +1936,7 @@ SİNYAL   : crossover(a,b) crossunder(a,b) → true/false dizisi
 <script src="stksz-data-engine.js?v=150"></script>
 <script src="stksz-ai-engine.js?v=121"></script>
 <script src="stksz-entitlement.js"></script>
+<script src="portfolio-data-engine.js?v=1"></script>
 <script src="market-view-model.js"></script>
 <script src="virtual-wallet.js?v=101"></script>
 <script src="broker-adapter.js?v=102"></script>
@@ -2608,6 +2597,22 @@ async function stkszChartFetchHistory(symbol){
  }catch(error){if(status)status.textContent="❌ Geçmiş çekilemedi: "+providerErrorText(error)+" (API Yönetimi'nden anahtar gerekli olabilir.)";}
 }
 function goMidas(){return launchExternalApp("midas");}
+function providerAction(){
+  /* 3.2 / 3.10: seçili hesabın sağlayıcısına bağlı tek aksiyon; yalnız Midas hesabı için Midas linki.
+     Hesap bilinmiyorsa veya sağlayıcı tanımlı değilse pasif (VERİ YOK) — hiçbir varsayım üretilmez. */
+  let accKey=(window.STKSZPortfolioDataEngine&&prefs&&prefs.selectedAccountKey)?prefs.selectedAccountKey:"primary";
+  try{
+    const model=(window.STKSZPortfolioDataEngine&&window.STKSZPortfolioDataEngine.hydrateLegacy)?window.STKSZPortfolioDataEngine.hydrateLegacy(data||{}):null;
+    const sel=model&&window.STKSZPortfolioDataEngine.selectedAccount(model,{selectedAccountKey:accKey});
+    if(sel&&sel.providerKey==="midas"){
+      const labelEl=document.getElementById("providerActionButton");if(labelEl)labelEl.textContent="MIDAS'A GİT →";
+      return goMidas();
+    }
+  }catch(e){/* pasif */}
+  const btn=document.getElementById("providerActionButton");if(btn)btn.textContent="HESAP SAĞLAYICI →";
+  showToast("Seçili hesap için sağlayıcı tanımlı değil · VERİ YOK.");
+}
+
 function openMidasTrade(symbol,side){
  const action=String(side).toUpperCase()==="SAT"?"SAT":"AL";
  showToast(`${symbol} · ${action} için Midas uygulaması açılıyor…`);
@@ -2723,7 +2728,7 @@ async function refreshAssetDiscovery(query){
 function scheduleAssetDiscovery(){clearTimeout(discoveryTimer);const value=document.getElementById("assetSearch")?.value||"";renderAssetExplorer();discoveryTimer=setTimeout(()=>refreshAssetDiscovery(value).catch(()=>{}),280);}
 function chartSvg(asset){const rows=Array.isArray(asset.history)?[...asset.history].reverse().map(row=>finite(row.close)).filter(value=>value!==null):[];if(rows.length<2)return '<div class="empty-state">GRAFİK VERİSİ YOK</div>';const min=Math.min(...rows),max=Math.max(...rows),range=max-min||1,points=rows.map((value,index)=>`${20+index*(560/(rows.length-1))},${155-(value-min)/range*125}`).join(" ");return `<svg viewBox="0 0 600 180" role="img" aria-label="Doğrulanmış kapanış grafiği"><defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D0904E" stop-opacity=".28"/><stop offset="1" stop-color="#D0904E" stop-opacity="0"/></linearGradient></defs><polyline points="${points}" fill="none" stroke="#D0904E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><polygon points="20,170 ${points} 580,170" fill="url(#chartFill)"/></svg>`;}
 function openAssetDetail(index){const item=currentAssetResults[Number(index)];if(!item)return;assetDetailIdx=Number(index);const page=document.getElementById("assetDetailPage"),body=document.getElementById("assetDetailBody");if(!page||!body)return;let name="",symbol="",kind="Varlık",fields=[],chart='<div class="empty-state">GRAFİK VERİSİ YOK</div>';
- if(item.kind==="asset"){const asset=item.asset,latest=asset.history?.[0]||{},previous=asset.history?.[1]||{},unrealized=assetUnrealized(asset);name=asset.name||"Varlık adı verisi yok";symbol=asset.s;kind=asset.type;fields=[["Güncel fiyat",moneyOrNoData(asset.p)],["Açılış",moneyOrNoData(asset.open??latest.open)],["Önceki kapanış",moneyOrNoData(asset.previousClose??previous.close)],["Piyasa değişimi",finite(asset.marketChangePct)===null?"VERİ YOK":pct(asset.marketChangePct)],["Günlük yüksek",moneyOrNoData(asset.high??latest.high)],["Günlük düşük",moneyOrNoData(asset.low??latest.low)],["İşlem hacmi",valueOrNoData(finite(asset.volume),countFmt)],["Portföydeki adet",valueOrNoData(finite(asset.q),fmt)],["Ortalama maliyet",moneyOrNoData(asset.avgCost)],["Portföy değeri",moneyOrNoData(asset.v)],["Kâr/Zarar",unrealized===null?"VERİ YOK":signedMoney(unrealized)],["Midas günlük K/Z",asset.dailyVerified?signedMoneyOrNoData(asset.d):"VERİ YOK"],["Veri kaynağı",asset.source||"API bağlı değil"],["Güncellik",PROVIDERS.freshnessLabel?PROVIDERS.freshnessLabel(asset.marketFreshness):asset.marketFreshness||"VERİ YOK"]];chart=chartSvg(asset);
+ if(item.kind==="asset"){const asset=item.asset,latest=asset.history?.[0]||{},previous=asset.history?.[1]||{},unrealized=assetUnrealized(asset);name=asset.name||"Varlık adı verisi yok";symbol=asset.s;kind=asset.type;fields=[["Güncel fiyat",moneyOrNoData(asset.p)],["Açılış",moneyOrNoData(asset.open??latest.open)],["Önceki kapanış",moneyOrNoData(asset.previousClose??previous.close)],["Piyasa değişimi",finite(asset.marketChangePct)===null?"VERİ YOK":pct(asset.marketChangePct)],["Günlük yüksek",moneyOrNoData(asset.high??latest.high)],["Günlük düşük",moneyOrNoData(asset.low??latest.low)],["İşlem hacmi",valueOrNoData(finite(asset.volume),countFmt)],["Portföydeki adet",valueOrNoData(finite(asset.q),fmt)],["Ortalama maliyet",moneyOrNoData(asset.avgCost)],["Portföy değeri",moneyOrNoData(asset.v)],["Kâr/Zarar",unrealized===null?"VERİ YOK":signedMoney(unrealized)],["Günlük K/Z",asset.dailyVerified?signedMoneyOrNoData(asset.d):"VERİ YOK"],["Veri kaynağı",asset.source||"API bağlı değil"],["Güncellik",PROVIDERS.freshnessLabel?PROVIDERS.freshnessLabel(asset.marketFreshness):asset.marketFreshness||"VERİ YOK"]];chart=chartSvg(asset);
  }else if(item.kind==="ipo"){const ipo=item.item;name=ipo.company||"Halka Arz";symbol=ipo.symbol||"—";kind="Halka Arz";fields=[["Tarih",ipo.date||"VERİ YOK"],["Talep durumu",ipo.status||"VERİ YOK"],["Tahmini lot",valueOrNoData(finite(ipo.estimatedLots),fmt)],["Gerekli nakit",moneyOrNoData(ipo.requiredCash)],["Risk/not",ipo.note||"VERİ YOK"],["Kaynak",ipo.source||data.ipoCalendar?.source||"VERİ YOK"]];
  }else{name=item.category;symbol="—";kind=item.category;fields=[["Güncel fiyat","VERİ YOK"],["Açılış","VERİ YOK"],["Önceki kapanış","VERİ YOK"],["İşlem hacmi","VERİ YOK"]];}
  setText("assetDetailName",name);setText("assetDetailSymbol",symbol);setText("assetDetailKind",kind.toUpperCase());try{renderAssetDetailFav();}catch(error){}
@@ -2733,7 +2738,7 @@ function openAssetDetail(index){const item=currentAssetResults[Number(index)];if
  /* v85: Midas/TradeAll mantığı — GRAFİK ÜSTTE ve geniş, detaylar altında */
  const vwButtons=item.kind==="asset"&&/^[A-Z0-9ÇĞİÖŞÜ.]{2,12}$/.test(symbol)?`<div class="vw-trade-buttons"><button type="button" class="btn primary vw-buy-btn" onclick="openVwTrade('AL','${esc(symbol)}')">🧪 SANAL AL</button><button type="button" class="btn vw-sell-btn" onclick="openVwTrade('SAT','${esc(symbol)}')">🧪 SANAL SAT</button><small>Simülasyon · gerçek emir iletilmez</small></div>`:"";
  /* v115: Midas tarzı bölümleme — POZİSYONUM (portföy alanları) + İSTATİSTİKLER (piyasa alanları) + VERİ KAYNAĞI (kullanıcı isteği: içerik düzeni) */
- const positionLabels=["Portföydeki adet","Ortalama maliyet","Portföy değeri","Kâr/Zarar","Midas günlük K/Z"],sourceLabels=["Veri kaynağı","Güncellik"];
+ const positionLabels=["Portföydeki adet","Ortalama maliyet","Portföy değeri","Kâr/Zarar","Günlük K/Z"],sourceLabels=["Veri kaynağı","Güncellik"];
  const positionFields=fields.filter(([label])=>positionLabels.includes(label)),sourceFields=fields.filter(([label])=>sourceLabels.includes(label)),statFields=fields.filter(([label])=>!positionLabels.includes(label)&&!sourceLabels.includes(label));
  const fieldGrid=list=>`<div class="asset-detail-grid">${list.map(([label,value])=>`<div class="asset-detail-field"><span>${esc(label)}</span><b>${esc(value)}</b></div>`).join("")}</div>`;
  const hasPosition=item.kind==="asset"&&finite(item.asset?.q)!==null&&finite(item.asset.q)>0;
@@ -2831,7 +2836,7 @@ function riskAnalysis(){
   {name:"PORTFÖY RİSKİ",score:portfolioScore,summary:"Pozisyon büyüklüğü, günlük yön ve toplam Midas dağılımının birleşik etkisini gösterir.",basis:`En büyük pozisyon ağırlığı ${fmt(maxWeight)}%; negatif günlük değişimli pozisyon oranı ${fmt(negativeRatio*100)}%.`},
   {name:"SEKTÖR YOĞUNLUĞU",score:sectorScore,summary:"Portföyün belirli bir sektörde ne kadar yoğunlaştığını gösterir.",basis:`En yüksek sektör ağırlığı ${fmt(sectorMax)}%. Sektör bilgisi yerel sınıflandırmadan alınır.`},
   {name:"LİKİDİTE RİSKİ",score:liquidityScore,summary:volumeKnown.length?"Mevcut işlem hacmi alanlarının kapsama oranına göre değerlendirilmiştir.":"Güncel hacim verisi bulunmadığı için temkinli biçimde orta kabul edilmiştir.",basis:`Hacim verisi bulunan pozisyon: ${volumeKnown.length}/${assets.length||0}. Veri yoksa uygulama düşük risk varsaymaz.`},
-  {name:"PİYASA RİSKİ",score:marketScore,summary:"BIST hisse ağırlığının piyasa hareketlerine duyarlılığını gösterir.",basis:`Midas portföyündeki doğrudan hisse ağırlığı ${fmt(equityWeight)}%.`},
+  {name:"PİYASA RİSKİ",score:marketScore,summary:"BIST hisse ağırlığının piyasa hareketlerine duyarlılığını gösterir.",basis:`Portföydeki doğrudan hisse ağırlığı ${fmt(equityWeight)}%.`},
   {name:"KUR RİSKİ",score:currencyScore,summary:"Doğrudan yabancı para pozisyonu ile kur/altın duyarlılığı olan varlıkların etkisini gösterir.",basis:`Doğrudan yabancı para pozisyonu kaydı yok; kıymetli maden ağırlığı ${fmt(goldWeight)}%. Şirketlerin dolaylı kur etkisi bu hesapta yoktur.`},
   {name:"VERİ GÜVENİ RİSKİ",score:dataReliabilityRisk,summary:"Fiyat, günlük yön ve doğrulanmış geçmiş kapsamındaki eksikleri gösterir.",basis:`Fiyat kapsamı ${fmt(priceCoverage*100)}%; günlük yön kapsamı ${fmt(dailyCoverage*100)}%; teknik geçmiş kapsamı ${fmt(historyCoverage*100)}%.`}
  ];
@@ -2908,7 +2913,7 @@ function renderOrders(containerId,settlementId){
    return `<div class="data-list-row"><div><b>${esc(order.symbol||"—")}</b><small>${esc(order.side||"BEKLEYEN EMİR")}${order.validity?` · ${esc(order.validity)}`:""}</small></div><b>${moneyOrNoData(order.price)} · ${valueOrNoData(finite(order.lots),fmt)} Lot</b><small>Tutar: ${finite(order.price)!==null&&finite(order.lots)!==null?money(order.price*order.lots):"VERİ YOK"}${chain?`<br>${esc(chain)}`:""}</small></div>`;
   }).join("");
  }
- setText(settlementId,data.settlement?`⚪ T+2 / Valör: ${data.settlement}`:"⚪ T+2 / Valör: Midas görselinden henüz okunmadı");
+ setText(settlementId,data.settlement?`⚪ T+2 / Valör: ${data.settlement}`:"⚪ T+2 / Valör: görselden henüz okunmadı");
  const valorBox=document.getElementById("valorAmounts");
  if(valorBox){const t1=finite(data.valorT1),t2=finite(data.valorT2);valorBox.hidden=t1===null&&t2===null;setText("valorT1Value",t1===null?"VERİ YOK":money(t1));setText("valorT2Value",t2===null?"VERİ YOK":money(t2));}
 }
@@ -3145,20 +3150,20 @@ function renderFeaturedAssets(){
 }
 function renderDaySummary(){
  const daily=dailyResults(),log=Array.isArray(data.activityLog)?data.activityLog:[],latest=log.length?log[log.length-1]:null,state=daily.net===null?"VERİ YOK":daily.net>0?"Portföy günlük olarak artıda.":daily.net<0?"Portföy günlük olarak ekside.":"Portföy günlük net değişimi sıfır.",tone=daily.net===null?"neutral":daily.net>0?"positive":daily.net<0?"negative":"neutral",rows=[["SON İŞLEM",latest?latest.text:"Kayıtlı işlem yok","neutral"],["GÜNLÜK K/Z",signedMoneyOrNoData(daily.net),tone],["PORTFÖY",state,tone],["VERİ KAYNAĞI",data.market?.source||"Yerel kayıt","neutral"]];
- ["daySummary"].forEach(id=>{const container=document.getElementById(id);if(!container)return;container.innerHTML=`<div class="day-summary-head"><div><span class="day-summary-dot ${tone}"></span><b>MİDAS · GÜNÜN ÖZETİ</b></div><small>Yalnızca mevcut doğrulanmış/yerel kayıt</small></div><div class="day-summary-rows">${rows.map(([label,value,rowTone])=>`<div class="day-summary-row"><span>${esc(label)}</span><b class="${rowTone}">${esc(value)}</b></div>`).join("")}</div>`;});
+ ["daySummary"].forEach(id=>{const container=document.getElementById(id);if(!container)return;container.innerHTML=`<div class="day-summary-head"><div><span class="day-summary-dot ${tone}"></span><b>GÜNÜN ÖZETİ</b></div><small>Yalnızca mevcut doğrulanmış/yerel kayıt</small></div><div class="day-summary-rows">${rows.map(([label,value,rowTone])=>`<div class="day-summary-row"><span>${esc(label)}</span><b class="${rowTone}">${esc(value)}</b></div>`).join("")}</div>`;});
 }
 function renderAiSummary(){
  const container=document.getElementById("aiSummary");if(!container)return;const bullets=[];const daily=dailyResults();const strongest=activeAssets().filter(asset=>asset.marketVerified&&finite(asset.marketChangePct)!==null).sort((a,b)=>b.marketChangePct-a.marketChangePct)[0];
  if(data.benchmark&&finite(data.benchmark.value)!==null)bullets.push(`BIST 100 ${formatNumber(data.benchmark.value,2,2)} seviyesinde; değişim ${pct(data.benchmark.changePct)}.`);else bullets.push("BIST 100 verisi alınamadı; seviye üretilmedi.");
  if(strongest)bullets.push(`${strongest.s} doğrulanmış piyasa değişiminde ${pct(strongest.marketChangePct)} ile portföy içindeki en güçlü yönü gösteriyor.`);
- bullets.push(daily.net===null?"Midas günlük K/Z verisi yok.":`Midas günlük net değişimi ${signedMoneyOrNoData(daily.net)}.`);
+ bullets.push(daily.net===null?"Günlük K/Z verisi yok.":`Günlük net değişim ${signedMoneyOrNoData(daily.net)}.`);
  if(!(data.ipoCalendar?.items||[]).length)bullets.push("Doğrulanmış halka arz takvimi verisi yok.");
  container.innerHTML='<ul class="summary-bullets">'+bullets.map(text=>`<li>${esc(text)}</li>`).join("")+'</ul>';
 }
 function renderStkszNote(){
  const risk=riskAnalysis(),daily=dailyResults();let note="Doğrulanmış teknik veri gelmeden yeni pozisyon büyütme.";
- if(risk.maxWeight>50)note="Midas portföyünde yoğunlaşma yüksek; yeni işlemden önce en büyük pozisyon ağırlığını kontrol et.";
- else if(daily.net<0)note="Midas günlük sonucu negatif; doğrulanmış tetik ve risk sınırı olmadan pozisyon artırma.";
+ if(risk.maxWeight>50)note="Portföyde yoğunlaşma yüksek; yeni işlemden önce en büyük pozisyon ağırlığını kontrol et.";
+ else if(daily.net<0)note="Günlük sonuç negatif; doğrulanmış tetik ve risk sınırı olmadan pozisyon artırma.";
  else if(data.market?.lastSuccess)note="Gün sonu veri kaydı mevcut; yine de tetik seviyeleri oluşmadan işlem yapma.";
  setText("stkszNote",note);
 }
@@ -3413,7 +3418,7 @@ function renderPortfolioDistribution(total){
  data.assets.forEach(asset=>{if(asset.type==="Hisse")groups.Hisseler+=asset.v;else if(asset.type==="Fon")groups.Fonlar+=asset.v;else groups.Sertifikalar+=asset.v;});
  container.innerHTML=Object.entries(groups).map(([name,value])=>{
   const weight=total?value/total*100:0;
-  return `<div class="allocation-row"><div><span>${esc(name)}</span><b>${money(value)}</b></div><div class="allocation-track"><i style="width:${clamp(weight)}%"></i></div><small>${fmt(weight)}% · Midas toplamındaki ağırlık</small></div>`;
+  return `<div class="allocation-row"><div><span>${esc(name)}</span><b>${money(value)}</b></div><div class="allocation-track"><i style="width:${clamp(weight)}%"></i></div><small>${fmt(weight)}% · portföy toplamındaki ağırlık</small></div>`;
  }).join("");
 }
 
@@ -4623,9 +4628,9 @@ function rsiOf(closes,period){
 /* ---- TEMETTÜ (gerçek kayıtlar) ---- */
 function renderDividends(){
  const items=(data.pendingDividends&&data.pendingDividends.items)||[];
- if(!data.pendingDividends||!data.pendingDividends.known||!items.length){radarHubContent.innerHTML=radarEmpty('Henüz doğrulanmış temettü kaydı yok. Midas görseli yüklendiğinde otomatik eklenir.',marketReportSource().source);return;}
+ if(!data.pendingDividends||!data.pendingDividends.known||!items.length){radarHubContent.innerHTML=radarEmpty('Henüz doğrulanmış temettü kaydı yok. Görsel yüklendiğinde otomatik eklenir.',marketReportSource().source);return;}
  const totalEst=items.reduce((s,x)=>s+((finite(x.amount)||0)*(data.assets.find(a=>a.s===x.symbol)?(finite(data.assets.find(a=>a.s===x.symbol).q)||0):0)),0);
- radarHubContent.innerHTML='<div class="dividend-total-row"><b>TOPLAM TAHMİNİ TEMETTÜ:</b> <span class="green">'+(totalEst>0?money(totalEst):'—')+'</span> <small>(portföy bazında)</small></div>'+items.map(x=>{const asset=data.assets.find(a=>a.s===x.symbol);const shares=asset?(finite(asset.q)||0):0;const amt=finite(x.amount)||0;return '<div class="dividend-row"><div class="dividend-sym"><b>'+esc(x.symbol||'—')+'</b><small>'+(shares>0?fmt(shares)+' adet':'portföyde yok')+'</small></div><div class="dividend-info"><span>'+(x.date||'Tarih belirsiz')+'</span><small>'+(x.note||'Temettü tutarı')+'</small></div><div class="dividend-amt"><b>'+(amt>0?formatNumber(amt,2,4)+' TL/lot':'—')+'</b></div></div>';}).join('')+radarSubnote('Temettü tutarları Midas görseli/elden doğrulanmış kayıtlardan gelir; ödeme takvimi değişebilir.');
+ radarHubContent.innerHTML='<div class="dividend-total-row"><b>TOPLAM TAHMİNİ TEMETTÜ:</b> <span class="green">'+(totalEst>0?money(totalEst):'—')+'</span> <small>(portföy bazında)</small></div>'+items.map(x=>{const asset=data.assets.find(a=>a.s===x.symbol);const shares=asset?(finite(asset.q)||0):0;const amt=finite(x.amount)||0;return '<div class="dividend-row"><div class="dividend-sym"><b>'+esc(x.symbol||'—')+'</b><small>'+(shares>0?fmt(shares)+' adet':'portföyde yok')+'</small></div><div class="dividend-info"><span>'+(x.date||'Tarih belirsiz')+'</span><small>'+(x.note||'Temettü tutarı')+'</small></div><div class="dividend-amt"><b>'+(amt>0?formatNumber(amt,2,4)+' TL/lot':'—')+'</b></div></div>';}).join('')+radarSubnote('Temettü tutarları görselden/elden doğrulanmış kayıtlardan gelir; ödeme takvimi değişebilir.');
 }
 /* ---- HALKA ARZLAR (IPO MERKEZİ) ---- */
 function renderIPOs(){
@@ -5774,6 +5779,32 @@ function csvCell(value){const text=String(value??"").replace(/"/g,'""');return `
 function exportMidasCsv(){const headers=["Kod","Hisse Adı","Tür","Sektör","Lot","Ortalama Maliyet","Güncel Fiyat","Günlük K/Z","Günlük %","Gerçekleşen Kâr","Gerçekleşen Zarar","Gerçekleşmemiş K/Z","Değer","Kaynak"],rows=data.assets.map(asset=>[asset.s,asset.name||"",asset.type,asset.sector,asset.q,asset.avgCost??"",asset.p,asset.d,asset.dp,asset.realizedProfit??"",asset.realizedLoss??"",assetUnrealized(asset)??"",asset.v,asset.source||"Yerel kayıt"]);const csv='\uFEFF'+[headers,...rows].map(row=>row.map(csvCell).join(",")).join("\r\n");downloadFile(`stksz-midas-${new Date().toISOString().slice(0,10)}.csv`,csv,"text/csv;charset=utf-8");showToast("Midas CSV dosyası indirildi.");}
 
 function portfolioPickerEntries(){return data.assets.filter(asset=>asset?.s&&(finite(asset.q)??0)>0).map(asset=>({symbol:asset.s,asset}));}
+function pfToggleCardPanel(){const panel=document.getElementById("pfCardOptionsPanel");if(!panel)return;panel.hidden=!panel.hidden;renderPfCardViewOptions();}
+function renderPfCardViewOptions(){
+  /* 3.11: panel kontrollerini mevcut tercihlerle eşle; renderPortfolioAssets'ta da çağrılır. */
+  const sort=document.getElementById("pfCardSort"),filter=document.getElementById("pfCardFilter");
+  if(!sort&&!filter)return;
+  const cp=pfCardPrefs();
+  if(sort)sort.value=cp.sort||"value_desc";
+  if(filter)filter.value=cp.favoritesOnly?"favorites":"all";
+}
+function pfCardPrefs(){
+  /* 3.11: kart görünüm tercihleri prefs içinde; engine applyCardPrefs ile sıralama/filtre. */
+  const prefsCard=prefs.portfolioCardPrefs||{};
+  return {visibleKpis:prefsCard.visibleKpis||null,favoritesOnly:Boolean(prefsCard.favoritesOnly),includeInstitutions:Array.isArray(prefsCard.includeInstitutions)?prefsCard.includeInstitutions:[],hideZeroPositions:prefsCard.hideZeroPositions!==false,sort:prefsCard.sort||"value_desc",favorites:[...favoriteSet()]};
+}
+function pfSetCardPrefs(patch){
+  try{
+    prefs.portfolioCardPrefs={...(prefs.portfolioCardPrefs||{}),...patch};
+    storageSet("stkszPrefs",JSON.stringify(prefs));
+    renderPfCardViewOptions();
+    renderPortfolioAssets(calc());
+  }catch(e){}
+}
+function cardEntryWithMeta(entry){
+  /* satırı engine metadata'sıyla zenginleştir (institution/favorites filtresi için). */
+  return {symbol:entry.symbol,value:(entry.asset&&finite(entry.asset.v))??((entry.asset&&finite(entry.asset.q)!==null&&finite(entry.asset.p)!==null)?round6(finite(entry.asset.q)*finite(entry.asset.p)):null),quantity:finite(entry.asset&&entry.asset.q),institutionKey:"primary",favorite:entry.watchOnly?favoriteSet().has(entry.symbol):favoriteSet().has(entry.symbol)};
+}
 function favoriteSet(){return new Set(Array.isArray(data.favorites)?data.favorites:[]);}
 function portfolioAssetCardHtml(entry,selected,favorites){const active=entry.symbol===selected,isFavorite=favorites.has(entry.symbol),signal=entry.asset&&!entry.watchOnly?assetSignal(entry.asset):{key:"unknown",label:entry.watchOnly?"TAKİPTE":"İŞLEM YOK"},name=entry.asset?.name||entry.asset?.type||"VERİ YOK";return `<div class="portfolio-asset-card" role="group"><button type="button" class="portfolio-asset-chip ${active?'active':''} ${entry.watchOnly?'watch-only':''}" data-portfolio-asset="${esc(entry.symbol)}" ${entry.watchOnly?'data-watch-only="1"':''} role="option" aria-selected="${active}"><b class="asset-chip-symbol">${esc(entry.symbol)}</b><span class="asset-chip-name">${esc(name)}</span><span class="asset-chip-bottom"><small>${moneyOrNoData(entry.asset?.p)}</small><em class="asset-chip-signal ${esc(signal.key)}">${esc(signal.label)}</em></span></button><button type="button" class="favorite-star ${isFavorite?'is-favorite':''}" data-favorite-symbol="${esc(entry.symbol)}" aria-pressed="${isFavorite}" aria-label="${esc(entry.symbol)} ${isFavorite?'favorilerden çıkar':'favorilere ekle'}" title="${isFavorite?'Favorilerden çıkar':'Favoriye ekle'}">${isFavorite?'★':'☆'}</button></div>`;}
 function holdingDetailHtml(asset,total){
@@ -5784,19 +5815,52 @@ function holdingDetailHtml(asset,total){
  return `<article class="holding-card selected-holding" data-selected-symbol="${esc(asset.s)}"><div class="holding-top"><div><div class="asset-symbol">${esc(asset.s)} <span class="asset-type">${esc(asset.type)}</span></div><div class="holding-name">${esc(asset.name||"Varlık adı verisi yok")}</div></div><div class="holding-top-actions"><button type="button" class="favorite-star ${isFavorite?'is-favorite':''}" data-favorite-symbol="${esc(asset.s)}" aria-pressed="${isFavorite}" aria-label="${esc(asset.s)} ${isFavorite?'favorilerden çıkar':'favorilere ekle'}">${isFavorite?'★':'☆'}</button><span class="signal-badge ${signal.key}" title="${esc(signal.note)}">${esc(signal.label)}</span></div></div><div class="holding-metrics">${metrics.map(([label,value,color])=>`<div class="holding-metric"><span>${esc(label)}</span><b class="${color}">${esc(value)}</b></div>`).join("")}</div>${dividend?`<div class="holding-dividend"><span>Bekleyen temettü</span><b>${moneyOrNoData(dividend.amount)}</b></div>`:""}${asset.note?`<div class="holding-note"><b>Not:</b> ${esc(asset.note)}</div>`:""}<div class="asset-explain">Veri kaynağı: ${esc(sourceLabel)} · İşlem kararı: ${esc(signal.label)} · ${esc(signal.note)}</div><div class="trade-actions"><button type="button" class="btn small manual-asset-action edit-icon-btn" data-manual-asset="${esc(asset.s)}" title="Manuel düzenle" aria-label="${esc(asset.s)} manuel düzenle"><span class="pen-ic"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L15.5 5.5a2.1 2.1 0 0 1 3 3L8 19l-4 1Z"/><path d="m13.5 7.5 3 3"/></svg></span></button><button type="button" class="btn small buy-action" data-midas-trade="AL" data-symbol="${esc(asset.s)}">AL · MİDAS'TA</button><button type="button" class="btn small sell-action" data-midas-trade="SAT" data-symbol="${esc(asset.s)}">SAT · MİDAS'TA</button><button type="button" class="btn small" data-remove-asset="${esc(asset.s)}" title="Portföyden çıkar">🗑 ÇIKAR</button></div></article>`;
 }
 function renderPortfolioAssets(total=calc()){
- const picker=document.getElementById("portfolioAssetPicker"),favoritesBox=document.getElementById("portfolioFavorites"),list=document.getElementById("assetList");if(!picker||!favoritesBox||!list)return;const entries=portfolioPickerEntries(),favorites=favoriteSet();
- if(!entries.length){picker.innerHTML='<div class="empty-state">VERİ YOK</div>';list.innerHTML='<div class="empty-state">Aktif portföy varlığı yok.</div>';selectedPortfolioSymbol="";
-  /* v73: portföy boş olsa bile favoriler tek kaynaktan gösterilir (Fırsatlar/aramadan yıldızlananlar) */
+ const picker=document.getElementById("portfolioAssetPicker"),favoritesBox=document.getElementById("portfolioFavorites"),list=document.getElementById("assetList");if(!picker||!favoritesBox||!list)return;
+ /* 3.10: seçili hesap ENR/TP2 ise gerçek ENR hesap görünümü (hassas · aggregate dışı) */
+ const selectedAccKey=(prefs&&prefs.selectedAccountKey)||"primary";
+ if(selectedAccKey==="enr"){
+   picker.innerHTML="<div class='empty-state'>ENR/TP2 ayrı hassas hesaptır; varlık kartı yerine hesap özeti aşağıdadır.</div>";
+   renderEnrAccountView(list);
+   const soloFavorites=[...favoriteSet()].map(sym=>{const asset=data.assets.find(a=>a.s===sym),meta=ASSET_META[sym]||SEARCH_UNIVERSE.find(u=>u.s===sym);return {symbol:sym,asset:asset||{s:sym,name:meta?.name||null,type:meta?.type||"Varlık",p:null,q:null},watchOnly:true};});
+   favoritesBox.innerHTML=soloFavorites.length?soloFavorites.map(entry=>portfolioAssetCardHtml(entry,"",favoriteSet())).join(""):'<div class="empty-state">Favori yok.</div>';
+   return;
+ }
+ const entriesRaw=portfolioPickerEntries(),favorites=favoriteSet();
+ /* 3.11: kart tercihleri (favoriler/hideZero/kurum/sıralama) engine uygular */
+ let entries=entriesRaw;
+ if(window.STKSZPortfolioDataEngine&&entriesRaw.length){
+   try{
+     const wanted=new Set(window.STKSZPortfolioDataEngine.applyCardPrefs(entriesRaw.map(cardEntryWithMeta),pfCardPrefs()).map(r=>r.symbol));
+     entries=entriesRaw.filter(e=>wanted.has(e.symbol));
+   }catch(e){entries=entriesRaw;}
+ }
+ if(!entries.length&&!favorites.size&&!entriesRaw.length){picker.innerHTML='<div class="empty-state">VERİ YOK</div>';list.innerHTML='<div class="empty-state">Aktif portföy varlığı yok.</div>';selectedPortfolioSymbol="";
   const soloFavorites=[...favorites].map(sym=>{const asset=data.assets.find(a=>a.s===sym),meta=ASSET_META[sym]||SEARCH_UNIVERSE.find(u=>u.s===sym);return {symbol:sym,asset:asset||{s:sym,name:meta?.name||null,type:meta?.type||"Varlık",p:null,q:null},watchOnly:true};});
   favoritesBox.innerHTML=soloFavorites.length?soloFavorites.map(entry=>portfolioAssetCardHtml(entry,"",favorites)).join(""):'<div class="empty-state">Favori yok. Kartlardaki ★ ile veya Fırsatlar sayfasından ekleyebilirsin.</div>';
   return;}
+ renderPfCardViewOptions();
+ if(!entries.length){picker.innerHTML='<div class="empty-state">Kart görünümü şu an bu hesap için kart göstermiyor. Kart Düzeni menüsünden filtreyi kapatın.</div>';favoritesBox.innerHTML='<div class="empty-state">Favori yok.</div>';list.innerHTML='<div class="empty-state">Seçili filtrelere uyan aktif kart yok.</div>';return;}
  if(!entries.some(entry=>entry.symbol===selectedPortfolioSymbol))selectedPortfolioSymbol=(entries.find(entry=>(finite(entry.asset?.q)??0)>0)||entries[0]).symbol;
  prefs.selectedPortfolioSymbol=selectedPortfolioSymbol;storageSet("stkszPrefs",JSON.stringify(prefs));picker.innerHTML=entries.map(entry=>portfolioAssetCardHtml(entry,selectedPortfolioSymbol,favorites)).join("");
  /* v73: FAVORİLER kutusu tek kaynaktan (data.favorites) beslenir — portföyde OLMAYAN favoriler de
     (Fırsatlar/arama/takip listesinden yıldızlananlar) burada görünür. */
  const favoriteEntries=[...favorites].map(sym=>{const inPortfolio=entries.find(entry=>entry.symbol===sym);if(inPortfolio)return inPortfolio;const asset=data.assets.find(a=>a.s===sym),meta=ASSET_META[sym]||SEARCH_UNIVERSE.find(u=>u.s===sym);return {symbol:sym,asset:asset||{s:sym,name:meta?.name||null,type:meta?.type||"Varlık",p:null,q:null},watchOnly:!asset||((finite(asset?.q)??0)<=0)};});
  favoritesBox.innerHTML=favoriteEntries.length?favoriteEntries.map(entry=>portfolioAssetCardHtml(entry,selectedPortfolioSymbol,favorites)).join(""):'<div class="empty-state">Favori yok. Kartlardaki ★ ile veya Fırsatlar sayfasından ekleyebilirsin.</div>';
- const selected=data.assets.find(asset=>asset.s===selectedPortfolioSymbol);list.className="holdings-list single-holding";list.innerHTML=selected?holdingDetailHtml(selected,total):'<div class="empty-state">Seçilen varlık için Midas pozisyon verisi yok.</div>';
+ const selected=data.assets.find(asset=>asset.s===selectedPortfolioSymbol);list.className="holdings-list single-holding";list.innerHTML=selected?holdingDetailHtml(selected,total):'<div class="empty-state">Seçilen varlık için pozisyon verisi yok.</div>';
+}
+function renderEnrAccountView(list){
+ /* ENR/TP2 görünümü: yalnız doğrulanmış görsel/OCR kayıtları; sahte veri yok. */
+ const enr=data.enr||{};
+ const total=finite(enr.total),units=finite(enr.units),unitPrice=finite(enr.unit);
+ const dist=Array.isArray(enr.dist)?enr.dist:[];
+ if(total===null&&units===null&&!dist.length){list.innerHTML='<div class="empty-state">ENR/TP2 kaydı yok · VERİ YOK.</div>';return;}
+ list.className="holdings-list single-holding";
+ let html='<div class="manual-identity"><div class="field"><label>Toplam Değer</label><b>'+((total===null)?"VERİ YOK":money(total))+'</b></div><div class="field"><label>Fon Birim Fiyatı</label><b>'+((unitPrice===null)?"VERİ YOK":money(unitPrice))+'</b></div>'+(units!==null?'<div class="field"><label>Pay Adedi</label><b>'+countFmt(Math.round(units))+'</b></div>':"")+'</div>';
+ html+='<p class="help">🔒 ENR/TP2 hassas hesaptır; toplam portföy (aggregate) hesaplarına dahil edilmez. Yalnız doğrulanmış görsel/OCR veya elle onaylı kayıtlarla güncellenir.</p>';
+ if(dist.length){
+   html+='<div class="notification-list">'+dist.map(row=>{const sym=esc(String(row[0]||"").toUpperCase()),amt=finite(row[1]);return '<div class="notification-item"><div><b>'+sym+'</b><small>ENR fonu</small></div><div class="notification-right"><span>'+((amt===null)?"VERİ YOK":money(amt))+'</span></div></div>';}).join("")+'</div>';
+ }
+ list.innerHTML=html;
 }
 function selectPortfolioAsset(symbol){const clean=String(symbol||"").toUpperCase(),entry=portfolioPickerEntries().find(item=>item.symbol===clean);
  if(entry){selectedPortfolioSymbol=clean;prefs.selectedPortfolioSymbol=clean;savePrefs();renderPortfolioAssets(calc());/* v71: karta dokununca TAM DETAY SAYFASI açılır (grafikli) */openAssetDetailForSymbol(clean);return;}
@@ -5858,7 +5922,33 @@ function refreshFavoriteViews(){
 function getAssetDetailSymbol(){const el=document.getElementById("assetDetailSymbol");return el?String(el.textContent||"").trim():"";}
 function renderAssetDetailFav(){const btn=document.getElementById("assetDetailFavBtn");if(!btn)return;const sym=getAssetDetailSymbol(),on=Boolean(sym)&&favoriteSet().has(sym);btn.classList.toggle("active",on);btn.setAttribute("aria-pressed",String(on));btn.setAttribute("title",on?"Favorilerden çıkar":"Favorilere ekle");}
 function toggleFavorite(symbol){const clean=String(symbol||"").toUpperCase();const known=data.assets.some(asset=>asset.s===clean)||SEARCH_UNIVERSE.some(item=>item.s===clean)||Boolean(ASSET_META[clean])||(data.watchlist||[]).some(item=>item.symbol===clean);if(!known)return;const favorites=favoriteSet(),adding=!favorites.has(clean);if(adding)favorites.add(clean);else favorites.delete(clean);data.favorites=[...favorites];storageSet("stkszData",JSON.stringify(dataForLocalStorage()));persistNativeEnr();refreshFavoriteViews();showToast(`${clean} ${adding?'favorilere eklendi':'favorilerden çıkarıldı'}.`);}
-function openSelectedAssetManual(){if(!selectedPortfolioSymbol){showToast("Önce bir Midas varlığı seç.");return;}openManual(selectedPortfolioSymbol);}
+function openSelectedAssetManual(){if(!selectedPortfolioSymbol){showToast("Önce bir varlık seç.");return;}openManual(selectedPortfolioSymbol);}
+function onPfAccountChange(key){
+  /* 3.2 / 3.10: seçili hesabı prefs'e yaz; provider aksiyonu ve görünümü buna bağlı. */
+  key=String(key||"primary");
+  try{prefs.selectedAccountKey=key;savePrefs();renderPfAccountSelect();syncProviderActionUi();renderPortfolioAssets(calc());}catch(e){}
+  showToast(key==="enr"?"ENR/TP2 hesabı seçili (hassas · aggregate dışı)":"Seçili hesap seçili");
+}
+function renderPfAccountSelect(){
+  const sel=document.getElementById("pfAccountSelect");if(!sel)return;
+  try{
+    const model=window.STKSZPortfolioDataEngine?window.STKSZPortfolioDataEngine.hydrateLegacy(data||{}):null;
+    const accounts=model?model.accounts:[{key:"primary",name:"Seçili Hesap",institutionName:"Midas"}];
+    sel.innerHTML=accounts.map(acc=>`<option value="${esc(acc.key)}">${esc(acc.masked?(acc.name+" 🔒"):acc.name)}${acc.includeInAggregate?"":" · ayrı"}</option>`).join("");
+    sel.value=(prefs&&prefs.selectedAccountKey)||model?.primaryAccountKey||"primary";
+  }catch(e){sel.innerHTML='<option value="primary">Seçili Hesap</option>';}
+}
+function syncProviderActionUi(){
+  try{
+    const btn=document.getElementById("providerActionButton");
+    if(!btn)return;
+    if(!window.STKSZPortfolioDataEngine||!prefs){btn.parentElement?.setAttribute("hidden","");return;}
+    const model=window.STKSZPortfolioDataEngine.hydrateLegacy(data||{});
+    const sel=window.STKSZPortfolioDataEngine.selectedAccount(model,{selectedAccountKey:(prefs&&prefs.selectedAccountKey)||model.primaryAccountKey});
+    if(sel&&sel.providerKey==="midas"){btn.textContent="MIDAS'A GİT →";btn.parentElement?.removeAttribute("hidden");}
+    else{btn.textContent="HESAP SAĞLAYICI →";btn.parentElement?.setAttribute("hidden","");}
+  }catch(e){const btn=document.getElementById("providerActionButton");if(btn)btn.parentElement?.setAttribute("hidden","");}
+}
 function renderPortfolioHero(total,scoreData){
  /* v89: skor üretilemiyorsa NEDENİ açıkça gösterilir (VERİ YOK yerine bağlantı/veri durumu) */
  const unavailable=scoreData.staleMarketData?"VERİ GÜNCEL DEĞİL":(data.market?.lastSuccess?"VERİ YETERSİZ":"PİYASA BAĞLI DEĞİL"),grade=scoreGrade(scoreData.score),gradeElement=document.getElementById("portfolioHeroGrade");
@@ -5890,9 +5980,11 @@ function renderPortfolioHero(total,scoreData){
 function render(){
  const total=calc(),daily=dailyResults(),cumulative=cumulativeResults(),scoreData=scoreDetails(),grade=scoreGrade(scoreData.score);data.midasDaily=daily.net;
  const volumeValues=data.assets.map(asset=>finite(asset.volume)).filter(value=>value!==null),dailyVolume=finite(data.dailyVolume)??(volumeValues.length?volumeValues.reduce((a,b)=>a+b,0):null);
- setText("portfolioTotal",moneyOrNoData(total));setText("uploadMidasTotal",moneyOrNoData(total));setText("uploadMidasTotalLegacy",moneyOrNoData(total));setText("midasCashQuick",moneyOrNoData(data.midasCash));setText("midasDaily",signedMoneyOrNoData(daily.net));const dailyEl=document.getElementById("midasDaily");if(dailyEl)dailyEl.title=`Midas günlük kaynak: ${data.midasDailySource||"VERİ YOK"}`;setText("midasDailyPct",midasDailyPct()===null?"VERİ YOK":pct(midasDailyPct()));setText("midasDailyProfit",daily.profit===null?"VERİ YOK":signedMoney(daily.profit));setText("midasDailyLoss",daily.loss===null?"VERİ YOK":"-"+money(daily.loss));setText("homeDailyProfit",daily.profit===null?"VERİ YOK":signedMoney(daily.profit));setText("homeDailyLoss",daily.loss===null?"VERİ YOK":"-"+money(daily.loss));
+ setText("portfolioTotal",moneyOrNoData(total));setText("uploadMidasTotal",moneyOrNoData(total));setText("uploadMidasTotalLegacy",moneyOrNoData(total));setText("midasCashQuick",moneyOrNoData(data.midasCash));setText("midasDaily",signedMoneyOrNoData(daily.net));const dailyEl=document.getElementById("midasDaily");if(dailyEl)dailyEl.title=`Günlük kaynak: ${data.midasDailySource||"VERİ YOK"}`;setText("midasDailyPct",midasDailyPct()===null?"VERİ YOK":pct(midasDailyPct()));setText("midasDailyProfit",daily.profit===null?"VERİ YOK":signedMoney(daily.profit));setText("midasDailyLoss",daily.loss===null?"VERİ YOK":"-"+money(daily.loss));setText("homeDailyProfit",daily.profit===null?"VERİ YOK":signedMoney(daily.profit));setText("homeDailyLoss",daily.loss===null?"VERİ YOK":"-"+money(daily.loss));
  const activeCount=activeAssets().length;setText("assetCount",activeCount||"VERİ YOK");setText("assetCountPortfolio",activeCount||"VERİ YOK");setText("midasDailyVolume",dailyVolume===null?"VERİ YOK":countFmt(dailyVolume));
  setText("score",scoreData.valid?scoreData.score:scoreData.staleMarketData?"VERİ GÜNCEL DEĞİL":"VERİ YOK");setText("scoreGrade",scoreData.valid?grade.label:scoreData.staleMarketData?"VERİ GÜNCEL DEĞİL":"VERİ YOK");const gradeEl=document.getElementById("scoreGrade");if(gradeEl)gradeEl.className="score-grade "+grade.key;setText("scoreNarrative",scoreData.valid?scoreNarrative(scoreData):scoreData.decision);setText("scoreConfidence",scoreData.confidence+"%");setText("scoreRisk",scoreData.riskPct+"%");setText("scoreDecision",scoreData.decision);setText("portfolioDaily",signedMoneyOrNoData(daily.net));renderPortfolioHero(total,scoreData);
+  renderPfAccountSelect();
+  syncProviderActionUi();
  const verifiedDailyPositions=data.assets.filter(asset=>asset.q>0&&asset.dailyVerified&&finite(asset.d)!==null);setText("positiveCount",verifiedDailyPositions.length?verifiedDailyPositions.filter(asset=>asset.d>0).length:"VERİ YOK");setText("negativeCount",verifiedDailyPositions.length?verifiedDailyPositions.filter(asset=>asset.d<0).length:"VERİ YOK");setText("realizedProfit",moneyOrNoData(cumulative.realizedProfit));setText("realizedLoss",cumulative.realizedLoss===null?"VERİ YOK":"-"+money(cumulative.realizedLoss));setText("realizedNet",signedMoneyOrNoData(cumulative.realizedNet));setText("unrealizedProfitTotal",moneyOrNoData(cumulative.unrealizedProfit));setText("unrealizedLossTotal",cumulative.unrealizedLoss===null?"VERİ YOK":"-"+money(cumulative.unrealizedLoss));setText("transactionCount",valueOrNoData(autoTransactionCount(),countFmt));refreshPlManualFlags();
  renderPortfolioAssets(total);
  renderAssetExplorer();
@@ -5903,10 +5995,10 @@ function render(){
 function assetTypeOptions(selected){return ["Hisse","Fon","ETF","Emtia","Sertifika","Döviz","Diğer"].map(type=>`<option value="${type}" ${selected===type?"selected":""}>${type}</option>`).join("");}
 function manualAmountParts(value){const number=finite(value);return {profit:number!==null&&number>0?number:"",loss:number!==null&&number<0?Math.abs(number):""};}
 function openManual(symbol=selectedPortfolioSymbol){
- const clean=String(symbol||"").toUpperCase(),asset=data.assets.find(item=>item.s===clean);if(!asset){showToast("Manuel düzenleme için aktif bir Midas varlığı seç.");return;}
+ const clean=String(symbol||"").toUpperCase(),asset=data.assets.find(item=>item.s===clean);if(!asset){showToast("Manuel düzenleme için aktif bir varlık seç.");return;}
  selectedPortfolioSymbol=clean;manualEditingSymbol=clean;manualEditorDirty=false;setText("manualAssetTitle",clean);
  const daily=manualAmountParts(asset.d),unrealized=manualAmountParts(asset.unrealized),weight=calc()?assetWeight(asset):null,box=document.getElementById("manualFields"),recentOrders=(asset.orderHistory||[]).slice(-3).reverse(),orderHistoryHtml=recentOrders.length?`<div class="manual-order-history">${recentOrders.map(order=>`<div><span>${esc(order.side||"EMİR")}</span><b>${valueOrNoData(finite(order.lots),fmt)} lot · ${moneyOrNoData(order.price)}</b><small>${esc(order.displayDate||order.date||"")}</small></div>`).join("")}</div>`:'<div class="empty-state compact-empty">Kayıtlı emir yok.</div>';
- box.innerHTML=`<section class="manual-section"><h3>VARLIK BİLGİSİ</h3><div class="manual-identity"><div class="field"><label>Sembol</label><input value="${esc(asset.s)}" readonly></div><div class="field"><label>Varlık türü</label><select id="manualAssetType">${assetTypeOptions(asset.type||"Diğer")}</select></div><div class="field"><label>Varlık adı</label><input id="manualAssetName" value="${esc(asset.name||"")}" placeholder="VERİ YOK"></div><div class="field"><label>Sektör</label><input id="manualAssetSector" value="${esc(asset.sector||"")}" placeholder="VERİ YOK"></div></div></section><section class="manual-section"><h3>POZİSYON</h3><div class="form-grid"><div class="field"><label>Lot / Adet</label><input id="manualAssetLot" type="number" min="0" step="0.0001" value="${asset.q??""}" placeholder="VERİ YOK"></div><div class="field"><label>Ortalama maliyet</label><input id="manualAssetAverage" type="number" min="0" step="0.0001" value="${asset.avgCost??""}" placeholder="VERİ YOK"></div><div class="field"><label>Güncel fiyat</label><input id="manualAssetPrice" type="number" min="0" step="0.0001" value="${asset.p??""}" placeholder="VERİ YOK"></div><div class="field"><label>Ağırlık · otomatik</label><input value="${weight===null?"VERİ YOK":fmt(weight)+"%"}" readonly></div></div></section><section class="manual-section"><h3>GÜNLÜK SONUÇ · MANUEL / DOĞRULANMAMIŞ</h3><div class="form-grid"><div class="field"><label>Günlük kâr</label><input id="manualAssetDailyProfit" type="number" min="0" step="0.01" value="${daily.profit}" placeholder="VERİ YOK"></div><div class="field"><label>Günlük zarar</label><input id="manualAssetDailyLoss" type="number" min="0" step="0.01" value="${daily.loss}" placeholder="VERİ YOK"></div><div class="field"><label>Günlük %</label><input id="manualAssetDailyPct" type="number" step="0.01" value="${asset.dp??""}" placeholder="VERİ YOK"></div></div><p class="help">Manuel günlük değerler, kullanıcı onaylı Midas ekran görüntüsü yerine geçmez ve doğrulanmış global Midas günlük K/Z üretmez.</p></section><section class="manual-section"><h3>KÂR / ZARAR</h3><div class="form-grid"><div class="field"><label>Gerçekleşen kâr</label><input id="manualAssetRealizedProfit" type="number" min="0" step="0.01" value="${asset.realizedProfit??""}" placeholder="VERİ YOK"></div><div class="field"><label>Gerçekleşen zarar</label><input id="manualAssetRealizedLoss" type="number" min="0" step="0.01" value="${asset.realizedLoss??""}" placeholder="VERİ YOK"></div><div class="field"><label>Gerçekleşmemiş kâr</label><input id="manualAssetUnrealizedProfit" type="number" min="0" step="0.01" value="${unrealized.profit}" placeholder="VERİ YOK"></div><div class="field"><label>Gerçekleşmemiş zarar</label><input id="manualAssetUnrealizedLoss" type="number" min="0" step="0.01" value="${unrealized.loss}" placeholder="VERİ YOK"></div></div></section><section class="manual-section manual-order-section"><h3>YENİ EMİR</h3><div class="form-grid"><div class="field"><label for="manualOrderSide">Emir türü</label><select id="manualOrderSide"><option value="">Emir seç</option><option value="ALIM">ALIM</option><option value="SATIM">SATIM</option></select></div><div class="field"><label for="manualOrderLots">Lot miktarı</label><input id="manualOrderLots" type="text" inputmode="decimal" placeholder="Örn. 19"></div><div class="field"><label for="manualOrderPrice">Lot fiyatı</label><input id="manualOrderPrice" type="text" inputmode="decimal" placeholder="Örn. 12,11 TL"></div></div><p class="help">Emir seçilen varlığın yerel işlem geçmişine tarih/saat ile kaydedilir; portföy lotu ve maliyeti otomatik değiştirilmez.</p>${orderHistoryHtml}</section><section class="manual-section"><h3>NOT</h3><div class="field"><label>Seçilen varlık notu</label><textarea id="manualAssetNote" maxlength="2000" placeholder="İsteğe bağlı yerel not">${esc(asset.note||"")}</textarea></div></section>`;
+ box.innerHTML=`<section class="manual-section"><h3>VARLIK BİLGİSİ</h3><div class="manual-identity"><div class="field"><label>Sembol</label><input value="${esc(asset.s)}" readonly></div><div class="field"><label>Varlık türü</label><select id="manualAssetType">${assetTypeOptions(asset.type||"Diğer")}</select></div><div class="field"><label>Varlık adı</label><input id="manualAssetName" value="${esc(asset.name||"")}" placeholder="VERİ YOK"></div><div class="field"><label>Sektör</label><input id="manualAssetSector" value="${esc(asset.sector||"")}" placeholder="VERİ YOK"></div></div></section><section class="manual-section"><h3>POZİSYON</h3><div class="form-grid"><div class="field"><label>Lot / Adet</label><input id="manualAssetLot" type="number" min="0" step="0.0001" value="${asset.q??""}" placeholder="VERİ YOK"></div><div class="field"><label>Ortalama maliyet</label><input id="manualAssetAverage" type="number" min="0" step="0.0001" value="${asset.avgCost??""}" placeholder="VERİ YOK"></div><div class="field"><label>Güncel fiyat</label><input id="manualAssetPrice" type="number" min="0" step="0.0001" value="${asset.p??""}" placeholder="VERİ YOK"></div><div class="field"><label>Ağırlık · otomatik</label><input value="${weight===null?"VERİ YOK":fmt(weight)+"%"}" readonly></div></div></section><section class="manual-section"><h3>GÜNLÜK SONUÇ · MANUEL / DOĞRULANMAMIŞ</h3><div class="form-grid"><div class="field"><label>Günlük kâr</label><input id="manualAssetDailyProfit" type="number" min="0" step="0.01" value="${daily.profit}" placeholder="VERİ YOK"></div><div class="field"><label>Günlük zarar</label><input id="manualAssetDailyLoss" type="number" min="0" step="0.01" value="${daily.loss}" placeholder="VERİ YOK"></div><div class="field"><label>Günlük %</label><input id="manualAssetDailyPct" type="number" step="0.01" value="${asset.dp??""}" placeholder="VERİ YOK"></div></div><p class="help">Manuel günlük değerler, kullanıcı onaylı ekran görüntüsü yerine geçmez ve doğrulanmış global Midas günlük K/Z üretmez.</p></section><section class="manual-section"><h3>KÂR / ZARAR</h3><div class="form-grid"><div class="field"><label>Gerçekleşen kâr</label><input id="manualAssetRealizedProfit" type="number" min="0" step="0.01" value="${asset.realizedProfit??""}" placeholder="VERİ YOK"></div><div class="field"><label>Gerçekleşen zarar</label><input id="manualAssetRealizedLoss" type="number" min="0" step="0.01" value="${asset.realizedLoss??""}" placeholder="VERİ YOK"></div><div class="field"><label>Gerçekleşmemiş kâr</label><input id="manualAssetUnrealizedProfit" type="number" min="0" step="0.01" value="${unrealized.profit}" placeholder="VERİ YOK"></div><div class="field"><label>Gerçekleşmemiş zarar</label><input id="manualAssetUnrealizedLoss" type="number" min="0" step="0.01" value="${unrealized.loss}" placeholder="VERİ YOK"></div></div></section><section class="manual-section manual-order-section"><h3>YENİ EMİR</h3><div class="form-grid"><div class="field"><label for="manualOrderSide">Emir türü</label><select id="manualOrderSide"><option value="">Emir seç</option><option value="ALIM">ALIM</option><option value="SATIM">SATIM</option></select></div><div class="field"><label for="manualOrderLots">Lot miktarı</label><input id="manualOrderLots" type="text" inputmode="decimal" placeholder="Örn. 19"></div><div class="field"><label for="manualOrderPrice">Lot fiyatı</label><input id="manualOrderPrice" type="text" inputmode="decimal" placeholder="Örn. 12,11 TL"></div></div><p class="help">Emir seçilen varlığın yerel işlem geçmişine tarih/saat ile kaydedilir; portföy lotu ve maliyeti otomatik değiştirilmez.</p>${orderHistoryHtml}</section><section class="manual-section"><h3>NOT</h3><div class="field"><label>Seçilen varlık notu</label><textarea id="manualAssetNote" maxlength="2000" placeholder="İsteğe bağlı yerel not">${esc(asset.note||"")}</textarea></div></section>`;
  box.oninput=()=>{manualEditorDirty=true;};box.onchange=()=>{manualEditorDirty=true;};openModalById("manualModal");
 }
 function closeManual(force=false){const modal=document.getElementById("manualModal");if(!modal?.classList.contains("show"))return true;if(!force&&manualEditorDirty&&!confirm("Kaydedilmemiş değişiklikler var. Kapatmak istiyor musunuz?"))return false;closeModalById("manualModal");manualEditorDirty=false;manualEditingSymbol="";return true;}
@@ -5922,7 +6014,7 @@ function saveManual(){
   const updated={...existing,name:document.getElementById("manualAssetName")?.value.trim()||null,type:document.getElementById("manualAssetType")?.value||existing.type,sector:document.getElementById("manualAssetSector")?.value.trim()||"Sınıflandırılmamış",q,avgCost,p:price,d:daily,dp:dailyPct,realizedProfit,realizedLoss,unrealized,returnPct,totalNet,note:document.getElementById("manualAssetNote")?.value.trim()||"",v:q!==null&&price!==null?q*price:null};let orderRecord=null;if(wantsOrder){const now=new Date();orderRecord={id:`order-${now.getTime()}-${Math.random().toString(36).slice(2,8)}`,date:now.toISOString(),displayDate:now.toLocaleString("tr-TR"),symbol:existing.s,side:orderSide,lots:orderLots,price:orderPrice,executedPrice:null,total:orderLots*orderPrice,commission:null,bsmv:null,note:"Seçili varlık manuel düzenleme emri",source:"Tek varlık manuel düzenleme · Yeni Emir",affectsPortfolio:false,status:"EMİR KAYDI"};updated.orderHistory=[...(existing.orderHistory||[]),orderRecord].slice(-200);data.transactions=Array.isArray(data.transactions)?data.transactions:[];data.transactions.push(orderRecord);data.transactions=data.transactions.slice(-500);}
   const dailyChanged=!sameNumber(existing.d,updated.d)||!sameNumber(existing.dp,updated.dp),priceChanged=!sameNumber(existing.p,updated.p),positionChanged=!sameNumber(existing.q,updated.q)||priceChanged||!sameNumber(existing.avgCost,updated.avgCost),financialChanged=dailyChanged||positionChanged||!sameNumber(existing.realizedProfit,updated.realizedProfit)||!sameNumber(existing.realizedLoss,updated.realizedLoss)||!sameNumber(existing.unrealized,updated.unrealized);
   updated.dailyVerified=dailyChanged?false:Boolean(existing.dailyVerified);if(priceChanged){updated.marketVerified=false;updated.marketDataCurrent=false;updated.marketFreshnessState="UNKNOWN";updated.marketFreshness="unknown";updated.marketProvider="";updated.marketDate="";updated.marketTimestamp="";}if(financialChanged&&(priceChanged||!existing.marketVerified))updated.source="Manuel düzenleme";data.assets[index]=updated;
-  if(positionChanged)data.reportedPortfolioTotal=null;if(dailyChanged){data.midasDailyVerified=false;data.midasDaily=null;data.dailyProfit=null;data.dailyLoss=null;data.midasDailySource="Manuel varlık kaydı · Midas günlük K/Z doğrulanmadı";}if(!sameNumber(existing.realizedProfit,updated.realizedProfit)||!sameNumber(existing.realizedLoss,updated.realizedLoss)){data.realizedProfit=null;data.realizedLoss=null;}data.lastUpdate=nowTr();if(positionChanged)data.market={...data.market,source:"Manuel düzenleme · yerel kayıt",delay:"Yerel kayıt",lastError:""};if(!orderRecord)addActivity(`${updated.s} yalnızca seçili varlık manuel düzenleyicisinden güncellendi.`,{symbol:updated.s,source:"Tek varlık manuel düzenleme"});selectedPortfolioSymbol=updated.s;prefs.selectedPortfolioSymbol=updated.s;manualEditorDirty=false;save();closeManual(true);showToast(orderRecord?`${updated.s} ${orderRecord.side} emri işlem geçmişine kaydedildi; portföy miktarı değişmedi.`:`${updated.s} güncellendi; diğer varlıklar değiştirilmedi.`);
+  if(positionChanged)data.reportedPortfolioTotal=null;if(dailyChanged){data.midasDailyVerified=false;data.midasDaily=null;data.dailyProfit=null;data.dailyLoss=null;data.midasDailySource="Manuel varlık kaydı · Günlük K/Z doğrulanmadı";}if(!sameNumber(existing.realizedProfit,updated.realizedProfit)||!sameNumber(existing.realizedLoss,updated.realizedLoss)){data.realizedProfit=null;data.realizedLoss=null;}data.lastUpdate=nowTr();if(positionChanged)data.market={...data.market,source:"Manuel düzenleme · yerel kayıt",delay:"Yerel kayıt",lastError:""};if(!orderRecord)addActivity(`${updated.s} yalnızca seçili varlık manuel düzenleyicisinden güncellendi.`,{symbol:updated.s,source:"Tek varlık manuel düzenleme"});selectedPortfolioSymbol=updated.s;prefs.selectedPortfolioSymbol=updated.s;manualEditorDirty=false;save();closeManual(true);showToast(orderRecord?`${updated.s} ${orderRecord.side} emri işlem geçmişine kaydedildi; portföy miktarı değişmedi.`:`${updated.s} güncellendi; diğer varlıklar değiştirilmedi.`);
  }catch(error){if(error.message!=="MANUAL_VALIDATION")showToast("Seçilen varlık kaydedilemedi.");}
 }
 function openCashEditor(){const input=document.getElementById("manualCashOnly");if(input)input.value=data.midasCash??"";const usd=document.getElementById("manualCashUsd");if(usd)usd.value=finite(data.midasCashUsd)??"";const eur=document.getElementById("manualCashEur");if(eur)eur.value=finite(data.midasCashEur)??"";openModalById("cashModal");}
@@ -6011,8 +6103,9 @@ function stkszAiContext(){
   });
  }else lines.push("POZİSYONLAR: aktif pozisyon yok.");
  const favs=[...favoriteSet()];if(favs.length)lines.push("Favoriler/Takip: "+favs.join(", "));
- const orders=data.pendingOrders?.known?(data.pendingOrders.items||[]):[];
- if(orders.length)lines.push("Bekleyen emirler: "+orders.map(o=>`${o.symbol} ${o.side} ${finite(o.lots)??"?"} lot @ ${finite(o.price)===null?"?":formatNumber(o.price,2,2)}`).join(" | "));
+const engineOrders=window.STKSZPortfolioDataEngine?window.STKSZPortfolioDataEngine.orderHistory(data).filter(o=>o.kind==="pending"):[];
+  const orders=engineOrders.length?engineOrders:(data.pendingOrders?.known?(data.pendingOrders.items||[]):[]);
+  if(orders.length)lines.push("Bekleyen emirler: "+orders.map(o=>`${o.symbol} ${o.side} ${finite(o.lots)??"?"} lot @ ${finite(o.price)===null?"?":formatNumber(o.price,2,2)}`).join(" | "));
  const newsItems=(newsCache.items||[]).filter(item=>item.kind!=="source").slice(0,8);
  if(newsItems.length){lines.push("SON HABER BAŞLIKLARI:");newsItems.forEach(item=>lines.push("- "+item.title+" ("+(item.source||"?")+")"));}
  return lines.join("\n");
@@ -6061,7 +6154,7 @@ function runAiReadTool(name,args){
   if(name==="getPortfolioSummary"){
    const total=calc(),daily=dailyResults(),cumulative=cumulativeResults();
    const positions=activeAssets().map(a=>({sembol:a.s,ad:a.name||null,lot:finite(a.q),ortalamaMaliyet:finite(a.avgCost),guncelFiyat:a.marketVerified?finite(a.p):null,fiyatDogrulandi:Boolean(a.marketVerified),deger:finite(a.v),gunlukDegisimPct:a.marketVerified?finite(a.marketChangePct):null}));
-   return {kaynak:"GERÇEK Midas kaydı (kullanıcı onaylı)",toplamVarlikTL:total,yatirimlarTL:positions.reduce((s,p)=>s+(p.deger||0),0),nakitTL:finite(data.midasCash),dovizNakitTLKarsiligi:fxCashTl().tl||null,gunlukNetKZ:daily.net,gerceklesenNetKZ:cumulative.realizedNet,pozisyonlar:positions};
+   return {kaynak:"Kullanıcı onaylı gerçek kayıt",toplamVarlikTL:total,yatirimlarTL:positions.reduce((s,p)=>s+(p.deger||0),0),nakitTL:finite(data.midasCash),dovizNakitTLKarsiligi:fxCashTl().tl||null,gunlukNetKZ:daily.net,gerceklesenNetKZ:cumulative.realizedNet,pozisyonlar:positions};
   }
   if(name==="getCashBalances"){
    const fx=fxCashTl();
@@ -6094,8 +6187,9 @@ function runAiReadTool(name,args){
    return {sembol:symArg,ad:a.name||null,fiyat:finite(a.p),gunlukDegisimPct:finite(a.marketChangePct),acilis:finite(a.open),yuksek:finite(a.high),dusuk:finite(a.low),oncekiKapanis:finite(a.previousClose),hacim:finite(a.volume),kaynak:a.marketProvider||a.source||null,guncellik:a.marketFreshnessState||null,veriZamani:a.marketTimestamp||null};
   }
   if(name==="getDividendData"){
-   const items=(data.pendingDividends?.items||[]).filter(x=>!symArg||String(x.symbol||"").toUpperCase()===symArg);
-   return data.pendingDividends?.known?{temettuler:items.map(x=>({sembol:x.symbol,tutar:finite(x.amount),tarih:x.date||null,not:x.note||null})),not:items.length?undefined:"Kayıtlı temettü yok."}:{durum:"Temettü verisi henüz yüklenmedi (Midas görselinden okunur)."};
+   /* 3.12: temettü sorgusu tek yakınsanmış veri kaynağından (engine dividends) — duplicate local state yok */
+   const items=(window.STKSZPortfolioDataEngine?window.STKSZPortfolioDataEngine.dividends(data):[]).filter(x=>!symArg||String(x.symbol||"").toUpperCase()===String(symArg).toUpperCase());
+   return (data.pendingDividends?.known||items.length)?{temettuler:items.map(x=>({sembol:x.symbol,tutar:finite(x.amount),tarih:x.date||null,not:x.note||null})),not:items.length?undefined:"Kayıtlı temettü yok."}:{durum:"Temettü verisi henüz yüklenmedi (görselden okunur)."};
   }
   if(name==="getIPOData"){
    const items=data.ipoCalendar?.items||[];
@@ -6883,7 +6977,8 @@ function renderOcrSourceUi(){
  else{setText("dataUploadTitle","ENR / Enpara veri görseli");setText("dataUploadHelp","JPG veya PNG ENR / Enpara görüntüsü seç. Kaynak uyumu doğrulanır; önce göz ikonuyla biyometrik doğrulama, sonra OCR önizlemesi ve açık onay gerekir.");}
 }
 function setOcrSource(source){const next=["auto","midas","enr"].includes(source)?source:"auto";if(next!==selectedOcrSource){selectedOcrSource=next;pendingOcr=null;pendingEnrOcr=null;const midasReview=document.getElementById("ocrReview"),enrReview=document.getElementById("enrOcrReview"),preview=document.getElementById("midasPreview"),input=document.getElementById("midasFile");if(midasReview)midasReview.hidden=true;if(enrReview)enrReview.hidden=true;if(preview){preview.classList.remove("show");preview.removeAttribute("src");}if(input)input.value="";setText("ocrStatus",`${next==="auto"?"OTOMATİK KAYNAK TESPİTİ":next==="midas"?"MIDAS":"ENR / ENPARA"} seçildi. Görsel henüz yüklenmedi; mevcut veri değişmedi.`);}renderOcrSourceUi();}
-function openDataUpload(source=null){showPage("portfolio");if(source)setOcrSource(source);setTimeout(()=>{const box=document.getElementById("dataImageUpload");if(typeof expandSectionFor==="function")expandSectionFor(box);box?.scrollIntoView({behavior:"auto",block:"start"});},80);}
+function openDataUpload(source=null){openImportCenter();}
+function openImportCenter(){showPage("portfolio");setTimeout(()=>{const box=document.getElementById("portfolioImportCard");const sec=box?box.closest(".section-title"):null;if(typeof expandSectionFor==="function")expandSectionFor(box);box?.scrollIntoView({behavior:"auto",block:"start"});},80);}
 function openMidasUpload(){openDataUpload("midas");}
 function detectOcrSource(text){const upper=String(text||"").toLocaleUpperCase("tr-TR"),universe=typeof stkszSymbolUniverse==="function"?stkszSymbolUniverse():new Map(data.assets.map(asset=>[asset.s,{}])),symbolHits=[...universe.keys()].filter(symbol=>symbol.length>=4&&upper.includes(symbol)).length,midasMarkers=(/\bM[Iİ]DAS\b/.test(upper)?3:0)+(symbolHits?2:0)+(/PORTF[ÖO]Y|LOT|ORTALAMA MAL[Iİ]YET|B[Iİ]ST H[Iİ]SSELER/.test(upper)?1:0)+(/POZ[Iİ]SYONUM|BUG[ÜU]NK[ÜU] GET[Iİ]R[Iİ]|ORT\.?\s*F[Iİ]YAT/.test(upper)?2:0),enrMarkers=(/\bENPARA\b|\bENR\b|QNB PORTF[ÖO]Y/.test(upper)?3:0)+(/FON B[Iİ]R[Iİ]M F[Iİ]YATI|FON DETAY|Y[ÖO]NET[Iİ]M [ÜU]CRET[Iİ]/.test(upper)?2:0);if(midasMarkers>=3&&midasMarkers>enrMarkers)return "midas";if(enrMarkers>=3&&enrMarkers>midasMarkers)return "enr";return "unknown";}
 function prepareDataOcr(file){return selectedOcrSource==="auto"?prepareAutomaticOcr(file):selectedOcrSource==="enr"?prepareEnrOcr(file):prepareMidasOcr(file);}
@@ -7156,43 +7251,109 @@ function onImportBrokerChange(value){importState.broker=value;}
 /* --- CSV format change --- */
 function onImportCsvFormatChange(value){importState.csvFormat=value;}
 
-/* ===== GÖRSEL (OCR) IMPORT ===== */
+/* ===== GÖRSEL IMPORT (server Gemini Vision → yerel OCR fallback) ===== */
+function _imageConfidencePct(value){
+  /* Vision güven sözcüklerini yüzdeye çevirir; sayı geldiyse olduğu gibi tutar. */
+  const n=finite(value);
+  if(n!==null)return Math.min(100,Math.max(0,n));
+  const s=String(value||"").toLowerCase();
+  return /y[üü]ksek|high|full|tam/.test(s)?90:/orta|medium/.test(s)?70:50;
+}
+function _finishImageImport(parsed,status,usedVision){
+  /* 3.7: ortak sonlandırıcı — önizleme + onay akışı; yazma yalnız onayla. */
+  if(!parsed||!Array.isArray(parsed.assets)||!parsed.assets.length){
+    status.textContent="VERİ YETERSİZ — KARAR YOK · Okunabilir pozisyon çıkarılamadı. Hiçbir kayıt değiştirilmedi.";
+    showToast("VERİ YETERSİZ — KARAR YOK");
+    return;
+  }
+  importState.parsedData=parsed;
+  showImportPreview(parsed);
+  status.textContent=`İşlem tamamlandı (${usedVision?"sunucu Vision":"yerel OCR"}) · ${parsed.assets.length} pozisyon kavrandı. Onay bekliyor; onaylanana kadar hiçbir kayıt değişmedi.`;
+  showToast(`${parsed.assets.length} pozisyon çıkarıldı. Onaylayın.`);
+}
 async function handleImportImage(file){
   if(!file)return;
-  if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>8*1024*1024){showToast("En fazla 8MB JPG/PNG/WebP yükleyin.");return;}
+  if(file.size>8*1024*1024){showToast("En fazla 8MB JPG/PNG/WebP yükleyin.");return;}
   const dz=document.getElementById("importImageDropzone");if(dz){dz.classList.add("dragover");}
   const preview=document.getElementById("importImagePreview");preview.src=await fileToDataUrl(file);preview.hidden=false;
-  const status=document.getElementById("importImageStatus");status.textContent="OCR işleniyor...";
+  const status=document.getElementById("importImageStatus");status.textContent="Görsel analiz ediliyor (sunucu Vision)...";
+  let raw={text:"",confidence:0},usedVision=false;
   try{
-    const Tesseract=await loadTesseract();
-    const result=await Tesseract.recognize(await preprocessImageForOcr(file),"tur+eng",{logger:m=>{if(status&&m.status==="recognizing text")status.textContent="OCR okunuyor: %"+Math.round((m.progress||0)*100);}});
-    const rawText=result?.data?.text||"";
-    const detected=detectOcrSource(rawText);
-    if(detected==="enr" && importState.broker!=="enr"){status.textContent="Görsel ENR/Enpara formatına benziyor. Lütfen 'ENR / Enpara' kaynağını seçin.";return;}
-    /* Broker-specific parsing */
+    /* 3.6: önce sunucu Gemini Vision (structured extraction) — kimlik istemcide yok; pasif altyapı. */
+    const ai=window.STKSZProviders?.stkszAiProvider;
+    if(ai&&typeof ai.visionBackend==="function"&&typeof ai.usesBackend==="function"&&ai.usesBackend()){
+      const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result||"").split(",")[1]||"");r.onerror=rej;r.readAsDataURL(file);});
+      try{
+        const vr=await ai.visionBackend(base64,file.type||"image/jpeg");
+        const ex=(vr&&vr.extraction)||(vr&&vr.data&&vr.data.extraction)||null;
+        const pos=ex&&Array.isArray(ex.positions)?ex.positions.filter(p=>p&&p.symbol):[];
+        if(pos.length){
+          usedVision=true;
+          const assets=pos.map(p=>({
+            s:String(p.symbol).toUpperCase(),
+            q:finite(p.quantity),
+            avgCost:finite(p.averageCost),
+            p:finite(p.currentPrice),
+            v:finite(p.marketValue),
+            type:p.type||"Hisse",
+            confidence:_imageConfidencePct(p.confidence),
+            uncertain:finite(p.quantity)===null||finite(p.currentPrice)===null
+          }));
+          let institution=null;
+          if(window.STKSZPortfolioDataEngine&&(ex.institution||ex.notes||ex.rawText)){
+            const inst=window.STKSZPortfolioDataEngine.detectInstitution(String(ex.institution||"")+" "+String(ex.notes||"")+" "+String(ex.rawText||""));
+            institution=inst.key==="unknown"?null:inst;
+          }
+          const parsed={assets:assets,source:"image_vision",broker:institution?institution.key:(importState.broker!=="auto"?importState.broker:"auto"),institution:institution,rawText:ex.rawText||"",warnings:(ex.notes?[String(ex.notes)]:[]),vision:"server_vision",cashTRY:finite(ex.cashTRY)};
+          if(parsed.broker==="auto"&&!institution){status.textContent="KURUM BİLİNMİYOR · Görsel bilinmeyen kurumdan; kurum tespit edilemedi. Yine de önizleyip onaylayabilir ya da kaynağı seçerek yenileyebilirsin. Yazma yalnız onayda olur.";}
+          _finishImageImport(parsed,status,true);
+          return;
+        }
+        raw.text=(ex&&(ex.rawText||""))||"";
+        raw.confidence=90;
+        if(!raw.text)status.textContent="Sunucu Vision pozisyon çıkaramadı; yerel OCR'a düşülüyor...";
+        else usedVision=true;
+      }catch(e){status.textContent="Sunucu Vision'a erişilemedi; yerel OCR'a düşülüyor...";}
+    }else{status.textContent="Sunucu Vision yapılandırılmadı; yerel OCR akışı kullanılıyor...";}
+    /* yerel OCR fallback — structured sonuç yoksa */
+    if(!usedVision&&!raw.text){
+      const Tesseract=await loadTesseract();
+      const result=await Tesseract.recognize(await preprocessImageForOcr(file),"tur+eng",{logger:function(m){if(status&&m.status==="recognizing text")status.textContent="OCR okunuyor: %"+Math.round((m.progress||0)*100)+" (yerel)";}});
+      raw.text=result?.data?.text||"";raw.confidence=finite(result?.data?.confidence)??0;
+    }
+    if(!raw.text){status.textContent="VERİ YOK · Görselden okunabilir metin çıkarılamadı. Hiçbir kayıt değiştirilmedi.";return;}
+    const detected=window.STKSZPortfolioDataEngine?window.STKSZPortfolioDataEngine.detectInstitution(raw.text):{key:detectOcrSource(raw.text)};
+    if(importState.broker==="auto"){
+      if(detected&&detected.key==="unknown"){status.textContent="KURUM BİLİNMİYOR · Kurum otomatik tanınamadı. Lütfen kaynağı seçin ya da VERİ YETERSİZ — KARAR YOK. Hiçbir kayıt yazılmadı.";return;}
+    }else if(importState.broker!=="enr"&&detected&&detected.key!=="unknown"&&detected.key!==importState.broker&&(detected.confidence||0.5)>=0.55){
+      status.textContent=`Görsel ${(detected.name||detected.key||"").toUpperCase()} formatına benziyor (güven %${Math.round((detected.confidence||0.5)*100)}). Seçilen kaynakla uyuşmuyor; hiçbir kayıt değiştirilmedi. Doğru kaynağı seçip yeniden yükleyin.`;return;
+    }
+    if(importState.broker==="enr"&&(!detected||detected.key!=="enpara")){
+      const legacyDetect=detectOcrSource(raw.text);
+      if(legacyDetect!=="enr"){status.textContent="Seçilen kaynak ENR/ENPARA; görsel bu kaynak ile eşleşmiyor. Hiçbir kayıt değiştirilmedi.";return;}
+    }
     let parsed;
     switch(importState.broker){
-      case "midas":parsed=parseMidasOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "isyatirim":parsed=parseIsYatirimOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "akbank":parsed=parseAkbankOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "yapikredi":parsed=parseYapiKrediOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "garanti":parsed=parseGarantiOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "deniz":parsed=parseDenizOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "hsbc":parsed=parseHSBCOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "vakif":parsed=parseVakifOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "tefas":parsed=parseTefasOcr(rawText,finite(result?.data?.confidence)??0);break;
-      case "generic":parsed=parseGenericTableOcr(rawText,finite(result?.data?.confidence)??0);break;
-      default:parsed=parseAutoBrokerOcr(rawText,finite(result?.data?.confidence)??0);break;
+      case "midas":parsed=parseMidasOcr(raw.text,raw.confidence);break;
+      case "isyatirim":parsed=parseIsYatirimOcr(raw.text,raw.confidence);break;
+      case "akbank":parsed=parseAkbankOcr(raw.text,raw.confidence);break;
+      case "yapikredi":parsed=parseYapiKrediOcr(raw.text,raw.confidence);break;
+      case "garanti":parsed=parseGarantiOcr(raw.text,raw.confidence);break;
+      case "deniz":parsed=parseDenizOcr(raw.text,raw.confidence);break;
+      case "hsbc":parsed=parseHSBCOcr(raw.text,raw.confidence);break;
+      case "vakif":parsed=parseVakifOcr(raw.text,raw.confidence);break;
+      case "tefas":parsed=parseTefasOcr(raw.text,raw.confidence);break;
+      case "generic":parsed=parseGenericTableOcr(raw.text,raw.confidence);break;
+      case "enr":parsed=parseEnrOcr(raw.text,raw.confidence);break;
+      default:parsed=parseAutoBrokerOcr(raw.text,raw.confidence);break;
     }
-    parsed.source="image_ocr";
-    parsed.broker=importState.broker!=="auto"?importState.broker:detected;
-    importState.parsedData=parsed;
-    showImportPreview(parsed);
-    status.textContent=`OCR tamamlandı · ${parsed.assets.length} pozisyon bulundu. Onay bekliyor.`;
-    showToast(`${parsed.assets.length} pozisyon çıkarıldı. Onaylayın.`);
+    parsed.source="image_ocr";parsed.broker=importState.broker!=="auto"?importState.broker:(detected&&detected.key)||detectOcrSource(raw.text);
+    parsed.rawText=raw.text;
+    parsed.vision=usedVision?"server_vision":"local_ocr";
+    _finishImageImport(parsed,status,usedVision);
   }catch(error){
-    status.textContent="OCR başarısız: "+String(error?.message||error);
-    showToast("OCR hatası: "+String(error?.message||error));
+    status.textContent="Görsel işleme başarısız: "+String(error?.message||error)+" · Hiçbir kayıt değiştirilmedi.";
+    showToast("Görsel işleme hatası");
   }finally{const input=document.getElementById("importImageFile");if(input)input.value="";if(dz)dz.classList.remove("dragover");}
 }
 
@@ -7476,8 +7637,19 @@ function showImportPreview(parsed){
   });
   html+=`</tbody></table>`;
   table.innerHTML=html;
-  /* Summary */
-  summary.innerHTML=`<b>${parsed.assets.length}</b> pozisyon · <b>${validCount}</b> doğrulanabilir (lot+fiyat) · Toplam değer: <b>${money(totalValue)}</b> · Kaynak: <b>${parsed.broker||parsed.source||"bilinmiyor"}</b> ${parsed.warnings?.length?" · <span class='warn'>"+parsed.warnings.length+" uyarı</span>":""}`;
+  /* Summary — 3.7: kurum tespiti + hedef hesap + güven etiketi */
+  let institutionNote="";
+  try{
+    if(window.STKSZPortfolioDataEngine&&parsed.rawText){
+      const inst=window.STKSZPortfolioDataEngine.detectInstitution(parsed.rawText+" "+(parsed.institution||""));
+      institutionNote=inst.key==="unknown"?' · Kurum: <span class="warn">Kurum bilinmiyor</span>':' · Kurum: '+esc(inst.name)+' (güven %'+Math.round(inst.confidence*100)+')';
+    }else if(parsed.broker&&parsed.broker!=="auto"){
+      institutionNote=' · Kurum: '+esc((parsed.broker||"").toUpperCase());
+    }
+  }catch(e){/* kurum uyarısı kritik değil */}
+  const cashNote=finite(parsed.cashTRY)!==null?` · Nakit: <b>${money(finite(parsed.cashTRY))}</b> (kaynak)`:``;
+  const pnlNote=finite(parsed.dailyPnl)!==null||finite(parsed.totalPnl)!==null?` · Günlük K/Z: <b>${finite(parsed.dailyPnl)!==null?money(finite(parsed.dailyPnl)):"VERİ YOK"}</b> · Toplam K/Z: <b>${finite(parsed.totalPnl)!==null?money(finite(parsed.totalPnl)):"VERİ YOK"}</b>`:`<span class="muted"> · Günlük K/Z / Toplam K/Z: VERİ YOK — kaynak bu alanları sağlamadı, çıkarım yapılmadı</span>`;
+  summary.innerHTML=`<b>${parsed.assets.length}</b> pozisyon · <b>${validCount}</b> doğrulanabilir (lot+fiyat) · Toplam değer: <b>${money(totalValue)}</b> · Kaynak: <b>${parsed.broker||parsed.source||"bilinmiyor"}</b>${institutionNote}${cashNote}${pnlNote}${parsed.warnings?.length?" · <span class='warn'>"+parsed.warnings.length+" uyarı</span>":""}${parsed.vision?` · Motor: <b>${parsed.vision==="server_vision"?"sunucu Vision":"yerel OCR"}</b>`:""}`;
   if(typeof expandSectionFor==="function")expandSectionFor(panel);
   requestAnimationFrame(()=>panel.scrollIntoView({block:"start",behavior:"auto"}));
 }
@@ -7640,7 +7812,7 @@ function renderOcrReview(){
  if(replaceRow){replaceRow.disabled=Boolean(pendingOcr.detail);if(pendingOcr.detail)replaceRow.checked=false;else replaceRow.checked=true;const holder=replaceRow.closest("label");if(holder)holder.style.opacity=pendingOcr.detail?"0.45":"1";}
  const fieldHtml=(item,key,label,step)=>{const confidence=Number(item.fieldConfidence?.[key])||0,value=item[key],trusted=confidence>=75&&value!==null;return `<label>${esc(label)}<small class="confidence ${trusted?"certain":"uncertain"}">Güven ${confidence}%</small><input data-field="${key}" type="number" step="${step}" value="${trusted?esc(value):""}" placeholder="VERİ YOK"></label>`;};
  pendingOcr.assets.forEach((item,index)=>{const row=document.createElement("div");row.className="ocr-row";row.dataset.index=String(index);const meta=ocrSymbolMeta(item.s),displayName=item.name||meta?.name||"",typeLabel=ocrAssetTypeLabel(item.type||meta?.type||"");row.innerHTML=`<div class="ocr-row-title"><b>${esc(item.s)}</b><span class="ocr-row-name">${esc(displayName||"Ad bilgisi yok")}${typeLabel?` · ${esc(typeLabel)}`:""}</span><small class="confidence ${item.uncertain?"uncertain":"certain"}">${item.uncertain?"Belirsiz":"Doğrulanabilir"} · Satır güveni ${item.confidence}%</small></div>${fieldHtml(item,"q","Lot","0.0001")}${fieldHtml(item,"avgCost","Ort. maliyet","0.0001")}${fieldHtml(item,"p","Fiyat","0.0001")}${fieldHtml(item,"d","Günlük TL","0.01")}${fieldHtml(item,"dp","Günlük %","0.01")}${fieldHtml(item,"unrealized","Gerç. olmayan K/Z","0.01")}`;rows.appendChild(row);});
- const configs=[["portfolioTotal","Toplam Midas portföyü"],["cash","Midas nakit (TL)"],["cashUsd","USD nakit ($)"],["cashEur","EUR nakit (€)"],["valorT1","T1 tutarı (valör)"],["valorT2","T2 tutarı (valör)"],["dailyProfit","Günlük kâr"],["dailyLoss","Günlük zarar"],["realizedProfit","Gerçekleşen kâr"],["realizedLoss","Gerçekleşen zarar"],["unrealizedProfit","Gerçekleşmemiş kâr"],["unrealizedLoss","Gerçekleşmemiş zarar"],["transactionCount","İşlem sayısı"],["dailyVolume","Günlük hacim"],["settlement","T+2 / valör"]];summaryBox.innerHTML="";configs.forEach(([key,label])=>{const value=pendingOcr.summary[key];if(value===null||value===undefined)return;const confidence=Number(pendingOcr.summaryConfidence?.[key])||0,trusted=confidence>=75,box=document.createElement("div");box.className="ocr-summary-field";box.dataset.summaryKey=key;box.innerHTML=`<label>${esc(label)} <small class="confidence ${trusted?"certain":"uncertain"}">Güven ${confidence}%</small></label><input data-summary-value type="${typeof value==="number"?"number":"text"}" step="0.01" value="${trusted?esc(value):""}" placeholder="VERİ YOK">`;summaryBox.appendChild(box);});
+ const configs=[["portfolioTotal","Toplam portföy"],["cash","Nakit (TL)"],["cashUsd","USD nakit ($)"],["cashEur","EUR nakit (€)"],["valorT1","T1 tutarı (valör)"],["valorT2","T2 tutarı (valör)"],["dailyProfit","Günlük kâr"],["dailyLoss","Günlük zarar"],["realizedProfit","Gerçekleşen kâr"],["realizedLoss","Gerçekleşen zarar"],["unrealizedProfit","Gerçekleşmemiş kâr"],["unrealizedLoss","Gerçekleşmemiş zarar"],["transactionCount","İşlem sayısı"],["dailyVolume","Günlük hacim"],["settlement","T+2 / valör"]];summaryBox.innerHTML="";configs.forEach(([key,label])=>{const value=pendingOcr.summary[key];if(value===null||value===undefined)return;const confidence=Number(pendingOcr.summaryConfidence?.[key])||0,trusted=confidence>=75,box=document.createElement("div");box.className="ocr-summary-field";box.dataset.summaryKey=key;box.innerHTML=`<label>${esc(label)} <small class="confidence ${trusted?"certain":"uncertain"}">Güven ${confidence}%</small></label><input data-summary-value type="${typeof value==="number"?"number":"text"}" step="0.01" value="${trusted?esc(value):""}" placeholder="VERİ YOK">`;summaryBox.appendChild(box);});
  [["pendingOrders","Bekleyen emirler"],["pendingDividends","Bekleyen temettüler"]].forEach(([key,label])=>{const values=pendingOcr.summary[key]||[],confidence=Number(pendingOcr.summaryConfidence?.[key])||0;if(confidence<75||!values.length)return;const box=document.createElement("div");box.className="ocr-summary-field";box.dataset.summaryKey=key;box.innerHTML=`<label>${esc(label)} <small class="confidence certain">Güven ${confidence}%</small></label><div class="help">${values.length} doğrulanabilir satır okundu.</div>`;summaryBox.appendChild(box);});
  if(!summaryBox.children.length)summaryBox.innerHTML='<div class="empty-state">Ek portföy alanı okunamadı.</div>';const uncertain=pendingOcr.assets.filter(item=>item.uncertain).length,warnings=pendingOcr.warnings||[];setText("ocrConfidence",`Genel OCR güveni: ${pendingOcr.ocrConfidence}%. ${uncertain?uncertain+" satırda düşük güvenli alanlar VERİ YOK bırakıldı.":"Alan güvenleri doğrulama eşiğini geçti."}`);document.querySelectorAll('#ocrReview .ocr-warning').forEach(node=>node.remove());if(uncertain||warnings.length){const warning=document.createElement("div");warning.className="ocr-warning";warning.textContent="OCR sonucu bazı alanlarda belirsizlik içeriyor. Güveni %75 altındaki finansal alanlar VERİ YOK bırakıldı ve mevcut doğru verilerin üzerine yazılmayacak. "+warnings.join(" ");review.querySelector(".ocr-review-head").after(warning);}const raw=document.getElementById("ocrRawText");if(raw)raw.textContent=pendingOcr.rawText||"Metin bulunamadı.";requestAnimationFrame(()=>review.scrollIntoView({block:"start",behavior:"auto"}));
 }
@@ -7906,8 +8078,8 @@ function applyLayoutEditMode(){
 
 /* ============ AÇILIR / KAPANIR BÖLÜMLER (v69) ============
    Çok yer kaplayan bölümler + / − butonuyla katlanır. Durum localStorage'da kalıcıdır. */
-const COLLAPSIBLE_SECTIONS=["GÖRSEL YÜKLE / GÜNCELLE","BEKLEYEN TEMETTÜ","EMİRLER / VALÖR","MİDAS PORTFÖY DAĞILIMI","STRES TESTİ & ÇEŞİTLENDİRME","VOLÜM PATLAMA & ÇIKIŞ ALARMLARI","SİZNİN İÇİN ÖNE ÇIKANLAR","ALGORİTMİK SİNYAL TERMİNALİ","GRID & DCA STRATEJİ KURULUMU"];
-const COLLAPSED_DEFAULT=new Set(["GÖRSEL YÜKLE / GÜNCELLE","STRES TESTİ & ÇEŞİTLENDİRME","VOLÜM PATLAMA & ÇIKIŞ ALARMLARI","SİZNİN İÇİN ÖNE ÇIKANLAR","ALGORİTMİK SİNYAL TERMİNALİ","GRID & DCA STRATEJİ KURULUMU"]);
+const COLLAPSIBLE_SECTIONS=["HESAP / PORTFÖY İÇE AKTAR","BEKLEYEN TEMETTÜ","EMİRLER / VALÖR","PORTFÖY DAĞILIMI","STRES TESTİ & ÇEŞİTLENDİRME","VOLÜM PATLAMA & ÇIKIŞ ALARMLARI","SİZNİN İÇİN ÖNE ÇIKANLAR","ALGORİTMİK SİNYAL TERMİNALİ","GRID & DCA STRATEJİ KURULUMU"];
+  const COLLAPSED_DEFAULT=new Set(["HESAP / PORTFÖY İÇE AKTAR","STRES TESTİ & ÇEŞİTLENDİRME","VOLÜM PATLAMA & ÇIKIŞ ALARMLARI","SİZNİN İÇİN ÖNE ÇIKANLAR","ALGORİTMİK SİNYAL TERMİNALİ","GRID & DCA STRATEJİ KURULUMU"]);
 let collapsedSections=safeJson(storageGet("stkszCollapsedSections"),null);
 function sectionTitleText(el){return (el?.textContent||"").replace(/[+−]\s*$/,"").replace(/\s+/g," ").trim().toLocaleUpperCase("tr-TR");}
 function setupCollapsibleSections(){
@@ -8229,7 +8401,7 @@ function renderDividendCalendar(){
  const el=document.getElementById("dividendCalendar");if(!el)return;
  const items=data.pendingDividends?.items||[];
  const known=data.pendingDividends?.known;
- if(!known||!items.length){el.innerHTML=`<div class="empty-state">Henüz doğrulanmış temettü kaydı yok. Midas görseli yüklendiğinde otomatik eklenir.</div>`;return;}
+ if(!known||!items.length){el.innerHTML=`<div class="empty-state">Henüz doğrulanmış temettü kaydı yok. Görsel yüklendiğinde otomatik eklenir.</div>`;return;}
  const totalEst=items.reduce((s,x)=>{const amt=finite(x.amount)||0;const asset=data.assets.find(a=>a.s===x.symbol);const shares=asset?(finite(asset.q)||0):0;return s+amt*shares;},0);
  el.innerHTML=`<div class="dividend-total-row"><b>Toplam Tahmini Temettü:</b> <span class="green">${totalEst>0?money(totalEst):"—"}</span> <small>(portföy bazında hesaplanmıştır)</small></div>`+items.map(x=>{
   const asset=data.assets.find(a=>a.s===x.symbol);
