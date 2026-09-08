@@ -24,7 +24,7 @@
 <link rel="apple-touch-icon" href="assets/icons/icon-120.png" sizes="120x120">
 <link rel="apple-touch-startup-image" href="assets/splash/splash-2732.png">
 <title>STKSZ Komuta Merkezi</title>
-<link rel="stylesheet" href="style.css?v=122">
+<link rel="stylesheet" href="style.css?v=123">
 </head>
 <body>
 <div id="appBootSplash" class="app-boot-splash" role="status" aria-label="STKSZ açılıyor"><div class="boot-splash-inner"><img src="assets/icons/stksz-logo.png" alt="STKSZ CAPITAL"><span class="boot-splash-brand">STKSZ CAPITAL</span><span class="boot-splash-loading" aria-hidden="true"></span></div></div>
@@ -32,7 +32,6 @@
 
 <div id="authGate" class="auth-gate" hidden>
  <div class="auth-card">
-  <img src="assets/icons/stksz-logo.png" alt="STKSZ CAPITAL" class="auth-logo">
   <div id="authChoices">
    <div class="auth-hero">
     <img src="assets/icons/stksz-logo.png" alt="STKSZ CAPITAL" class="auth-hero-logo">
@@ -114,6 +113,13 @@
 </header>
 
 <main id="appScroll">
+<div id="appLegalDisclaimer" class="app-legal-disclaimer">
+ <details class="disclaimer-core" open>
+  <summary class="disclaimer-summary" aria-label="Yasal bilgilendirme"><b>BİLGİLENDİRME</b><span class="disclaimer-dot">.</span><span class="disclaimer-cta">Yatırım tavsiyesi değildir</span><svg class="disclaimer-caret" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+  <p>STKSZ Capital yalnızca bilgilendirme amaçlıdır; yatırım tavsiyesi, portföy yönetimi veya alım-satım tavsiyesi sunmaz. Tüm finansal kararlar kullanıcıya aittir. Geçmiş performans gelecek sonuçların garantisi değildir. Veriler gecikmeli veya doğrulanmamış olabilir. Gerçek para ile işlem yapmadan önce lisanslı bir yatırım danışmanına başvurun.</p>
+ <p class="disclaimer-sub">Yapay zeka analizleri haber ve kamuoyu bilgilerine dayanır; nihai alım-satım kararları deterministik risk motoru tarafından üretilir. STKSZ, broker aracılık hizmeti sunmaz; tüm emirler kullanıcı tarafından doğrudan aracı kurum uygulaması üzerinden iletilir.</p>
+ </details>
+</div>
 <section class="page active" id="page-home">
   <article class="portfolio-value-hero" aria-labelledby="portfolioValueTitle">
     <div class="portfolio-value-main">
@@ -546,6 +552,7 @@
     <div class="section-title" style="font-size:14px; font-weight:700; color:var(--text);">GEÇMİŞ HESAP DEĞİŞİMLERİ & SNAPSHOT'LAR</div>
     <div id="snapshotHistoryList" style="margin-top:8px;"></div>
   </div>
+</section>
 
 <section class="page" id="page-news">
   <div class="news-toolbar">
@@ -1687,10 +1694,7 @@
   <button type="button" class="nav-ai-btn" onclick="openStkszAi()" aria-label="STKSZ AI asistanını aç" title="STKSZ AI"><span class="nav-ai-ring" aria-hidden="true"></span><span class="nav-ai-core"><b>STKSZ</b><b>AI</b></span></button>
 </nav>
 
-<div id="appLegalDisclaimer" class="app-legal-disclaimer">
- <p>STKSZ Capital yalnızca bilgilendirme amaçlıdır; yatırım tavsiyesi, portföy yönetimi veya alım-satım tavsiyesi sunmaz. Tüm finansal kararlar kullanıcıya aittir. Geçmiş performans gelecek sonuçların garantisi değildir. Veriler gecikmeli veya doğrulanmamış olabilir. Gerçek para ile işlem yapmadan önce lisanslı bir yatırım danışmanına başvurun.</p>
- <p class="disclaimer-sub">Yapay zeka analizleri haber ve kamuoyu bilgilerine dayanır; nihai alım-satım kararları deterministik risk motoru tarafından üretilir. STKSZ, broker aracılık hizmeti sunmaz; tüm emirler kullanıcı tarafından doğrudan aracı kurum uygulaması üzerinden iletilir.</p>
-</div>
+
 
 <div class="modal asset-manual-modal" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manualAssetTitle">
  <div class="modal-box asset-manual-box">
@@ -1903,7 +1907,7 @@
 SİNYAL   : crossover(a,b) crossunder(a,b) → true/false dizisi
 ÇİZİM    : plot(dizi,{isim,renk,kalinlik,panel:"alt"})
           hline(100,{isim:"Seviye",renk:"#e7b51e"})
-          marker(koşulDizisi,{yazi:"AL",renk:"#00df78"})</pre>
+          marker(koşulDizisi,{yazi:"AL",renk:"#00a859"})</pre>
   </details>
   </div>
  </div>
@@ -1943,6 +1947,7 @@ SİNYAL   : crossover(a,b) crossunder(a,b) → true/false dizisi
 <script src="stksz-secret-vault.js?v=148"></script>
 <script src="stksz-data-engine.js?v=150"></script>
 <script src="stksz-ai-engine.js?v=121"></script>
+<script src="stksz-entitlement.js"></script>
 <script src="market-view-model.js"></script>
 <script src="virtual-wallet.js?v=101"></script>
 <script src="broker-adapter.js?v=102"></script>
@@ -2443,13 +2448,13 @@ const STKSZ_EDITOR_DEFAULT=`// STKSZ Editör — kendi stratejini yaz!
 
 const h20 = sma(close, 20);
 const h50 = sma(close, 50);
-plot(h20, { isim: "SMA 20", renk: "#00df78" });
+plot(h20, { isim: "SMA 20", renk: "#00a859" });
 plot(h50, { isim: "SMA 50", renk: "#4b9cff" });
 
 const g = rsi(close, 14);
 plot(g, { isim: "RSI 14", renk: "#e7b51e", panel: "alt" });
 
-marker(crossover(h20, h50), { yazi: "AL", renk: "#00df78" });
+marker(crossover(h20, h50), { yazi: "AL", renk: "#00a859" });
 marker(crossunder(h20, h50), { yazi: "SAT", renk: "#ff4d4d", konum: "ust" });`;
 /* v83: STKSZ grafik tam ekran modu — ⛶ ile aç, tüm çizim/hesaplama araçları ve editör içeride */
 function toggleChartFullscreen(button){
@@ -4029,7 +4034,7 @@ function renderKeyMomentsOnChart(symbol,moments){
   moments.forEach(m=>{
     const x=(m.index/asset.priceHistory.length)*rect.width;
     const y=rect.height-(m.price/Math.max(...asset.priceHistory))*rect.height;
-    const color=m.type==="GAP_UP"?"#00df78":m.type==="GAP_DOWN"?"#ff4d4d":m.type==="VOLUME_SPIKE"?"#D0904E":m.type==="NEWS"?"#4b9cff":"#e7b51e";
+    const color=m.type==="GAP_UP"?"#00a859":m.type==="GAP_DOWN"?"#ff4d4d":m.type==="VOLUME_SPIKE"?"#D0904E":m.type==="NEWS"?"#4b9cff":"#e7b51e";
     ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();
     ctx.strokeStyle="#000";ctx.lineWidth=2;ctx.stroke();
   });
@@ -6296,8 +6301,8 @@ const AUTH_ENABLED=true;
 let authState=safeJson(storageGet("stkszAuth"),null);
 let authReady=false;
 const GUEST_BLOCKED_FNS=["openPlEditor","openCashEditor","openManual","openAddAsset","openNewTransaction","vwInit","vwExecute","vwTradeConfirm","aiApplyTradeProposal","aiApplyDividendProposal","saveProviderKey","syncCreateAccount","syncPairDevice","openVwTrade","purchaseBadge","openTelegramBot","openStkszEditorFromMenu"];
-function isGuest(){return authState?.mode==="guest";}
-function isAuthed(){return Boolean(authState&&(authState.mode==="account"||authState.mode==="guest"));}
+function isGuest(){return window.STKSZEntitlement?window.STKSZEntitlement.isGuest():authState?.mode==="guest";}
+function isAuthed(){return window.STKSZEntitlement?window.STKSZEntitlement.isAuthed():Boolean(authState&&(authState.mode==="account"||authState.mode==="guest"));}
 function authPersist(){storageSet("stkszAuth",JSON.stringify(authState));}
 async function hashPassword(password){const enc=new TextEncoder().encode(password);const buf=await crypto.subtle.digest("SHA-256",enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");}
 function getUsers(){return safeJson(storageGet("stkszUsers"),{});}
@@ -6317,8 +6322,8 @@ gate.hidden=isAuthed();
   if(!isAuthed()){document.getElementById("authChoices").hidden=false;document.getElementById("authBiometric").hidden=true;_authHideSteps();const err=document.getElementById("authLoginError");if(err)err.hidden=true;const rerr=document.getElementById("authRegisterError");if(rerr)rerr.hidden=true;const wrap=document.getElementById("authUserFormWrap");if(wrap)wrap.hidden=true;const rwrap=document.getElementById("authRegisterFormWrap");if(rwrap)rwrap.hidden=true;}
 }
 function authRegister(provider){
- const label={google:"Google",apple:"Apple"}[provider]||provider;
- showToast(label+" ile kayıt/giriş için OAuth yapılandırması gerekli (Client ID / Services ID). Şu anda \"E-Posta İle Kaydol\" veya \"Kullanıcı adı + şifre\" seçenekleriyle devam edin.");
+ const msg=provider==="google"?"Google ile giriş şu anda yapılandırılmadı.":"Apple ile giriş şu anda yapılandırılmadı.";
+ showToast(msg);
 }
 function _authHideSteps(){["authRegisterStep","authLoginStep","authBiometric"].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=true;});}
 function authShowLoginOptions(){_authHideSteps();document.getElementById("authChoices").hidden=true;const el=document.getElementById("authLoginStep");if(el)el.hidden=false;}
@@ -7965,7 +7970,7 @@ function initEvents(){
  document.addEventListener("keydown",event=>{if(event.key!=="Escape")return;if(!document.getElementById("stkszAiOverlay")?.hidden){closeStkszAi();return;}if(document.getElementById("manualModal")?.classList.contains("show")){closeManual();return;}document.querySelectorAll(".modal.show").forEach(modal=>closeModalById(modal.id));closeAssetDetail();});
 }
 async function reconcileBuildCache(){const build=document.querySelector('meta[name="stksz-build"]')?.content||"";const previous=storageGet("stkszBuild");if(previous&&previous!==build&&"caches" in window){for(const key of await caches.keys())if(key.startsWith("stksz-shell-"))await caches.delete(key);}storageSet("stkszBuild",build);try{storageRemove("stkszAlgolabSession");}catch(error){}/* v91: AlgoLab kaldırıldı — eski cihazlardaki oturum kalıntısı temizlenir */}
-function registerServiceWorker(){if(!("serviceWorker" in navigator)||!/^https?:$/.test(location.protocol))return;window.addEventListener("load",async()=>{try{await reconcileBuildCache();const hadController=Boolean(navigator.serviceWorker.controller),registration=await navigator.serviceWorker.register("./service-worker.js?v=20260820-auth-v122",{updateViaCache:"none"});let refreshing=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(refreshing||!hadController)return;refreshing=true;location.reload();});registration.addEventListener("updatefound",()=>{const worker=registration.installing;worker?.addEventListener("statechange",()=>{if(worker.state==="installed"&&navigator.serviceWorker.controller){showToast("STKSZ güncellemesi hazırlandı.");worker.postMessage({type:"SKIP_WAITING"});}});});registration.waiting?.postMessage({type:"SKIP_WAITING"});await registration.update();setInterval(()=>registration.update().catch(()=>{}),6*60*60*1000);}catch(error){}});}
+function registerServiceWorker(){if(!("serviceWorker" in navigator)||!/^https?:$/.test(location.protocol))return;window.addEventListener("load",async()=>{try{await reconcileBuildCache();const hadController=Boolean(navigator.serviceWorker.controller),registration=await navigator.serviceWorker.register("./service-worker.js?v=20260820-auth-v123",{updateViaCache:"none"});let refreshing=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(refreshing||!hadController)return;refreshing=true;location.reload();});registration.addEventListener("updatefound",()=>{const worker=registration.installing;worker?.addEventListener("statechange",()=>{if(worker.state==="installed"&&navigator.serviceWorker.controller){showToast("STKSZ güncellemesi hazırlandı.");worker.postMessage({type:"SKIP_WAITING"});}});});registration.waiting?.postMessage({type:"SKIP_WAITING"});await registration.update();setInterval(()=>registration.update().catch(()=>{}),6*60*60*1000);}catch(error){}});}
 function maybeAutoUpdate(){if(!prefs.autoUpdate||prefs.provider==="local"||!providerInfo("market")?.configured)return;const freshness=providerInfo("market")?.freshness||"eod",ttl=freshness==="realtime"?60*1000:freshness==="delayed"?15*60*1000:6*60*60*1000,last=Date.parse(data.market?.lastAttempt||"");if(!Number.isFinite(last)||Date.now()-last>ttl)setTimeout(()=>refreshMarket(false),500);}
 
 /* ============ MANUEL YENİLE + 15 DK OTOMATİK GÜNCELLEME (v68) ============
@@ -8078,9 +8083,9 @@ function computeFearGreed(){
  const raw=breadth*25+momScore*30+volNorm*20+cautionScore*25;
  const score=Math.max(0,Math.min(100,Math.round(raw)));
  const label=score<=20?"AŞIRI KORKU":score<=40?"KORKU":score<=60?"NÖTR":score<=80?"AÇGÖZLÜK":"AŞIRI AÇGÖZLÜK";
- const color=score<=25?"#e74c3c":score<=45?"#D0904E":score<=65?"#a99a82":score<=80?"#7ed56f":"#00df78";
+ const color=score<=25?"#e74c3c":score<=45?"#D0904E":score<=65?"#a99a82":score<=80?"#7ed56f":"#00a859";
  const angle=(score/100)*180-90;
- el.innerHTML=`<div class="fg-gauge-wrap"><svg viewBox="0 0 200 110" class="fg-gauge-svg"><defs><linearGradient id="fgGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e74c3c"/><stop offset="25%" stop-color="#D0904E"/><stop offset="50%" stop-color="#a99a82"/><stop offset="75%" stop-color="#7ed56f"/><stop offset="100%" stop-color="#00df78"/></linearGradient></defs><path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="url(#fgGrad)" stroke-width="14" stroke-linecap="round" opacity="0.3"/><line x1="100" y1="100" x2="${100+70*Math.cos(angle*Math.PI/180)}" y2="${100-70*Math.sin(Math.abs(angle)*Math.PI/180)*(angle<0?-1:1)}" stroke="${color}" stroke-width="3" stroke-linecap="round" class="fg-needle"/><circle cx="100" cy="100" r="6" fill="${color}"/></svg><div class="fg-score" style="color:${color}">${score}</div><div class="fg-label" style="color:${color}">${esc(label)}</div><div class="fg-meta">Genişlik: ${Math.round(breadth*100)}% · Momentum: ${avgMomentum>0?"+":""}${avgMomentum.toFixed(1)}% · Hacim İndeksi: ${Math.round(volNorm)}</div></div>`;
+ el.innerHTML=`<div class="fg-gauge-wrap"><svg viewBox="0 0 200 110" class="fg-gauge-svg"><defs><linearGradient id="fgGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e74c3c"/><stop offset="25%" stop-color="#D0904E"/><stop offset="50%" stop-color="#a99a82"/><stop offset="75%" stop-color="#7ed56f"/><stop offset="100%" stop-color="#00a859"/></linearGradient></defs><path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="url(#fgGrad)" stroke-width="14" stroke-linecap="round" opacity="0.3"/><line x1="100" y1="100" x2="${100+70*Math.cos(angle*Math.PI/180)}" y2="${100-70*Math.sin(Math.abs(angle)*Math.PI/180)*(angle<0?-1:1)}" stroke="${color}" stroke-width="3" stroke-linecap="round" class="fg-needle"/><circle cx="100" cy="100" r="6" fill="${color}"/></svg><div class="fg-score" style="color:${color}">${score}</div><div class="fg-label" style="color:${color}">${esc(label)}</div><div class="fg-meta">Genişlik: ${Math.round(breadth*100)}% · Momentum: ${avgMomentum>0?"+":""}${avgMomentum.toFixed(1)}% · Hacim İndeksi: ${Math.round(volNorm)}</div></div>`;
 }
 /* ===== M45: STKSZ SABAH KARTI ===== */
 function renderStkszSabah(){
@@ -8149,7 +8154,7 @@ function computeDiversification(assets,totalVal){
  return Math.round(Math.max(5,Math.min(95,(1-normHHI)*100)));
 }
 function renderDiversificationDonut(score){
- const color=score>=70?"#00df78":score>=40?"#D0904E":"#e74c3c";
+ const color=score>=70?"#00a859":score>=40?"#D0904E":"#e74c3c";
  const dash=score*2.51;
  return `<svg viewBox="0 0 100 100" class="divers-donut"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(184,115,51,.12)" stroke-width="10"/><circle cx="50" cy="50" r="40" fill="none" stroke="${color}" stroke-width="10" stroke-dasharray="${dash} ${251-dash}" stroke-dashoffset="63" stroke-linecap="round" class="divers-ring"/></svg>`;
 }
@@ -9635,6 +9640,7 @@ function openSnapshotDetail(snapshotId) {
 }
 
 </script>
+<script src="faz1-p0.js"></script>
 </body>
 </html>
 

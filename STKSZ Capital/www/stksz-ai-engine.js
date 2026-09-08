@@ -220,6 +220,7 @@
 
   /* ================= 6) ANALYSIS TOOLS (analiz araçları) ================= */
   const AnalysisTools = {
+
     calculatePortfolioSummary(portfolioData) {
       if (!portfolioData || !portfolioData.items) return null;
       const items = portfolioData.items;
@@ -354,6 +355,221 @@
               alpha: +alpha.toFixed(2),
               outperforms: alpha > 0
 };
+          }
+        });
+      }
+      return {
+        portfolioReturn,
+        benchmarks: results
+      };
+    },
+
+    /* Risk-Adjusted Metrics */
+    calculateRiskMetrics(portfolioData) {
+      if (!portfolioData || !portfolioData.items) return null;
+      const items = portfolioData.items;
+      const totalValue = items.reduce((s, i) => s + (i.currentPrice * i.quantity), 0);
+      if (totalValue <= 0) return null;
+      /* Simple volatility proxy from daily changes */
+      const dailyChanges = items
+        .filter(i => i.dailyChangePct !== undefined && i.dailyChangePct !== null)
+        .map(i => i.dailyChangePct);
+      const avgDailyChange = dailyChanges.length ? dailyChanges.reduce((s, v) => s + v, 0) / dailyChanges.length : 0;
+      const dailyVolatility = dailyChanges.length > 1
+        ? Math.sqrt(dailyChanges.reduce((s, v) => s + Math.pow(v - avgDailyChange, 2), 0) / (dailyChanges.length - 1))
+        : 0;
+      const sharpe = dailyVolatility > 0 ? (avgDailyChange / dailyVolatility) * Math.sqrt(252) : 0; // Annualized
+      const maxDrawdown = Math.max(...items.map(i => {
+        const cost = i.avgCost * i.quantity;
+        const current = i.currentPrice * i.quantity;
+        return cost > 0 ? ((current - cost) / cost) * 100 : 0;
+      })) || 0;
+      return {
+        dailyVolatility: +dailyVolatility.toFixed(4),
+        sharpeRatio: +sharpe.toFixed(2),
+        maxDrawdown: +maxDrawdown.toFixed(2),
+        avgDailyChange: +avgDailyChange.toFixed(4)
+      };
+    },
+
+    /* Pre-Market Briefing Data (Task 94) */
+    generatePreMarketBriefing(portfolioData, marketData, newsData) {
+      const items = portfolioData?.items || [];
+      const totalValue = items.reduce((s, i) => s + (i.currentPrice * i.quantity), 0);
+      const dailyResults = items.filter(i => i.dailyChangePct !== null).map(i => ({
+        symbol: i.symbol,
+        changePct: i.dailyChangePct,
+        contribution: ((i.currentPrice * i.quantity) / (totalValue || 1)) * i.dailyChangePct
+      }));
+      const topMovers = dailyResults
+        .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct))
+        .slice(0, 5);
+      const keyLevels = marketData?.keyLevels || {};
+      return {
+        timestamp: new Date().toISOString(),
+        portfolioValue: +totalValue.toFixed(2),
+        portfolioDailyChange: +dailyResults.reduce((s, v) => s + v.contribution, 0).toFixed(2),
+        topMovers,
+        marketOverview: marketData?.overview || 'VERİ YOK',
+        keyLevels: {
+          bist100: keyLevels.bist100 || 'VERİ YOK',
+          usdtry: keyLevels.usdtry || 'VERİ YOK',
+          gold: keyLevels.gold || 'VERİ YOK'
+        },
+        newsHighlights: (newsData || []).slice(0, 3).map(n => ({ title: n.title, source: n.source, impact: n.impact })),
+        watchlistAlerts: items.filter(i => Math.abs(i.dailyChangePct || 0) > 3).map(i => i.symbol)
+      };
+    },
+
+    /* Key Moments Detection for Charts (Task 98) */
+    detectKeyMoments(priceHistory, volumeHistory, newsEvents, kapEvents) {
+      if (!Array.isArray(priceHistory) || priceHistory.length < 2) return [];
+      const moments = [];
+      for (let i = 1; i < priceHistory.length; i++) {
+        const prev = priceHistory[i - 1];
+        const curr = priceHistory[i];
+        const vol = volumeHistory?.[i] || 0;
+        const avgVol = volumeHistory ? volumeHistory.slice(Math.max(0, i - 20), i).reduce((s, v) => s + (v || 0), 0) / Math.min(20, i) : 0;
+        const pctChange = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
+        const volRatio = avgVol > 0 ? vol / avgVol : 0;
+        /* Gap detection */
+        if (Math.abs(pctChange) > 5) {
+          moments.push({
+            index: i,
+            type: pctChange > 0 ? 'GAP_UP' : 'GAP_DOWN',
+            label: pctChange > 0 ? 'Gap Açılış' : 'Gap Kapanış',
+            price: curr,
+            change: +pctChange.toFixed(2),
+            volume: vol,
+            volRatio: +volRatio.toFixed(2),
+            description: `Fiyat ${pctChange > 0 ? 'yukarı' : 'aşağı'} %${Math.abs(pctChange).toFixed(1)} girdi`
+          });
+        }
+        /* Volume spike */
+        else if (volRatio > 3 && Math.abs(pctChange) > 2) {
+          moments.push({
+            index: i,
+            type: 'VOLUME_SPIKE',
+            label: 'Hacim Patlaması',
+            price: curr,
+            change: +pctChange.toFixed(2),
+            volume: vol,
+            volRatio: +volRatio.toFixed(2),
+            description: `Ortalamanın ${volRatio.toFixed(1)} katı hacim, %${Math.abs(pctChange).toFixed(1)} hareketle`
+          });
+        }
+        /* News correlation */
+        if (newsEvents?.[i]) {
+          moments.push({
+            index: i,
+            type: 'NEWS',
+            label: 'Haber Etkisi',
+            price: curr,
+            change: +pctChange.toFixed(2),
+            news: newsEvents[i],
+            description: `Haber: ${newsEvents[i].title?.slice(0, 80)}`
+          });
+        }
+        /* KAP events */
+        if (kapEvents?.[i]) {
+          moments.push({
+            index: i,
+            type: 'KAP',
+            label: 'KAP Bildirimi',
+            price: curr,
+            change: +pctChange.toFixed(2),
+            kap: kapEvents[i],
+            description: `KAP: ${kapEvents[i].title?.slice(0, 80)}`
+          });
+        }
+      }
+      return moments;
+    },
+
+    /* "Why did it move?" Timeline (Task 103) */
+    generateMovementTimeline(priceHistory, volumeHistory, newsEvents, kapEvents, trades) {
+      if (!Array.isArray(priceHistory) || priceHistory.length < 2) return [];
+      const timeline = [];
+      for (let i = 1; i < priceHistory.length; i++) {
+        const prev = priceHistory[i - 1];
+        const curr = priceHistory[i];
+        const pctChange = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
+        if (Math.abs(pctChange) < 0.5) continue; // Skip tiny moves
+        const entry = {
+          index: i,
+          timestamp: new Date(Date.now() - (priceHistory.length - i) * 5 * 60 * 1000).toISOString(), // Approx 5min intervals
+          price: curr,
+          change: +pctChange.toFixed(2),
+          volume: volumeHistory?.[i] || 0,
+          factors: []
+        };
+        if (newsEvents?.[i]) entry.factors.push({ type: 'HABER', detail: newsEvents[i].title?.slice(0, 100) });
+        if (kapEvents?.[i]) entry.factors.push({ type: 'KAP', detail: kapEvents[i].title?.slice(0, 100) });
+        if (trades?.[i]) entry.factors.push({ type: 'İŞLEM', detail: `${trades[i].side} ${trades[i].quantity} lot @ ${trades[i].price}` });
+        if (entry.factors.length === 0) entry.factors.push({ type: 'PIYASA', detail: 'Genel piyasa hareketi' });
+        timeline.push(entry);
+      }
+      return timeline.slice(-50); // Last 50 significant moves
+    },
+
+    /* Insights Center Data Preparation (Tasks 92-93) */
+    prepareInsightsCenterData(portfolioData, benchmarks, fxData) {
+      if (!portfolioData || !portfolioData.items) return { error: 'VERİ YOK' };
+      const concentration = this.analyzeConcentration(portfolioData);
+      const riskMetrics = this.calculateRiskMetrics(portfolioData);
+      const benchmarksComp = this.compareWithBenchmarks(portfolioData, benchmarks);
+      const items = portfolioData.items;
+      const totalValue = items.reduce((s, i) => s + (i.currentPrice * i.quantity), 0);
+      const totalCost = items.reduce((s, i) => s + (i.avgCost * i.quantity), 0);
+      const dailyPnl = items.reduce((s, i) => s + ((i.dailyChangePct || 0) * i.currentPrice * i.quantity / 100), 0);
+      const monthlyPnl = dailyPnl * 21; // Rough estimate
+      const yearlyPnl = dailyPnl * 252;
+      const sectorAllocation = {};
+      items.forEach(i => {
+        const sector = i.sector || 'Diğer';
+        const val = i.currentPrice * i.quantity;
+        sectorAllocation[sector] = (sectorAllocation[sector] || 0) + val;
+      });
+      return {
+        portfolio: {
+          totalValue: +totalValue.toFixed(2),
+          totalCost: +totalCost.toFixed(2),
+          totalPnl: +(totalValue - totalCost).toFixed(2),
+          totalPnlPercent: totalCost > 0 ? +(((totalValue - totalCost) / totalCost) * 100).toFixed(2) : 0,
+          dailyPnl: +dailyPnl.toFixed(2),
+          monthlyPnlEst: +monthlyPnl.toFixed(2),
+          yearlyPnlEst: +yearlyPnl.toFixed(2),
+          itemCount: items.length
+        },
+        risk: {
+          level: concentration.level,
+          hhi: concentration.hhi,
+          maxWeight: concentration.maxWeight,
+          volatility: riskMetrics?.dailyVolatility || 0,
+          sharpe: riskMetrics?.sharpeRatio || 0,
+          maxDrawdown: riskMetrics?.maxDrawdown || 0,
+          concentrationItems: concentration.topConcentrations
+        },
+        performance: {
+          portfolioReturn: benchmarksComp.portfolioReturn,
+          benchmarks: benchmarksComp.benchmarks,
+          dailyPnl: +dailyPnl.toFixed(2),
+          topGainers: items.filter(i => (i.dailyChangePct || 0) > 0).sort((a, b) => (b.dailyChangePct || 0) - (a.dailyChangePct || 0)).slice(0, 5).map(i => ({ symbol: i.symbol, change: i.dailyChangePct })),
+          topLosers: items.filter(i => (i.dailyChangePct || 0) < 0).sort((a, b) => (a.dailyChangePct || 0) - (b.dailyChangePct || 0)).slice(0, 5).map(i => ({ symbol: i.symbol, change: i.dailyChangePct }))
+        },
+        allocation: {
+          bySymbol: Object.fromEntries(Object.entries(sectorAllocation).map(([k, v]) => [k, +((v / totalValue) * 100).toFixed(2)])),
+          bySector: Object.fromEntries(Object.entries(sectorAllocation).map(([k, v]) => [k, +((v / totalValue) * 100).toFixed(2)]))
+        },
+        fx: fxData ? {
+          usdtry: fxData.usdtry || 'VERİ YOK',
+          eurtry: fxData.eurtry || 'VERİ YOK',
+          gold: fxData.goldTry || 'VERİ YOK'
+        } : { usdtry: 'VERİ YOK', eurtry: 'VERİ YOK', gold: 'VERİ YOK' },
+        timestamp: new Date().toISOString()
+      };
+    }
+  };
 
 // Account Asset Class
 class AccountAsset {
@@ -816,213 +1032,7 @@ const STKSZAccountEngine = {
       possibleMovementNote: (cashDelta < 0 && totalDelta >= 0) ? 'OLASI HAREKET: Nakit çıkışı ile varlık alımı yapılmış olabilir.' : null
     };
   },
-
-    /* Risk-Adjusted Metrics */
-    calculateRiskMetrics(portfolioData) {
-      if (!portfolioData || !portfolioData.items) return null;
-      const items = portfolioData.items;
-      const totalValue = items.reduce((s, i) => s + (i.currentPrice * i.quantity), 0);
-      if (totalValue <= 0) return null;
-      /* Simple volatility proxy from daily changes */
-      const dailyChanges = items
-        .filter(i => i.dailyChangePct !== undefined && i.dailyChangePct !== null)
-        .map(i => i.dailyChangePct);
-      const avgDailyChange = dailyChanges.length ? dailyChanges.reduce((s, v) => s + v, 0) / dailyChanges.length : 0;
-      const dailyVolatility = dailyChanges.length > 1
-        ? Math.sqrt(dailyChanges.reduce((s, v) => s + Math.pow(v - avgDailyChange, 2), 0) / (dailyChanges.length - 1))
-        : 0;
-      const sharpe = dailyVolatility > 0 ? (avgDailyChange / dailyVolatility) * Math.sqrt(252) : 0; // Annualized
-      const maxDrawdown = Math.max(...items.map(i => {
-        const cost = i.avgCost * i.quantity;
-        const current = i.currentPrice * i.quantity;
-        return cost > 0 ? ((current - cost) / cost) * 100 : 0;
-      })) || 0;
-      return {
-        dailyVolatility: +dailyVolatility.toFixed(4),
-        sharpeRatio: +sharpe.toFixed(2),
-        maxDrawdown: +maxDrawdown.toFixed(2),
-        avgDailyChange: +avgDailyChange.toFixed(4)
-      };
-    },
-
-    /* Pre-Market Briefing Data (Task 94) */
-    generatePreMarketBriefing(portfolioData, marketData, newsData) {
-      const items = portfolioData?.items || [];
-      const totalValue = items.reduce((s, i) => s + (i.currentPrice * i.quantity), 0);
-      const dailyResults = items.filter(i => i.dailyChangePct !== null).map(i => ({
-        symbol: i.symbol,
-        changePct: i.dailyChangePct,
-        contribution: ((i.currentPrice * i.quantity) / (totalValue || 1)) * i.dailyChangePct
-      }));
-      const topMovers = dailyResults
-        .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct))
-        .slice(0, 5);
-      const keyLevels = marketData?.keyLevels || {};
-      return {
-        timestamp: new Date().toISOString(),
-        portfolioValue: +totalValue.toFixed(2),
-        portfolioDailyChange: +dailyResults.reduce((s, v) => s + v.contribution, 0).toFixed(2),
-        topMovers,
-        marketOverview: marketData?.overview || 'VERİ YOK',
-        keyLevels: {
-          bist100: keyLevels.bist100 || 'VERİ YOK',
-          usdtry: keyLevels.usdtry || 'VERİ YOK',
-          gold: keyLevels.gold || 'VERİ YOK'
-        },
-        newsHighlights: (newsData || []).slice(0, 3).map(n => ({ title: n.title, source: n.source, impact: n.impact })),
-        watchlistAlerts: items.filter(i => Math.abs(i.dailyChangePct || 0) > 3).map(i => i.symbol)
-      };
-    },
-
-    /* Key Moments Detection for Charts (Task 98) */
-    detectKeyMoments(priceHistory, volumeHistory, newsEvents, kapEvents) {
-      if (!Array.isArray(priceHistory) || priceHistory.length < 2) return [];
-      const moments = [];
-      for (let i = 1; i < priceHistory.length; i++) {
-        const prev = priceHistory[i - 1];
-        const curr = priceHistory[i];
-        const vol = volumeHistory?.[i] || 0;
-        const avgVol = volumeHistory ? volumeHistory.slice(Math.max(0, i - 20), i).reduce((s, v) => s + (v || 0), 0) / Math.min(20, i) : 0;
-        const pctChange = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
-        const volRatio = avgVol > 0 ? vol / avgVol : 0;
-        /* Gap detection */
-        if (Math.abs(pctChange) > 5) {
-          moments.push({
-            index: i,
-            type: pctChange > 0 ? 'GAP_UP' : 'GAP_DOWN',
-            label: pctChange > 0 ? 'Gap Açılış' : 'Gap Kapanış',
-            price: curr,
-            change: +pctChange.toFixed(2),
-            volume: vol,
-            volRatio: +volRatio.toFixed(2),
-            description: `Fiyat ${pctChange > 0 ? 'yukarı' : 'aşağı'} %${Math.abs(pctChange).toFixed(1)} girdi`
-          });
-        }
-        /* Volume spike */
-        else if (volRatio > 3 && Math.abs(pctChange) > 2) {
-          moments.push({
-            index: i,
-            type: 'VOLUME_SPIKE',
-            label: 'Hacim Patlaması',
-            price: curr,
-            change: +pctChange.toFixed(2),
-            volume: vol,
-            volRatio: +volRatio.toFixed(2),
-            description: `Ortalamanın ${volRatio.toFixed(1)} katı hacim, %${Math.abs(pctChange).toFixed(1)} hareketle`
-          });
-        }
-        /* News correlation */
-        if (newsEvents?.[i]) {
-          moments.push({
-            index: i,
-            type: 'NEWS',
-            label: 'Haber Etkisi',
-            price: curr,
-            change: +pctChange.toFixed(2),
-            news: newsEvents[i],
-            description: `Haber: ${newsEvents[i].title?.slice(0, 80)}`
-          });
-        }
-        /* KAP events */
-        if (kapEvents?.[i]) {
-          moments.push({
-            index: i,
-            type: 'KAP',
-            label: 'KAP Bildirimi',
-            price: curr,
-            change: +pctChange.toFixed(2),
-            kap: kapEvents[i],
-            description: `KAP: ${kapEvents[i].title?.slice(0, 80)}`
-          });
-        }
-      }
-      return moments;
-    },
-
-    /* "Why did it move?" Timeline (Task 103) */
-    generateMovementTimeline(priceHistory, volumeHistory, newsEvents, kapEvents, trades) {
-      if (!Array.isArray(priceHistory) || priceHistory.length < 2) return [];
-      const timeline = [];
-      for (let i = 1; i < priceHistory.length; i++) {
-        const prev = priceHistory[i - 1];
-        const curr = priceHistory[i];
-        const pctChange = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
-        if (Math.abs(pctChange) < 0.5) continue; // Skip tiny moves
-        const entry = {
-          index: i,
-          timestamp: new Date(Date.now() - (priceHistory.length - i) * 5 * 60 * 1000).toISOString(), // Approx 5min intervals
-          price: curr,
-          change: +pctChange.toFixed(2),
-          volume: volumeHistory?.[i] || 0,
-          factors: []
-        };
-        if (newsEvents?.[i]) entry.factors.push({ type: 'HABER', detail: newsEvents[i].title?.slice(0, 100) });
-        if (kapEvents?.[i]) entry.factors.push({ type: 'KAP', detail: kapEvents[i].title?.slice(0, 100) });
-        if (trades?.[i]) entry.factors.push({ type: 'İŞLEM', detail: `${trades[i].side} ${trades[i].quantity} lot @ ${trades[i].price}` });
-        if (entry.factors.length === 0) entry.factors.push({ type: 'PIYASA', detail: 'Genel piyasa hareketi' });
-        timeline.push(entry);
-      }
-      return timeline.slice(-50); // Last 50 significant moves
-    },
-
-    /* Insights Center Data Preparation (Tasks 92-93) */
-    prepareInsightsCenterData(portfolioData, benchmarks, fxData) {
-      if (!portfolioData || !portfolioData.items) return { error: 'VERİ YOK' };
-      const concentration = this.analyzeConcentration(portfolioData);
-      const riskMetrics = this.calculateRiskMetrics(portfolioData);
-      const benchmarksComp = this.compareWithBenchmarks(portfolioData, benchmarks);
-      const items = portfolioData.items;
-      const totalValue = items.reduce((s, i) => s + (i.currentPrice * i.quantity), 0);
-      const totalCost = items.reduce((s, i) => s + (i.avgCost * i.quantity), 0);
-      const dailyPnl = items.reduce((s, i) => s + ((i.dailyChangePct || 0) * i.currentPrice * i.quantity / 100), 0);
-      const monthlyPnl = dailyPnl * 21; // Rough estimate
-      const yearlyPnl = dailyPnl * 252;
-      const sectorAllocation = {};
-      items.forEach(i => {
-        const sector = i.sector || 'Diğer';
-        const val = i.currentPrice * i.quantity;
-        sectorAllocation[sector] = (sectorAllocation[sector] || 0) + val;
-      });
-      return {
-        portfolio: {
-          totalValue: +totalValue.toFixed(2),
-          totalCost: +totalCost.toFixed(2),
-          totalPnl: +(totalValue - totalCost).toFixed(2),
-          totalPnlPercent: totalCost > 0 ? +(((totalValue - totalCost) / totalCost) * 100).toFixed(2) : 0,
-          dailyPnl: +dailyPnl.toFixed(2),
-          monthlyPnlEst: +monthlyPnl.toFixed(2),
-          yearlyPnlEst: +yearlyPnl.toFixed(2),
-          itemCount: items.length
-        },
-        risk: {
-          level: concentration.level,
-          hhi: concentration.hhi,
-          maxWeight: concentration.maxWeight,
-          volatility: riskMetrics?.dailyVolatility || 0,
-          sharpe: riskMetrics?.sharpeRatio || 0,
-          maxDrawdown: riskMetrics?.maxDrawdown || 0,
-          concentrationItems: concentration.topConcentrations
-        },
-        performance: {
-          portfolioReturn: benchmarksComp.portfolioReturn,
-          benchmarks: benchmarksComp.benchmarks,
-          dailyPnl: +dailyPnl.toFixed(2),
-          topGainers: items.filter(i => (i.dailyChangePct || 0) > 0).sort((a, b) => (b.dailyChangePct || 0) - (a.dailyChangePct || 0)).slice(0, 5).map(i => ({ symbol: i.symbol, change: i.dailyChangePct })),
-          topLosers: items.filter(i => (i.dailyChangePct || 0) < 0).sort((a, b) => (a.dailyChangePct || 0) - (b.dailyChangePct || 0)).slice(0, 5).map(i => ({ symbol: i.symbol, change: i.dailyChangePct }))
-        },
-        allocation: {
-          bySymbol: Object.fromEntries(Object.entries(sectorAllocation).map(([k, v]) => [k, +((v / totalValue) * 100).toFixed(2)])),
-          bySector: Object.fromEntries(Object.entries(sectorAllocation).map(([k, v]) => [k, +((v / totalValue) * 100).toFixed(2)]))
-        },
-        fx: fxData ? {
-          usdtry: fxData.usdtry || 'VERİ YOK',
-          eurtry: fxData.eurtry || 'VERİ YOK',
-          gold: fxData.goldTry || 'VERİ YOK'
-        } : { usdtry: 'VERİ YOK', eurtry: 'VERİ YOK', gold: 'VERİ YOK' },
-        timestamp: new Date().toISOString()
-      };
-    }
-  };
+};
 
   /* ================= 7) WRITE TOOLS (kullanıcı verisi değiştirme — onaylı) ================= */
   const WriteTools = {
@@ -1137,6 +1147,7 @@ const STKSZAccountEngine = {
       } catch (e) { return { ok: false, error: 'Sıfırlama hatası.' }; }
     }
   };
+
 
   /* ================= 9) CENTRAL INTELLIGENCE CONTEXT =================
      Tüm veri kaynaklarını birleştirerek STKSZ AI'a kapsamlı bağlam sunar.
@@ -1460,7 +1471,7 @@ const STKSZAccountEngine = {
         }
 
         // 8. Valuation Agent: F/K, PD/DD, FD/FAVÖK
-        if (/(F/K|PD/DD|FAVÖK|yükleme|alacak|borç|değerleme|çarpan)/.test(question)) {
+        if (/(F\/K|PD\/DD|FAVÖK|yükleme|alacak|borç|değerleme|çarpan)/.test(question)) {
           routes.push(['valuation', this._valuation]);
         }
 
@@ -1631,7 +1642,7 @@ const STKSZAccountEngine = {
       },
 
       // 5. Technical Analysis Agent
-      _technicalAnalysis(question, question, context) {
+      _technicalAnalysis(question, context) {
         // EMA, RSI, MACD, Bollinger, destek/direnç determinist hesaplama
         // Gerçek veri gerektirmiyor, mevcut fiyat verilerinden simülasyon yapar
         return {
@@ -1659,11 +1670,11 @@ const STKSZAccountEngine = {
 
       // 7. Market Movement Agent
       _marketMovement(question, context) {
-        // Key Moments: olağandırıç hacim/fiyat gap'leri
+        // Key Moments: olağandırıç hacim/fiyat gap\'leri
         return {
           ok: true,
           data: {
-            text: '[MARKET MOVEMENT] Aşırı hacim patlamaları, fiyat gap'leri ve Key Momentlar tespit ediliyor. "Grafikteki olağandırıç hareketler nedir?" sorusu ile detaylar.',
+            text: '[MARKET MOVEMENT] Aşırı hacim patlamaları, fiyat gap\'leri ve Key Momentlar tespit ediliyor. "Grafikteki olağandırıç hareketler nedir?" sorusu ile detaylar.',
             confidence: 0.8,
             source: 'key-moments'
           }
@@ -1689,7 +1700,7 @@ const STKSZAccountEngine = {
         return {
           ok: true,
           data: {
-            text: '[IPO AGENT] Halka arz (IPO) finansalları, tahsisat oranları ve katılım analizi yapılıyor. "Son IPO'lar" sorusu ile yeni sunulan fonlar.',
+            text: '[IPO AGENT] Halka arz (IPO) finansalları, tahsisat oranları ve katılım analizi yapılıyor. "Son IPO\'lar" sorusu ile yeni sunulan fonlar.',
             confidence: 0.82,
             source: 'ipo-data'
           }
@@ -2017,7 +2028,7 @@ const STKSZAccountEngine = {
         { re: /process\.env\.BROKER_API_KEY/, label: 'BROKER_API_KEY referansı', severity: 'CRITICAL' },
         { re: /process\.env\.BROKER_API_SECRET/, label: 'BROKER_API_SECRET referansı', severity: 'CRITICAL' },
         { re: /TG_PAYMENT_WEBHOOK_SECRET/, label: 'Telegram webhook secret', severity: 'CRITICAL' },
-        { re /['"]TOKEN['"]\s*[:=]\s*['"][A-Za-z0-9]{8,}/i, label: 'Token deseni', severity: 'HIGH' },
+        { re: /['"]TOKEN['"]\s*[:=]\s*['"][A-Za-z0-9]{8,}/i, label: 'Token deseni', severity: 'HIGH' },
         { re: /['"]SECRET['"]\s*[:=]\s*['"][A-Za-z0-9]{8,}/i, label: 'Secret deseni', severity: 'HIGH' },
         { re: /admob|AdMob|ADMOB/i, label: 'AdMob referansı', severity: 'CRITICAL' },
       ];
@@ -2187,4 +2198,6 @@ const STKSZAccountEngine = {
 
 /* ================= DIŞA AÇILAN API ================= */
   global.STKSZAIEngine = engine;
+  global.STKSZAccountEngine = STKSZAccountEngine;
+  if (typeof module !== "undefined" && module.exports) module.exports = engine;
 })(typeof window !== 'undefined' ? window : globalThis);
