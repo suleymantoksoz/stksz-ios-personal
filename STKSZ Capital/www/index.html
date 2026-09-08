@@ -687,7 +687,7 @@
   <div id="microGrid" class="micro-grid"><div class="empty-state">Tarama bekleniyor…</div></div>
   <div class="sweep-panel" id="sweepPanel"><small class="sweep-result">Bakiye Süpürge: kalan nakit ile alınabilecek maksimum lot hesaplanır.</small></div>
 
-  <div class="section-title">BOŞTA DURAN PARANI DEĞERLENDİR</div>
+  <div class="section-title">ORTAK FİNANSAL ÜRÜNLER · YAKINDA</div>
   <div class="card pd-partner-hook" id="pdPartnerHook">
     <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,rgba(208,144,78,.18),rgba(140,82,32,.06));border-bottom:1px solid rgba(184,115,51,.4)">
       <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:var(--copper-grad);box-shadow:0 3px 10px rgba(184,115,51,.35);font-size:17px;flex:none">🤝</span>
@@ -799,7 +799,7 @@
   <div class="crypto-detail-header">
     <button type="button" class="btn small" onclick="closeCryptoDetail()">← GERİ</button>
     <button type="button" class="btn small primary" onclick="openCryptoStkszEditor(cryptoDetailIdx)">⚙ STKSZ EDİTÖR</button>
-    <div class="crypto-detail-title"><h2 id="cryptoDetailSymbol">—</h2><span id="cryptoDetailPair">/USDT</span></div>
+    <div class="crypto-detail-title"><h2 id="cryptoDetailSymbol">—</h2><span id="cryptoDetailPair">/USDT</span><button type="button" class="btn small crypto-fav-btn" id="cryptoDetailFavBtn" onclick="toggleCryptoFavorite(document.getElementById('cryptoDetailSymbol').textContent)" aria-label="Kripto favori ekle/çıkar" aria-pressed="false" title="Kripto favoriye ekle">★</button></div>
   </div>
   <div id="cryptoDetailContent">
     <div class="crypto-detail-price-row">
@@ -2082,8 +2082,10 @@ const defaultData={
  transactionCount:null,
  transactions:[],
  favorites:[],
- watchlist:[],
- pendingOrders:{known:false,items:[]},
+  cryptoFavorites:[],
+  paperConditions:[],
+  watchlist:[],
+  pendingOrders:{known:false,items:[]},
  pendingDividends:{known:false,items:[]},
  settlement:null,
  activityLog:[],
@@ -2185,6 +2187,8 @@ function hydrateData(raw){
  if(raw.market&&typeof raw.market==="object")base.market={...base.market,...raw.market};
  if(Array.isArray(raw.transactions))base.transactions=raw.transactions.slice(-500);
  if(Array.isArray(raw.favorites))base.favorites=[...new Set(raw.favorites.map(symbol=>String(symbol||"").toUpperCase().trim()).filter(symbol=>/^[A-ZÇĞİÖŞÜ0-9.]{2,12}$/.test(symbol)))];
+  if(Array.isArray(raw.cryptoFavorites))base.cryptoFavorites=[...new Set(raw.cryptoFavorites.map(symbol=>String(symbol||"").toUpperCase().trim()).filter(symbol=>/^[A-ZÇĞİÖŞÜ0-9.]{2,12}$/.test(symbol)))];
+  if(Array.isArray(raw.paperConditions))base.paperConditions=raw.paperConditions.map(c=>({...c,status:c.status==="TRIGGERED"?"TRIGGERED":"ACTIVE",steps:Array.isArray(c.steps)?c.steps:[],triggeredAt:c.triggeredAt||""})).slice(-60);
  if(Array.isArray(raw.watchlist))base.watchlist=raw.watchlist.filter(item=>item&&item.symbol).map(item=>({symbol:String(item.symbol).toUpperCase(),sector:String(item.sector||"Sınıflandırılmamış"),source:String(item.source||"Yerel izleme listesi")}));
  if(Array.isArray(raw.priceAlerts))base.priceAlerts=raw.priceAlerts.filter(item=>item&&item.symbol&&Number.isFinite(Number(item.value))).map(item=>({id:String(item.id||Date.now()+Math.random()),symbol:String(item.symbol).toUpperCase(),condition:item.condition==="below"?"below":"above",value:Number(item.value),telegram:Boolean(item.telegram),created:item.created||nowTr(),triggered:Boolean(item.triggered)}));
  if(raw.pendingOrders&&typeof raw.pendingOrders==="object")base.pendingOrders={known:Boolean(raw.pendingOrders.known),items:Array.isArray(raw.pendingOrders.items)?raw.pendingOrders.items:[]};
@@ -3773,6 +3777,19 @@ function appMoney(value){
 }
 /* ---- KRİPTO PARALAR (Binance Public API) ---- */
 let cryptoPriceCache=[],cryptoLoading=false;
+function cryptoFavoritesSet(){return new Set(Array.isArray(data.cryptoFavorites)?data.cryptoFavorites:[]);}
+function toggleCryptoFavorite(symbol){
+ const clean=String(symbol||"").toUpperCase();
+ if(!cryptoPriceCache.some(c=>c.symbol===clean)){showToast("Kripto verisi bulunamadı.");return;}
+ const favorites=cryptoFavoritesSet(),adding=!favorites.has(clean);
+ if(adding)favorites.add(clean);else favorites.delete(clean);
+ data.cryptoFavorites=[...favorites];
+ storageSet("stkszData",JSON.stringify(dataForLocalStorage()));persistNativeEnr();
+ renderCryptoList();
+ const favBtn=document.getElementById("cryptoDetailFavBtn");
+ if(favBtn){const on=cryptoFavoritesSet().has(clean);favBtn.classList.toggle("active",on);favBtn.setAttribute("aria-pressed",String(on));favBtn.setAttribute("title",on?"Kripto favorilerden çıkar":"Kripto favoriye ekle");}
+ showToast(`${clean} ${adding?"kripto favorilere eklendi":"kripto favorilerden çıkarıldı"}.`);
+}
 async function refreshCryptoPrices(force=false){
  if(cryptoLoading)return;cryptoLoading=true;
  const statusEl=document.getElementById("cryptoListStatus");
@@ -3800,7 +3817,7 @@ function renderCryptoList(filter=""){
  if(!items.length){box.innerHTML='<div class="empty-state">'+(cryptoLoading?"Yükleniyor…":"Kripto verisi yok — YENİLE butonuna basın.")+'</div>';return;}
  box.innerHTML=items.map((c,i)=>{
   const up=c.change>=0;
-  return `<div class="crypto-card" onclick="openCryptoDetail(${cryptoPriceCache.indexOf(c)})" role="button" tabindex="0"><div class="crypto-card-head"><b>${esc(c.symbol)}</b><span class="crypto-pair">/USDT</span></div><div class="crypto-price">${formatNumber(c.price,c.price>=1000?2:c.price>=1?4:6)}</div><div class="crypto-change ${up?"positive":"negative"}">${up?"+":""}${formatNumber(c.change,2,2)}%</div><div class="crypto-meta"><span>Hacim: $${formatNumber(c.volume/1e6,1,1)}M</span><span>↑${formatNumber(c.high,2,2)} ↓${formatNumber(c.low,2,2)}</span></div><div class="crypto-card-arrow">→</div></div>`;
+  return `<div class="crypto-card" onclick="openCryptoDetail(${cryptoPriceCache.indexOf(c)})" role="button" tabindex="0"><div class="crypto-card-head"><b>${esc(c.symbol)}</b><span class="crypto-pair">/USDT</span><button type="button" class="crypto-fav-btn ${cryptoFavoritesSet().has(c.symbol)?"active":""}" onclick="event.stopPropagation();toggleCryptoFavorite('${esc(c.symbol)}')" aria-label="Kripto favori ekle/çıkar" aria-pressed="${cryptoFavoritesSet().has(c.symbol)?"true":"false"}" title="Kripto favori">★</button></div><div class="crypto-price">${formatNumber(c.price,c.price>=1000?2:c.price>=1?4:6)}</div><div class="crypto-change ${up?"positive":"negative"}">${up?"+":""}${formatNumber(c.change,2,2)}%</div><div class="crypto-meta"><span>Hacim: $${formatNumber(c.volume/1e6,1,1)}M</span><span>↑${formatNumber(c.high,2,2)} ↓${formatNumber(c.low,2,2)}</span></div><div class="crypto-card-arrow">→</div></div>`;
  }).join("");
 }
 function filterCryptoList(){
@@ -3844,6 +3861,26 @@ function connectCryptoWs(){
        }
       }
 });
+
+     if(cryptoDetailIdx!==null&&cryptoPriceCache[cryptoDetailIdx]?.symbol===sym){
+      setText("cryptoDetailPrice","$"+formatNumber(newPrice,newPrice>=1000?2:newPrice>=1?4:8));
+      const chEl=document.getElementById("cryptoDetailChange");
+      if(chEl){chEl.textContent=(item.change>=0?"+":"")+formatNumber(item.change,2,2)+"%";chEl.className=item.change>=0?"positive":"negative";}
+     }
+    }
+   }catch(err){}
+  };
+  cryptoWs.onerror=function(){};
+  cryptoWs.onclose=function(){
+   if(cryptoWsReconnectTimer)clearTimeout(cryptoWsReconnectTimer);
+   cryptoWsReconnectTimer=setTimeout(()=>{if(document.getElementById("page-crypto")?.classList.contains("active"))connectCryptoWs();},5000);
+  };
+ }catch(err){
+  if(cryptoWsReconnectTimer)clearTimeout(cryptoWsReconnectTimer);
+  cryptoWsReconnectTimer=setTimeout(()=>{if(document.getElementById("page-crypto")?.classList.contains("active"))connectCryptoWs();},10000);
+ }
+}
+function disconnectCryptoWs(){if(cryptoWs){try{cryptoWs.close();}catch(err){}cryptoWs=null;}if(cryptoWsReconnectTimer){clearTimeout(cryptoWsReconnectTimer);cryptoWsReconnectTimer=null;}}
 
 /* ===== FAZ 3: INSIGHTS CENTER (Tasks 92-93) ===== */
 function setInsightsTab(tab){
@@ -4018,31 +4055,48 @@ function detectAndRenderKeyMoments(symbol){
   const eng=window.STKSZAIEngine;
   if(!eng?.analysis?.detectKeyMoments){showToast("Key moments motoru hazır değil.");return;}
   try{
-    /* Get price/volume history from chart data or API */
     const asset=data.assets.find(a=>a.s===symbol);
-    if(!asset||!asset.priceHistory)return;
-    const moments=eng.analysis.detectKeyMoments(asset.priceHistory,asset.volumeHistory,{},{}); // news/kap empty for now
-    renderKeyMomentsOnChart(symbol,moments);
-    showToast(`${moments.length} key moment tespit edildi.`);
-  }catch(error){console.error("Key moments error:",error);showToast("Key moments hatası");}
+    if(!asset){showToast("Varlık bulunamadı.");return;}
+    const closes=buildMomentSeries(asset);
+    if(closes.length<10){showToast("VERİ YETERSİZ — kilit anlar için en az 10 gerçek geçmiş fiyat noktası gerekli.");return;}
+    const volumes=Array.isArray(asset.volumeHistory)?asset.volumeHistory:(Array.isArray(asset.history)?asset.history.map(h=>h.volume!==undefined?h.volume:(h.v||0)):[]);
+    const moments=eng.analysis.detectKeyMoments(closes,volumes,{},{}); // news/kap verisi yoksa haber ilişkisi üretilmez
+    renderKeyMomentsOnChart(symbol,moments,closes);
+    showToast(moments.length?`${moments.length} kilit an işaretlendi (yalnızca gerçek geçmiş veri).`:"kilit an tespit edilmedi — sahte an üretilmedi.");
+  }catch(error){console.error("Key moments error:",error);showToast("Key moments hatası — işlem yapılmadı.");}
 }
 
-function renderKeyMomentsOnChart(symbol,moments){
+function buildMomentSeries(asset){
+  if(Array.isArray(asset.priceHistory)&&asset.priceHistory.length)return asset.priceHistory.map(Number).filter(v=>Number.isFinite(v)&&v>0);
+  if(Array.isArray(asset.history)&&asset.history.length)return asset.history.map(h=>h.close!==undefined?h.close:h.c).map(Number).filter(v=>Number.isFinite(v)&&v>0);
+  return [];
+}
+
+function renderKeyMomentsOnChart(symbol,moments,closes){
   const canvas=document.getElementById("chartCanvas")||document.getElementById("cryptoChartCanvas");
-  if(!canvas)return;
-  const ctx=canvas.getContext("2d");
-  const rect=canvas.getBoundingClientRect();
-  const dpr=window.devicePixelRatio||1;
-  canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;ctx.scale(dpr,dpr);
-  /* Clear and redraw chart with markers */
-  /* This is a simplified version - full implementation would integrate with existing chart code */
-  moments.forEach(m=>{
-    const x=(m.index/asset.priceHistory.length)*rect.width;
-    const y=rect.height-(m.price/Math.max(...asset.priceHistory))*rect.height;
-    const color=m.type==="GAP_UP"?"#00a859":m.type==="GAP_DOWN"?"#ff4d4d":m.type==="VOLUME_SPIKE"?"#D0904E":m.type==="NEWS"?"#4b9cff":"#e7b51e";
-    ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();
-    ctx.strokeStyle="#000";ctx.lineWidth=2;ctx.stroke();
-  });
+  if(!canvas||!Array.isArray(moments))return;
+  const series=Array.isArray(closes)&&closes.length?closes.slice():[];
+  if(!series.length)return;
+  const min=Math.min(...series),max=Math.max(...series),range=max-min||1;
+  const drawMarkers=function(ctx){
+    const rect=canvas.getBoundingClientRect()||{width:canvas.width||600,height:canvas.height||220};
+    const scaleX=rect.width>0?rect.width:(canvas.width||600),scaleY=rect.height>0?rect.height:(canvas.height||220);
+    moments.forEach(m=>{
+      const idx=Math.min(series.length-1,Math.max(1,Math.round(Number(m.index)||1)));
+      const px=idx/(series.length-1)*scaleX;
+      const py=scaleY-((Number(m.price)||series[idx]||min)-min)/range*(scaleY*0.9);
+      const color=m.type==="GAP_UP"?"#00a859":m.type==="GAP_DOWN"?"#ff4d4d":m.type==="VOLUME_SPIKE"?"#D0904E":m.type==="NEWS"?"#4b9cff":"#e7b51e";
+      ctx.beginPath();ctx.arc(px,py,8,0,2*Math.PI);ctx.fillStyle=color;ctx.fill();
+      ctx.strokeStyle="#000";ctx.lineWidth=2;ctx.stroke();
+    });
+  };
+  let ctx=null;try{ctx=canvas.getContext("2d");}catch(error){}
+  if(!ctx)return;
+  /* Mevcut grafiği bozmadan marker'lar üstüne çizilir; grafik sıfırdan sahte çizilmez. */
+  try{
+    const snapshot=canvas.toDataURL("image/png");
+    const img=new Image();img.onload=function(){const c=canvas.getContext("2d");if(!c)return;c.save();c.drawImage(img,0,0);drawMarkers(c);c.restore();};img.src=snapshot;
+  }catch(error){ctx.save();drawMarkers(ctx);ctx.restore();}
 }
 
 function generateMovementTimeline(symbol){
@@ -4188,25 +4242,7 @@ function checkDataSufficiency(context){
 function aiInsufficiencyResponse(gaps){
   return "VERİ YETERSİZ — KARAR YOK\n\nEksik alanlar:\n- "+gaps.join("\n- ")+"\n\nLütfen eksik verileri tamamlayın (nakit girişi, fiyat yenileme, OCR). API anahtarları asla istenmez.";
 }
-     if(cryptoDetailIdx!==null&&cryptoPriceCache[cryptoDetailIdx]?.symbol===sym){
-      setText("cryptoDetailPrice","$"+formatNumber(newPrice,newPrice>=1000?2:newPrice>=1?4:8));
-      const chEl=document.getElementById("cryptoDetailChange");
-      if(chEl){chEl.textContent=(item.change>=0?"+":"")+formatNumber(item.change,2,2)+"%";chEl.className=item.change>=0?"positive":"negative";}
-     }
-    }
-   }catch(err){}
-  };
-  cryptoWs.onerror=function(){};
-  cryptoWs.onclose=function(){
-   if(cryptoWsReconnectTimer)clearTimeout(cryptoWsReconnectTimer);
-   cryptoWsReconnectTimer=setTimeout(()=>{if(document.getElementById("page-crypto")?.classList.contains("active"))connectCryptoWs();},5000);
-  };
- }catch(err){
-  if(cryptoWsReconnectTimer)clearTimeout(cryptoWsReconnectTimer);
-  cryptoWsReconnectTimer=setTimeout(()=>{if(document.getElementById("page-crypto")?.classList.contains("active"))connectCryptoWs();},10000);
- }
-}
-function disconnectCryptoWs(){if(cryptoWs){try{cryptoWs.close();}catch(err){}cryptoWs=null;}if(cryptoWsReconnectTimer){clearTimeout(cryptoWsReconnectTimer);cryptoWsReconnectTimer=null;}}
+
 /* ---- KRİPTO DETAY ---- */
 let cryptoDetailIdx=null;
 function openCryptoDetail(idx,opts){
@@ -4214,6 +4250,7 @@ function openCryptoDetail(idx,opts){
   const c=cryptoPriceCache[idx];if(!c)return;
   cryptoDetailIdx=idx;
   setText("cryptoDetailSymbol",c.symbol);
+  const favBtn=document.getElementById("cryptoDetailFavBtn");if(favBtn){const on=cryptoFavoritesSet().has(c.symbol);favBtn.classList.toggle("active",on);favBtn.setAttribute("aria-pressed",String(on));favBtn.setAttribute("title",on?"Kripto favorilerden çıkar":"Kripto favoriye ekle");}
   setText("cryptoDetailPrice","$"+formatNumber(c.price,c.price>=1000?2:c.price>=1?4:8));
   const chEl=document.getElementById("cryptoDetailChange");
   if(chEl){const up=c.change>=0;chEl.textContent=(up?"+":"")+formatNumber(c.change,2,2)+"%";chEl.className=up?"positive":"negative";}
@@ -5654,6 +5691,7 @@ function showLocalNotification(title,body){
 /* Fiyat güncellemesi sonrası alarm kontrolü: koşul sağlananlar bildirilir ve kapatılır */
 async function checkPriceAlerts(){
  try{if(typeof checkSmartAlerts==="function")checkSmartAlerts();}catch(e){}
+  try{if(typeof evalPaperConditions==="function")evalPaperConditions();}catch(e){}
  const pending=(data.priceAlerts||[]).filter(item=>!item.triggered);
  if(!pending.length)return;
  let changed=0;
@@ -8257,7 +8295,10 @@ function computeFearGreed(){
  const label=score<=20?"AŞIRI KORKU":score<=40?"KORKU":score<=60?"NÖTR":score<=80?"AÇGÖZLÜK":"AŞIRI AÇGÖZLÜK";
  const color=score<=25?"#e74c3c":score<=45?"#D0904E":score<=65?"#a99a82":score<=80?"#7ed56f":"#00a859";
  const angle=(score/100)*180-90;
- el.innerHTML=`<div class="fg-gauge-wrap"><svg viewBox="0 0 200 110" class="fg-gauge-svg"><defs><linearGradient id="fgGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e74c3c"/><stop offset="25%" stop-color="#D0904E"/><stop offset="50%" stop-color="#a99a82"/><stop offset="75%" stop-color="#7ed56f"/><stop offset="100%" stop-color="#00a859"/></linearGradient></defs><path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="url(#fgGrad)" stroke-width="14" stroke-linecap="round" opacity="0.3"/><line x1="100" y1="100" x2="${100+70*Math.cos(angle*Math.PI/180)}" y2="${100-70*Math.sin(Math.abs(angle)*Math.PI/180)*(angle<0?-1:1)}" stroke="${color}" stroke-width="3" stroke-linecap="round" class="fg-needle"/><circle cx="100" cy="100" r="6" fill="${color}"/></svg><div class="fg-score" style="color:${color}">${score}</div><div class="fg-label" style="color:${color}">${esc(label)}</div><div class="fg-meta">Genişlik: ${Math.round(breadth*100)}% · Momentum: ${avgMomentum>0?"+":""}${avgMomentum.toFixed(1)}% · Hacim İndeksi: ${Math.round(volNorm)}</div></div>`;
+  const fgSrc=String(data.market?.source||"Yerel kayıt — API bağlı değil");
+  const fgTs=String(data.lastUpdate||data.market?.lastSuccess||"");
+  const fgConf=assets.length?Math.round(assets.filter(a=>Boolean(a.marketVerified)).length/assets.length*100):0;
+ el.innerHTML=`<div class="fg-gauge-wrap"><svg viewBox="0 0 200 110" class="fg-gauge-svg"><defs><linearGradient id="fgGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e74c3c"/><stop offset="25%" stop-color="#D0904E"/><stop offset="50%" stop-color="#a99a82"/><stop offset="75%" stop-color="#7ed56f"/><stop offset="100%" stop-color="#00a859"/></linearGradient></defs><path d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke="url(#fgGrad)" stroke-width="14" stroke-linecap="round" opacity="0.3"/><line x1="100" y1="100" x2="${100+70*Math.cos(angle*Math.PI/180)}" y2="${100-70*Math.sin(Math.abs(angle)*Math.PI/180)*(angle<0?-1:1)}" stroke="${color}" stroke-width="3" stroke-linecap="round" class="fg-needle"/><circle cx="100" cy="100" r="6" fill="${color}"/></svg><div class="fg-score" style="color:${color}">${score}</div><div class="fg-label" style="color:${color}">${esc(label)}</div><div class="fg-meta">Genişlik: ${Math.round(breadth*100)}% · Momentum: ${avgMomentum>0?"+":""}${avgMomentum.toFixed(1)}% · Hacim İndeksi: ${Math.round(volNorm)}<br><span>Kaynak: ${esc(fgSrc)} — portföy bazlı algı, piyasa endeksi değildir</span> · <span>TS: ${esc(fgTs||"—")}</span> · <span>Güven: %${fgConf} doğrulanmış varlık</span></div></div>`;
 }
 /* ===== M45: STKSZ SABAH KARTI ===== */
 function renderStkszSabah(){
@@ -8335,7 +8376,7 @@ function scanBreakoutAlerts(){
  const el=document.getElementById("breakoutAlerts");if(!el)return;
  const alerts=[];
  activeAssets().filter(a=>finite(a.p)!==null&&a.p>0&&(a.history||[]).length>=10).forEach(a=>{
-  const hist=a.history;const closes=hist.map(h=>h.c);const volumes=hist.map(h=>h.v||0);
+  const hist=a.history;const closes=hist.map(h=>h.close!==undefined?h.close:h.c);const volumes=hist.map(h=>h.volume!==undefined?h.volume:(h.v||0));
   const avgVol10=volumes.slice(-10).reduce((s,v)=>s+v,0)/10;
   const lastVol=volumes[volumes.length-1]||0;
   const high10=Math.max(...closes.slice(-10));
@@ -8438,8 +8479,9 @@ function renderPaperTradingPanel(){
   <div class="paper-card"><div class="paper-label">Trailing Stop</div><div class="paper-content"><select id="trailingSymbol" class="asset-search" style="max-width:120px"><option value="">Sembol seç…</option></select><input id="trailingActivation" type="number" placeholder="Aktivasyon %" step="0.1" min="1" max="50" value="5"><input id="trailingTrail" type="number" placeholder="Trail %" step="0.1" min="0.5" max="20" value="3"><button type="button" class="btn btn-sm primary" onclick="activateTrailingStop()">BAŞLAT</button></div></div>
   <div class="paper-card"><div class="paper-label">Kısmi Kar Al (TP)</div><div class="paper-content"><select id="tpSymbol" class="asset-search" style="max-width:120px"><option value="">Sembol seç…</option></select><input id="tpTier1" type="number" placeholder="T1: % Kar al" step="1" min="1" max="100" value="25"><input id="tpTier1Pct" type="number" placeholder="T1: % Sat" step="1" min="1" max="100" value="50"><button type="button" class="btn btn-sm primary" onclick="activatePartialTP()">BAŞLAT</button></div></div>
   <div class="paper-card"><div class="paper-label">Maks. Drawdown Kill</div><div class="paper-content"><input id="maxDrawdownPct" type="number" placeholder="Maks drawdown %" step="1" min="5" max="50" value="15"><button type="button" class="btn btn-sm primary" onclick="activateMaxDrawdownKill()">BAŞLAT</button></div></div>
- </div>`;
- fillPaperSymbolSelects();
+</div><div id="paperConditionsWrap" class="paper-conditions"></div>`;
+  fillPaperSymbolSelects();
+  renderPaperConditionsWrap();
 }
 function fillPaperSymbolSelects(){
  ["trailingSymbol","tpSymbol"].forEach(id=>{
@@ -8448,24 +8490,99 @@ function fillPaperSymbolSelects(){
   activeAssets().filter(a=>finite(a.p)!==null).forEach(a=>{if(!existing.has(a.s)){const opt=document.createElement("option");opt.value=a.s;opt.textContent=a.s+(a.name?" · "+a.name:"");sel.appendChild(opt);}});
  });
 }
+function paperConditions(){return Array.isArray(data.paperConditions)?data.paperConditions:[];}
+function savePaperConditions(){data.paperConditions=paperConditions().slice(-60);storageSet("stkszData",JSON.stringify(dataForLocalStorage()));persistNativeEnr();}
+function paperLabel(kind){return kind==="trailing"?"Trailing Stop":kind==="partial_tp"?"Kısmi Kar Al":kind==="drawdown"?"Maks. Drawdown Kill":"—";}
+function paperAssetPrice(sym){const a=data.assets.find(x=>x.s===String(sym||"").toUpperCase());const p=finite(a?.p);return(a&&p!==null&&p>0)?p:null;}
+function pcId(){return"pc-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,7);}
 function activateTrailingStop(){
  const sym=document.getElementById("trailingSymbol")?.value;
  const activation=parseFloat(document.getElementById("trailingActivation")?.value)||5;
  const trail=parseFloat(document.getElementById("trailingTrail")?.value)||3;
  if(!sym){showToast("Sembol seçin.");return;}
- showToast(`${sym} Trailing Stop aktif: ${activation}% aktivasyon, ${trail}% trail.`);
- logSignal("HOLD",{action:"TRAILING_STOP_START",symbol:sym,activationPct:activation,trailPct:trail});
+ const clean=String(sym).toUpperCase(),price=paperAssetPrice(clean);
+ if(price===null){showToast("Doğrulanmış fiyat yok — PAPER koşul başlatılamadı.");return;}
+ data.paperConditions=paperConditions().filter(c=>c.kind!=="trailing"||c.symbol!==clean);
+ data.paperConditions.push({id:pcId(),kind:"trailing",symbol:clean,activationPct:activation,trailPct:trail,status:"ACTIVE",anchor:price,peak:price,startPrice:price,created:new Date().toISOString(),steps:["Aktivasyon bekleniyor (+%"+activation+" üzeri)"]});
+ savePaperConditions();
+ showToast(`🧪 PAPER Trailing Stop: ${clean} · akt. %${activation} · trail %${trail} · SIMULASYON`);
+ logSignal("HOLD",{action:"TRAILING_STOP_START",symbol:clean,activationPct:activation,trailPct:trail,paper:"SIMULASYON",status:"AKTİF"});
+ renderPaperTradingPanel();
 }
 function activatePartialTP(){
  const sym=document.getElementById("tpSymbol")?.value;
+ const target=parseFloat(document.getElementById("tpTier1")?.value)||25;
+ const sellPct=parseFloat(document.getElementById("tpTier1Pct")?.value)||50;
  if(!sym){showToast("Sembol seçin.");return;}
- showToast(`${sym} Kısmi Kar Al aktif.`);
- logSignal("HOLD",{action:"PARTIAL_TP_START",symbol:sym});
+ const clean=String(sym).toUpperCase(),price=paperAssetPrice(clean);
+ if(price===null){showToast("Doğrulanmış fiyat yok — PAPER koşul başlatılamadı.");return;}
+ data.paperConditions=paperConditions().filter(c=>c.kind!=="partial_tp"||c.symbol!==clean);
+ data.paperConditions.push({id:pcId(),kind:"partial_tp",symbol:clean,targetPct:target,sellPct:sellPct,status:"ACTIVE",startPrice:price,created:new Date().toISOString(),steps:["Hedef bekleniyor (+%"+target+" üzeri)"]});
+ savePaperConditions();
+ showToast(`🧪 PAPER Kısmi Kar Al: ${clean} · +%${target} hedef, %${sellPct} satış · SIMULASYON`);
+ logSignal("HOLD",{action:"PARTIAL_TP_START",symbol:clean,targetPct:target,sellPct:sellPct,paper:"SIMULASYON",status:"AKTİF"});
+ renderPaperTradingPanel();
 }
 function activateMaxDrawdownKill(){
  const pct=parseFloat(document.getElementById("maxDrawdownPct")?.value)||15;
- showToast(`Maks. Drawdown Kill aktif: -${pct}%`);
- logSignal("RISK",{action:"MAX_DRAWDOWN_KILL",maxDrawdownPct:pct});
+ const wallet=window.STKSZVirtualWallet&&typeof window.STKSZVirtualWallet.getWallet==="function"?window.STKSZVirtualWallet.getWallet():null;
+ const hasWallet=Boolean(wallet&&wallet.initialized&&finite(wallet.totalPortfolioValue)!==null);
+ if(!hasWallet){showToast("SANAL cüzdan bağlı değil — drawdown koşulu başlatılamadı.");return;}
+ data.paperConditions=paperConditions().filter(c=>c.kind!=="drawdown");
+ data.paperConditions.push({id:pcId(),kind:"drawdown",drawdownPct:pct,status:"ACTIVE",peak:finite(wallet.totalPortfolioValue),created:new Date().toISOString(),steps:["Peak takibi başladı"]});
+ savePaperConditions();
+ showToast(`🧪 PAPER Maks. Drawdown Kill: -%${pct} · sanal cüzdan · SIMULASYON`);
+ logSignal("RISK",{action:"MAX_DRAWDOWN_KILL",maxDrawdownPct:pct,paper:"SIMULASYON",status:"AKTİF"});
+ renderPaperTradingPanel();
+}
+function removePaperCondition(id){
+ data.paperConditions=paperConditions().filter(c=>c.id!==id);
+ savePaperConditions();renderPaperTradingPanel();
+}
+function evalPaperConditions(){
+ const active=paperConditions().filter(c=>c.status==="ACTIVE"||c.status==="TRAILING");
+ if(!active.length)return;
+ let changed=0;
+ data.paperConditions.forEach(c=>{
+  if(c.status!=="ACTIVE"&&c.status!=="TRAILING")return;
+  if(!Array.isArray(c.steps))c.steps=[];
+  try{
+   if(c.kind==="trailing"||c.kind==="partial_tp"){
+    const price=paperAssetPrice(c.symbol);if(price===null)return;
+    if(c.kind==="partial_tp"){
+     const target=c.startPrice*(1+Number(c.targetPct||0)/100);
+     if(price>=target){c.status="TRIGGERED";c.triggeredAt=new Date().toISOString();c.triggerPrice=price;c.steps=c.steps.concat([`Hedef: ${price.toFixed(4)} >= ${target.toFixed(4)} → %${c.sellPct} PAPER satış sinyali`]);changed++;
+      logSignal("SELL",{action:"PARTIAL_TP",symbol:c.symbol,price:price,sellPct:c.sellPct,paper:"SIMULASYON",status:"TETİKLENDİ",time:c.triggeredAt});}
+    }else{
+     if(c.status==="ACTIVE"){
+      if(price>=c.anchor*(1+Number(c.activationPct||0)/100)){c.status="TRAILING";c.peak=Math.max(c.peak||price,price);c.steps=c.steps.concat([`Aktivasyon: ${price.toFixed(4)} (+${c.activationPct}% üzeri)`]);changed++;}
+      else if(price>c.anchor){c.anchor=price;}
+     }
+     if(c.status==="TRAILING"){
+      const peak=c.peak||price,nextPeak=Math.max(peak,price);
+      const trailLevel=nextPeak*(1-Number(c.trailPct||0)/100);
+      if(price<=trailLevel){c.status="TRIGGERED";c.triggeredAt=new Date().toISOString();c.triggerPrice=price;c.peak=nextPeak;c.steps=c.steps.concat([`Trail: ${price.toFixed(4)} <= ${trailLevel.toFixed(4)} (peak ${nextPeak.toFixed(4)})`]);changed++;
+       logSignal("SELL",{action:"TRAILING_STOP",symbol:c.symbol,price:price,peak:nextPeak,trailPct:c.trailPct,paper:"SIMULASYON",status:"TETİKLENDİ",time:c.triggeredAt});}
+      else if(price>peak){c.peak=price;}
+     }
+    }
+   }else if(c.kind==="drawdown"){
+    const wallet=window.STKSZVirtualWallet&&typeof window.STKSZVirtualWallet.getWallet==="function"?window.STKSZVirtualWallet.getWallet():null;
+    const eq=finite(wallet?.totalPortfolioValue);if(eq===null)return;
+    const peak=Math.max(c.peak||eq,eq);c.peak=peak;
+    const level=peak*(1-Number(c.drawdownPct||0)/100);
+    if(eq<=level){c.status="TRIGGERED";c.triggeredAt=new Date().toISOString();c.triggerEquity=eq;c.triggerPeak=peak;c.steps=c.steps.concat([`Drawdown: ${eq.toFixed(2)} <= ${level.toFixed(2)} (peak ${peak.toFixed(2)})`]);changed++;
+     logSignal("RISK",{action:"MAX_DRAWDOWN_KILL",equity:eq,peak:peak,maxDrawdownPct:c.drawdownPct,paper:"SIMULASYON",status:"TETİKLENDİ",time:c.triggeredAt});}
+   }
+  }catch(error){}
+ });
+ if(changed){save({render:false});showToast("🧪 PAPER koşul tetiklendi — SIMULASYON; gerçek emir çalışmaz.");renderPaperTradingPanel();}
+}
+function renderPaperConditionsWrap(){
+ const wrap=document.getElementById("paperConditionsWrap");if(!wrap)return;
+ const list=paperConditions();
+ if(!list.length){wrap.innerHTML='<p class="help" style="margin:8px 0 0">Hiçbir PAPER koşul yok · Trailing/Kar Al/Drawdown koşulları yalnızca doğrulanmış fiyat veya sanal cüzdan üzerinden çalışır · SIMULASYON.</p>';return;}
+ wrap.innerHTML=`<div class="paper-conditions-title">PAPER KOŞULLAR · SIMULASYON · GERÇEK EMİR ÇALIŞMAZ</div><div class="paper-conditions-grid">${list.map(c=>`<div class="paper-condition ${c.status}"><div class="pc-head"><b>${esc((c.kind==="partial_tp"?"Kısmi Kar Al":c.kind==="trailing"?"Trailing Stop":"Maks. Drawdown Kill"))}</b><span class="pc-status">${c.status==="TRIGGERED"?"TETİKLENDİ":"AKTİF"}</span><button type="button" class="btn btn-sm" onclick="removePaperCondition('${esc(c.id)}')">KALDIR</button></div><div class="pc-body">${c.symbol?`<span>${esc(c.symbol)}</span>`:""}${c.kind==="trailing"?`<span>akt +%${esc(c.activationPct)} · trail %${esc(c.trailPct)}</span>`:c.kind==="partial_tp"?`<span>hedef +%${esc(c.targetPct)} · %${esc(c.sellPct)} satış</span>`:`<span>-%${esc(c.drawdownPct)} (cüzdan)</span>`}${c.triggerPrice!==undefined&&c.triggerPrice!==null?`<span>tetik fiyat: ${esc(c.triggerPrice)}</span>`:""}${c.triggerEquity!==undefined&&c.triggerEquity!==null?`<span>tetik bakiye: ${esc(c.triggerEquity)}</span>`:""}</div><small class="pc-steps">${esc(c.steps.join(" · "))}</small></div>`).join("")}</div>`;
 }
 /* ===== BACKTEST ===== */
 function runBacktest(){
@@ -8475,8 +8592,8 @@ function runBacktest(){
  if(!sym||!resultEl){showToast("Sembol seçin.");return;}
  const asset=data.assets.find(a=>a.s===sym);
  const hist=(asset?.history||[]).slice(-120);
- if(hist.length<30){showToast(`${sym} için yeterli tarihi veri yok (en az 30 mum gerekli).`);return;}
- const closes=hist.map(h=>h.c);
+if(hist.length<30){showToast(`${sym} için yeterli tarihi veri yok (en az 30 mum gerekli).`);return;}
+const closes=hist.map(h=>h.close!==undefined?h.close:h.c);
  let trades=[];let pos=null;let equity=[];let peak=0;let maxDD=0;
  const run=(buyFn,sellFn)=>{
   for(let i=20;i<closes.length;i++){
@@ -8497,20 +8614,23 @@ function runBacktest(){
   const signalLine=(w)=>{const vals=[];for(let i=26;i<=w.length;i++)vals.push(ema(w.slice(0,i),12)-ema(w.slice(0,i),26));return ema(vals,9);};
   run((w,i)=>{if(i<35)return false;const m=macdLine(w),s=signalLine(w),pm=macdLine(w.slice(0,-1)),ps=signalLine(w.slice(0,-1));return m>s&&pm<=ps;},(w,i)=>{if(i<35)return false;const m=macdLine(w),s=signalLine(w),pm=macdLine(w.slice(0,-1)),ps=signalLine(w.slice(0,-1));return m<s&&pm>=ps;});
  }
- const sellTrades=trades.filter(t=>t.side==="SELL");
- const wins=sellTrades.filter(t=>t.pnl>0).length;
- const winRate=sellTrades.length?(wins/sellTrades.length*100).toFixed(1):"0";
- const totalReturn=sellTrades.reduce((s,t)=>s+t.pnl,0).toFixed(2);
- const avgTrade=sellTrades.length?(sellTrades.reduce((s,t)=>s+t.pnl,0)/sellTrades.length).toFixed(2):"0";
- maxDD=-Math.max(...sellTrades.map(t=>t.pnl),0).toFixed(2);
+const sellTrades=trades.filter(t=>t.side==="SELL");
+  const wins=sellTrades.filter(t=>t.pnl>0).length;
+  const winRate=sellTrades.length?(wins/sellTrades.length*100).toFixed(1):"0";
+  const totalReturn=sellTrades.reduce((s,t)=>s+t.pnl,0).toFixed(2);
+  const avgTrade=sellTrades.length?(sellTrades.reduce((s,t)=>s+t.pnl,0)/sellTrades.length).toFixed(2):"0";
+  maxDD=sellTrades.length?Math.min(0,...sellTrades.map(t=>t.pnl)):0;
+  const btFirst=hist[0],btLast=hist[hist.length-1];
+  const btPeriod=btFirst&&btLast?(String(btFirst.t||btFirst.ts||btFirst.date||"")+" → "+String(btLast.t||btLast.ts||btLast.date||"")):"";
+  const btSource=String(asset?.source||"Kaynak bilgisi yok");
  const sharpe=sellTrades.length>1?Math.sqrt(sellTrades.length)*(parseFloat(avgTrade)/Math.max(0.01,parseFloat(maxDD))).toFixed(2):"—";
  resultEl.innerHTML=`<div class="backtest-results">
-  <div class="bt-summary"><b>${esc(sym)} · ${esc(strategy==="sma_cross"?"SMA 5/20":strategy==="rsi"?"RSI 14":"MACD")}</b><small>${hist.length} mum · ${sellTrades.length} işlem</small></div>
+  <div class="bt-summary"><b>${esc(sym)} · ${esc(strategy==="sma_cross"?"SMA 5/20":strategy==="rsi"?"RSI 14":"MACD")}</b><small>${hist.length} mum · ${sellTrades.length} işlem · Kaynak: ${esc(btSource)} · Aralık: ${esc(btPeriod||hist.length+" mum (zaman damgası yok)")}</small></div>
   <div class="bt-grid">
    <div class="bt-stat"><span>Toplam Getiri</span><b class="${parseFloat(totalReturn)>=0?"green":"red"}">${totalReturn}%</b></div>
    <div class="bt-stat"><span>Kazanma Oranı</span><b>${winRate}%</b></div>
    <div class="bt-stat"><span>Ort. İşlem</span><b class="${parseFloat(avgTrade)>=0?"green":"red"}">${avgTrade}%</b></div>
-   <div class="bt-stat"><span>Maks. Drawdown</span><b class="red">-${maxDD}%</b></div>
+   <div class="bt-stat"><span>Maks. Drawdown</span><b class="red">-${Math.abs(maxDD).toFixed(2)}%</b></div>
    <div class="bt-stat"><span>Sharpe Ratio</span><b>${sharpe}</b></div>
   </div>
   <p class="help" style="margin-top:10px">⚠ Walk-forward testi değildir. Gerçek ticaret sonuçları farklı olabilir. Sonuçlar yalnızca strateji mantığını değerlendirmek içindir.</p>
@@ -8750,9 +8870,9 @@ function computeConfidence(scores){
  return Math.max(0,Math.min(100,100-spread));
 }
 function computeDipProbability(a){
- const hist=a.history||[];
- if(hist.length<10)return 0;
- const closes=hist.map(h=>h.c);
+const hist=a.history||[];
+if(hist.length<10)return 0;
+const closes=hist.map(h=>h.close!==undefined?h.close:h.c);
  const recent=closes.slice(-3).reduce((s,c)=>s+c,0)/3;
  const older=closes.slice(-10,-3).reduce((s,c)=>s+c,0)/7;
  if(recent>=older)return 0;
@@ -8771,9 +8891,9 @@ function deriveAction(score,confidence,dipProb){
  return "HOLD";
 }
 function computeSmartMoneyStatus(a){
- const hist=a.history||[];
- if(hist.length<10)return"VERİ YOK";
- const closes=hist.map(h=>h.c);
+const hist=a.history||[];
+if(hist.length<10)return"VERİ YOK";
+const closes=hist.map(h=>h.close!==undefined?h.close:h.c);
  const recent=closes.slice(-3).reduce((s,c)=>s+c,0)/3;
  const older=closes.slice(-10,-3).reduce((s,c)=>s+c,0)/7;
  const declining=recent<older;
@@ -8807,8 +8927,8 @@ function renderCustodyChangeCard(asset){
 function computeStkszFlow(asset){
  const hist=asset?.history||[];
  if(hist.length<5)return{flow:"NÖTR",value:"VERİ YOK"};
- const vols=hist.map(h=>h.v||0);
- const closes=hist.map(h=>h.c);
+const vols=hist.map(h=>h.volume!==undefined?h.volume:(h.v||0));
+const closes=hist.map(h=>h.close!==undefined?h.close:h.c);
  const recentVol=vols.slice(-3).reduce((s,v)=>s+v,0)/3;
  const olderVol=vols.slice(-5,-3).reduce((s,v)=>s+v,0)/2;
  const priceDir=closes[closes.length-1]>=closes[closes.length-2];

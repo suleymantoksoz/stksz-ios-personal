@@ -2468,8 +2468,20 @@ body:not([data-theme="light"]) .page-edit-toggle .pen-ic svg{stroke:#FFF}
 body.layout-edit:not([data-theme="light"]) .page-edit-toggle{width:auto;padding:0 14px;font-size:10px;letter-spacing:.7px;color:#FFF;background:linear-gradient(145deg,#E2A968,#8C5220);font-weight:900}
 
 /* ── 5) VARLIK DETAY: Midas tarzı başlık + bölümler ── */
-.asset-detail-price-row{display:flex;align-items:baseline;gap:10px;margin-top:8px}
+.asset-detail-price-row{display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:nowrap;white-space:nowrap;min-width:0}
 .asset-detail-price-row b{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.2px;color:#FFF}
+.crypto-fav-btn{background:transparent;border:none;padding:2px 4px;color:var(--muted,#a99a82);font-size:15px;line-height:1;cursor:pointer}
+.crypto-fav-btn.active{color:#e7b51e}
+.paper-conditions-title{font-size:12px;font-weight:800;letter-spacing:.5px;margin:12px 0 6px;color:var(--muted,#a99a82)}
+.paper-conditions-grid{display:grid;gap:8px}
+.paper-condition{background:var(--card,#241f18);border:1px solid var(--divider,rgba(184,115,51,.25));border-radius:10px;padding:8px 10px;font-size:12px}
+.paper-condition.TRIGGERED{border-color:var(--green,#00a859)}
+.paper-condition .pc-head{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.paper-condition .pc-head b{flex:1}
+.pc-status{font-weight:800;font-size:10px;letter-spacing:.5px;color:var(--green,#00a859)}
+.paper-condition.TRIGGERED .pc-status{color:var(--green,#00a859)}
+.paper-condition .pc-body{color:var(--muted,#a99a82);display:flex;flex-wrap:wrap;gap:4px 10px}
+.pc-steps{display:block;color:var(--muted,#a99a82);font-size:11px;margin-top:4px}
 .asset-detail-price-row span{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
 .asset-detail-price-row span.positive{color:var(--green)}
 .asset-detail-price-row span.negative{color:var(--red)}
