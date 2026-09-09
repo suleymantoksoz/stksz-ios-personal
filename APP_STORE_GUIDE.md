@@ -130,7 +130,7 @@ Uygulama su kategorilere gore degerlendirilmistir:
 - **Yuksek Dereceli Icerik**: Yok (4+)
 - **Sakincali Icerik**: Yok
 - **Iletisim / Etkilesim**: Yalnizca kullanici verisi (yerel)
-- **Reklam**: Var (Google AdMob) — "Reklam" etiketi gerekli
+- **Reklam**: Yok — Google AdMob, proje karariyla kaldirilmistir (aktif reklam entegrasyonu 0). "Reklam" etiketi GEREKMEZ.
 
 **Onemli**: App Store Connect'te "Bu uygulama uygulama ici satin alma sunmaktadir" secenegi isaretlenmeli ve satin alinan urunler (rozetler) acikca belirtilmelidir.
 
@@ -150,8 +150,8 @@ Uygulama su kategorilere gore degerlendirilmistir:
 - [ ] E-posta iletisim bilgisi
 
 ### Onay Gerektiren
-- [ ] App Tracking Transparency (ATT) aciklamasi
-- [ ] Reklam aciklamasi ("Bu uygulama reklam icerir")
+- [ ] App Tracking Transparency (ATT) aciklamasi — reklam/takip YOK oldugundan GEREKMEZ (gorunurse kapatilabilir)
+- [ ] Reklam aciklamasi ("Bu uygulama reklam icerir") — reklam YOK, AdMob kaldirildigindan isaretlenmesi GEREKMEZ
 - [ ] Finans uygulamasi ozel gereksinimleri (yatirim tavsiyesi degil aciklamasi)
 
 ### Opsiyonel ama Onerilen
@@ -208,8 +208,8 @@ open "STKSZ Capital/ios/App/App.xcworkspace"
 Uygulama inceleme sirasinda dikkat edilmesi gerekenler:
 
 1. **Yatirim Tavsiyesi Degil**: Uygulama icinde "Yatirim tavsiyesi degil, veri temelli analiz" aciklamasi acikca gorunmeli
-2. **Reklam Ayrintisi**: AdMob reklamlari gorunmeli ve "Reklam" etiketi tasimali
+2. **Reklam Ayrintisi**: Reklam YOK. AdMob entegrasyonu proje karariyla kaldirildigi icin "Reklam" etiketi GEREKMEZ; ATT izni gerekmez.
 3. **Demo Modu**: Satin alma islemleri demo/simulasyon olarak calismali
 4. **Gizlilik**: Gizlilik politikasi URL'si calismali ve icerigi dogru olmali
 5. **Face ID**: NSFaceIDUsageDescription acik ve anlasilir olmali
-6. **ATT**: App Tracking Transparency istegi dogru sekilde gosterilmeli
+6. **ATT**: App Tracking Transparency gerekmez — reklam/takip YOK (AdMob kaldirildi)

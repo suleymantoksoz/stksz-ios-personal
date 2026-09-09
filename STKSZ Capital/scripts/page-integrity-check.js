@@ -112,12 +112,12 @@ else { fail('ENV sızıntısı tespit edildi'); hasError = true; }
 
 // 10. Cache bust
 console.log('10) Cache bust...');
-const hasV123 = html.includes('style.css?v=123');
-const hasSWBump = html.includes('20260820-auth-v123');
-if (hasV123) pass('style.css?v=123');
-else { fail('style.css?v=123 eksik'); hasError = true; }
-if (hasSWBump) pass('service-worker v123');
-else { fail('service-worker v123 eksik'); hasError = true; }
+const hasV124Css = html.includes('style.css?v=124');
+const hasSWBump = html.includes('service-worker.js?v=20260909-auth-v124');
+if (hasV124Css) pass('style.css?v=124');
+else { fail('style.css?v=124 eksik'); hasError = true; }
+if (hasSWBump) pass('service-worker v124 (20260909-auth-v124)');
+else { fail('service-worker v124 eksik'); hasError = true; }
 
 // 11. Neon #00df78 in CSS
 console.log('11) CSS neon kalıntıları...');
