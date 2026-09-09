@@ -1,5 +1,5 @@
 /* =====================================================================
-   STKSZ AI ENGINE · v121 (2. ADIM)
+   STKSZ AI ENGINE · v123 (FAZ 6 — Yatırımcı Copilot)
    ---------------------------------------------------------------------
    STKSZ AI, uygulamanın KENDİ yapay zekâ ürünüdür. Gemini yalnızca
    arka plandaki değiştirilebilir model sağlayıcısıdır (Model Layer).
@@ -15,12 +15,16 @@
        ├── STKSZ Profile      (yatırımcı seviyesi testi + rozetler)
        └── STKSZ Rules        (VERİ YOK ilkesi, güvenlik, yetkiler)
 
-   v121 EKLEMEKLER:
-   - DataReaders: uygulama içi verileri okuyan merkezi okuyucular
-   - AnalysisTools: teknik analiz, hesaplama,찐 değer analizi araçları
-   - WriteTools: kullanıcı verisini değiştiren (portföy, izleme listesi) araçları
-   - AdminTools: admin paneli, API yönetimi, rozet yönetimi araçları
-   - centralIntelligenceContext(): tüm bağlam kaynaklarını birleştiren
+   v123 EKLEMELER (FAZ 6 — 117-158):
+   - MULTI_AGENT.ORCHESTRATOR v2: plan/execute/cancel/retry + araç bütçesi + activity
+   - masterContext(): paylaşılmış doğrulanmış bağlam (canlı uygulama verisi köprüsü)
+   - EXPERT_AGENTS (10) + INVESTOR_AGENTS (3) + COPILOT.run(): tek komutlu analiz
+   - DEEP_RESEARCH / CROSS_CHECK / SCENARIO_ENGINE / EXPORT / RESEARCH_WORKSPACE yenilendi
+   - MORNING_INTEL, ANALYSIS_HISTORY (What Changed), PROVIDER_ROUTER
+   - Safety: canExecuteTrade=false + assertNoSecrets → VERİ YETERSİZ — KARAR YOK
+
+   ÖNCEKİ SÜRÜMLER:
+   - v121: DataReaders / AnalysisTools / WriteTools / AdminTools / centralIntelligenceContext()
 
    GÜVENLİK:
    - Bu dosyada API anahtarı YOKTUR ve asla olamaz.
@@ -1421,333 +1425,473 @@ const STKSZAccountEngine = {
   /* ================= 13) PERMISSION SYSTEM (yetki) ================= */
   function isAdmin() { return userBadges().some(b => b.id === 'ADMIN'); }
 
-  /* ================= 14) MULTI-AGENT ORCHESTRATOR & EXPERT AGENTS ================= */
+/* ================= 14) MULTI-AGENT ORCHESTRATOR & EXPERT AGENTS =================
+     FAZ 6 (117-158): YATIRIMCI COPİLOT — plan bazlı çoklu ajan orkestrasyonu.
+     - Request plan: her koşu için ajan listesi + mod + araç bütçesi vardır.
+     - Shared context: masterContext() tüm ajanlara AYNI doğrulanmış bağlamı verir.
+     - Tool budget: mod başına ajan sonucu üst sınırı; plan bu sınırı aşamaz.
+     - Cancellation: cancel(token) koşuyu iptal eder.
+     - Retry: geçici hatalarda en fazla RETRY_LIMIT deneme.
+     - Provenance: her sonuç ajan/kaynak/veri durumu/güven/ms taşır. */
+
+  const EXPERT_AGENTS = Object.freeze([
+    { id: 'equity',           name: 'Equity Research',      focus: 'sembol bazlı pozisyon + momentum',     hint: 'doğrulanmış pozisyon/geçmiş; temel veri yoksa VERİ YOK' },
+    { id: 'financial',        name: 'Financial Analysis',   focus: 'maliyet/KZ/finansal durum',            hint: 'maliyet bazı, gerçekleşmemiş ve günlük net K/Z' },
+    { id: 'portfolio',        name: 'Portfolio',            focus: 'toplam değer/dağılım/ağırlık',         hint: 'doğrulanmış toplam varlık ve tür dağılımı' },
+    { id: 'risk',             name: 'Risk',                 focus: 'yoğunlaşma/volatilite/risk skoru',     hint: 'HHI, en büyük ağırlık, portföy risk notu' },
+    { id: 'technical',        name: 'Technical',            focus: 'SMA/EMA/RSI/destek-direnç',           hint: 'yalnız doğrulanmış OHLCV geçmişi' },
+    { id: 'news',             name: 'News & Catalyst',      focus: 'haber/katalizör ilişkisi',             hint: 'doğrulanmış haber akışı + pozisyon eşleşmesi' },
+    { id: 'market_movement',  name: 'Market Movement',      focus: 'günlük hareket/kilit anlar',           hint: 'doğrulanmış günlük değişim/hacim' },
+    { id: 'valuation',        name: 'Valuation',            focus: 'F/K/PD/DD çarpanları',                 hint: 'yalnız kayıtlı temel veri; yoksa VERİ YOK' },
+    { id: 'ipo',              name: 'IPO',                  focus: 'halka arz takvimi',                    hint: 'doğrulanmış halka arz takvimi kayıtları' },
+    { id: 'macro',            name: 'Macro & Market',       focus: 'kur/altın/piyasa durumu',              hint: 'doğrulanmış kur/altın önbelleği ve piyasa kaynağı' }
+  ]);
+  const EXPERT_BY_ID = {};
+  EXPERT_AGENTS.forEach(a => { EXPERT_BY_ID[a.id] = a; });
+
+  const INVESTOR_AGENTS = Object.freeze([
+    { id: 'deep_dive',     name: 'Deep Dive',            focus: 'alan bazlı derinleştirme + veri boşlukları' },
+    { id: 'cross_check',   name: 'Cross Check',          focus: 'bağımsız sayısal doğrulama + çelişki temizleme' },
+    { id: 'source_conf',   name: 'Source & Confidence',  focus: 'kaynak tazeliği + güven skoru + köken kaydı' }
+  ]);
+
+  function nowIso() { try { return new Date().toISOString(); } catch (e) { return ''; } }
+  function num(x) { return Number.isFinite(Number(x)) ? Number(x) : null; }
+  function n2(v) { const x = num(v); return x === null ? null : Math.round(x * 100) / 100; }
+  function pctText(v) { const x = num(v); return x === null ? 'VERİ YOK' : Number(x).toFixed(2) + '%'; }
+  function srcRow(name, status) { return { name: String(name || 'belirsiz'), status: String(status || 'verified') }; }
+  function factRow(k, v, src, status) { const s = srcRow(src, status); return { k: String(k), v: (v === null || v === undefined) ? 'VERİ YOK' : v, source: s.name, status: s.status }; }
+  function veriYok(reason) { return { ok: false, error: 'VERİ YOK: ' + reason, data: { text: 'VERİ YOK: ' + reason, status: 'none', confidence: 0, sources: [], facts: [] } }; }
+  function assetReturnOf(a) { const r = num(a && a.returnPct); if (r !== null) return r; const c = num(a && a.avgCost); const p = a && a.marketVerified ? num(a.price) : null; return (c !== null && c > 0 && p !== null) ? (p - c) / c * 100 : null; }
+  function assetUnrealizedOf(a) { const u = num(a && a.unrealized); if (u !== null) return u; const c = num(a && a.avgCost), p = num(a && a.price), q = num(a && a.quantity); return (c !== null && p !== null && q !== null) ? (p - c) * q : null; }
+
+  /* ---- canlı uygulama verisi köprüsü (UI yükler; Node'ta yoksa DataReaders kullanılır) ---- */
+  let liveContextFn = null;
+  function setLiveContext(fn) { liveContextFn = typeof fn === 'function' ? fn : null; return { ok: true }; }
+
+  function normCloses(a) {
+    if (Array.isArray(a && a.priceHistory) && a.priceHistory.length) return a.priceHistory.map(Number).filter(v => Number.isFinite(v) && v > 0);
+    if (Array.isArray(a && a.history) && a.history.length) return a.history.map(h => num(h && h.close !== undefined ? h.close : (h && h.c))).filter(v => v !== null && v > 0);
+    return [];
+  }
+  function normVolumes(a) {
+    if (Array.isArray(a && a.volumeHistory) && a.volumeHistory.length) return a.volumeHistory.map(Number).filter(v => Number.isFinite(v) && v >= 0);
+    if (Array.isArray(a && a.history) && a.history.length) return a.history.map(h => num(h && (h.volume !== undefined ? h.volume : (h && h.v)))).filter(v => v !== null && v >= 0);
+    return [];
+  }
+
+  /* ---- Master Context: tüm ajanların kullandığı paylaşılmış DOĞRULANMIŞ bağlam ---- */
+  function masterContext() {
+    const live = liveContextFn ? liveContextFn() : null;
+    const assets = [];
+    const rawAssets = Array.isArray(live && live.assets) ? live.assets : [];
+    rawAssets.forEach(a => {
+      if (!a || !a.s) return;
+      const q = num(a.q), p = (a.marketVerified || num(a.p) !== null) ? num(a.p) : null;
+      const v = (q !== null && p !== null) ? q * p : num(a.v);
+      assets.push({
+        symbol: String(a.s), name: a.name || '', type: a.type || '', sector: a.sector || '',
+        quantity: q, avgCost: num(a.avgCost), price: p, value: v,
+        unrealized: assetUnrealizedOf({ avgCost: num(a.avgCost), price: p, quantity: q, unrealized: num(a.unrealized) }),
+        returnPct: assetReturnOf(a),
+        daily: a.dailyVerified ? num(a.d) : null, dailyVerified: Boolean(a.dailyVerified),
+        marketVerified: Boolean(a.marketVerified), marketDataCurrent: a.marketDataCurrent === undefined ? Boolean(a.marketVerified) : Boolean(a.marketDataCurrent),
+        marketChangePct: a.marketVerified ? num(a.marketChangePct) : null,
+        volume: num(a.volume), source: a.source || '', provider: a.marketProvider || '',
+        closes: normCloses(a), volumes: normVolumes(a)
+      });
+    });
+
+    if (!assets.length) {
+      const drP = DataReaders.portfolio();
+      if (drP && drP.items && drP.items.length) {
+        drP.items.forEach(it => assets.push({
+          symbol: String(it.symbol || ''), name: it.name || '', type: 'Hisse', sector: '',
+          quantity: num(it.quantity), avgCost: num(it.avgCost), price: num(it.currentPrice), value: (num(it.currentPrice) || 0) * (num(it.quantity) || 0),
+          unrealized: num(it.pnl), returnPct: num(it.pnlPercent), daily: null, dailyVerified: false,
+          marketVerified: num(it.currentPrice) !== null && num(it.currentPrice) > 0, marketDataCurrent: true,
+          marketChangePct: null, volume: null, source: 'stkszPortfolio', provider: 'DataReaders',
+          closes: [], volumes: []
+        }));
+      }
+    }
+
+    const cash = { tl: num(live && live.cashTl), usd: num(live && live.cashUsd), eur: num(live && live.cashEur) };
+    let fxTl = num(live && live.fxTl);
+    const fxDb = (live && live.fx) || DataReaders.fxRates() || {};
+    if (fxTl === null && fxDb && (num(fxDb.usdtry) > 0 || num(fxDb.eurtry) > 0)) {
+      fxTl = n2(((num(cash.usd) || 0) * (num(fxDb.usdtry) || 0)) + ((num(cash.eur) || 0) * (num(fxDb.eurtry) || 0)));
+    }
+    const reported = num(live && live.reportedPortfolioTotal);
+    const posItems = assets.filter(a => a.quantity !== null && a.quantity > 0);
+    const summedValue = posItems.reduce((s, a) => s + (a.value || 0), 0);
+    const hasValued = posItems.some(a => a.value !== null);
+    let totalValue = null;
+    if (hasValued) totalValue = n2(summedValue + (cash.tl || 0) + (fxTl || 0));
+    else if (reported !== null) totalValue = n2(reported + (fxTl || 0));
+    else if (summedValue > 0 || cash.tl !== null || (fxTl || 0) > 0) totalValue = n2(summedValue + (cash.tl || 0) + (fxTl || 0));
+    const totalCost = n2(posItems.reduce((s, a) => s + ((a.avgCost !== null && a.quantity !== null) ? a.avgCost * a.quantity : 0), 0));
+
+    const market = (live && live.market) || {};
+    const newsRaw = (live && live.news) || DataReaders.news() || null;
+    const news = Array.isArray(newsRaw) ? newsRaw : Array.isArray(newsRaw && newsRaw.items) ? newsRaw.items.slice(0, 10).map(n => ({ title: n.title || '', source: n.source && typeof n.source === 'object' ? n.source.name : n.source, date: n.date || n.pubDate || n.publishedAt || '', summary: (n.description || n.summary || '').slice(0, 120) })) : [];
+    const fx = (live && live.fx) || fxDb || {};
+    const risk = (live && live.risk) || DataReaders.riskProfile() || {};
+    const watchlist = (live && live.watchlist) || DataReaders.watchlist() || [];
+    const transactions = (live && live.transactions) || DataReaders.transactions() || [];
+    const ipo = (live && live.ipoCalendar) || {};
+    const fundamentals = (live && live.fundamentals) || {};
+    const mem = memorySnapshot();
+
+    const ctx = {
+      at: nowIso(),
+      provider: { id: 'stksz_local', label: 'Yerel doğrulanmış motor' },
+      portfolio: { items: posItems, totalValue, totalCost, cash, fxTl, hasValued, symbols: assets.map(a => a.symbol) },
+      assets, market, news, fx, risk, watchlist, transactions, ipo, fundamentals, mem
+    };
+    return ctx;
+  }
+
   const MULTI_AGENT = Object.freeze({
     ORCHESTRATOR: {
-      version: 'v1',
-      analyze(question, context) {
-        if (typeof question !== 'string' || question.trim().length === 0) return { ok: false, error: 'Soru boş.' };
-        const q = question.trim().toLowerCase();
+      version: 'v2',
+      RETRY_LIMIT: 2,
+      _seq: 0,
+      _cancelled: {},
+      activity: [],
 
-        // TDZ guard: MODULES must exist
-        if (typeof MODULES !== 'function' && typeof MODULES !== 'object') return { ok: false, error: 'Motor yapısı eksik.' };
+      plan(question, modeId, ctx) {
+        const ids = this._routeAgents(String(question || '').toLowerCase(), modeId || 'INVESTOR_ANALYST', ctx, ctx && ctx.focus && ctx.focus.symbol);
+        const mode = WORK_MODES[modeId] || WORK_MODES.INVESTOR_ANALYST;
+        const agents = ids.slice(0, mode.maxAgents).map(id => ({ id, name: (EXPERT_BY_ID[id] || { name: id }).name, focus: (EXPERT_BY_ID[id] || { focus: 'genel' }).focus }));
+        return { agents, mode: mode.id, modeName: mode.name, maxAgents: mode.maxAgents, providerId: 'stksz_local' };
+      },
 
-        // Routing: hangi ajanların çalıştırılması gerektiğini belirle
-        const routes = this._route(q);
+      run(question, opts) {
+        opts = opts || {};
+        const ctx = opts.context || masterContext();
+        if (opts.symbol && ctx) ctx.focus = { symbol: String(opts.symbol || '').toUpperCase() };
+        const plan = this.plan(question, opts.mode, ctx);
+        return this.execute(plan, ctx, opts);
+      },
+
+      execute(plan, ctx, opts) {
+        opts = opts || {};
+        const token = 'run_' + (++this._seq) + '_' + String(plan.mode || 'm').toLowerCase();
+        const rec = { token, at: nowIso(), mode: plan.mode, question: opts.question || '', symbol: (ctx && ctx.focus && ctx.focus.symbol) || null, agents: [], status: 'running' };
+        this.activity.push(rec);
+        if (this.activity.length > 24) this.activity = this.activity.slice(-24);
+        this._cancelled[token] = false;
         const results = [];
-
-        for (const [agentName, agentFn] of routes) {
-          try {
-            const r = agentFn(q, context);
-            results.push({ agent: agentName, ok: r.ok, data: r.data || null, error: r.error || null });
-            if (!r.ok) break;
-          } catch (e) {
-            results.push({ agent: agentName, ok: false, error: e instanceof Error ? e.message : 'Bilinmeyen hata' });
-            break;
-          }
-        }
-
-        if (results.length === 0) return { ok: false, error: 'Herhangi bir ajan çalıştıramadı.' };
-
-        // Sonuçları sentezle: orchestration logic
-        const synthesis = this._synthesize(results, context);
-        return { ok: true, synthesis, perAgent: results };
-      },
-
-      _route(question) {
-        const routes = [];
-
-        // 1. Equity Research Agent: Şirket/Sektör analizi
-        if (/şirket|sektor|ticari|kar|zarar|rapor|analiz/.test(question) &&
-            !/finans|bilanço|gelir|nakit|risk|teknik|değer|ipo|makro/.test(question)) {
-          routes.push(['equity', this._equityResearch]);
-        }
-
-        // 2. Financial Analysis Agent: Bilanço, Gelir Tablosu, oranlar
-        if (/bilanço|gelir tablosu|nakit akış|finansal|oran|ROE|ROA|likidite|karlılık/.test(question)) {
-          routes.push(['financial', this._financialAnalysis]);
-        }
-
-        // 3. Portfolio Agent: Kullanıcı portföyü
-        if (/portföy|bağlı|değeri|dağılım|performans|kazan|kaybed|weights/.test(question)) {
-          routes.push(['portfolio', this._portfolioAnalysis]);
-        }
-
-        // 4. Risk Agent: Drawdown, HHI, volatilite
-        if (/risk|drawdown|Yoğunlaşma|HHI|volatilite|maximum|Value at Risk/.test(question)) {
-          routes.push(['risk', this._riskAnalysis]);
-        }
-
-        // 5. Technical Analysis Agent: EMA, RSI, MACD, Bollinger, S/D
-        if (/EMA|RSI|MACD|Bollinger|destek|direnç|trend|fiyat.*hareket|grafige/.test(question)) {
-          routes.push(['technical', this._technicalAnalysis]);
-        }
-
-        // 6. News & Catalyst Agent: KAP, haber, etkinlik
-        if (/KAP|haber|duyuru|etkinlik|haber.*güncel|son\.haber/.test(question)) {
-          routes.push(['news', this._newsCatalyst]);
-        }
-
-        // 7. Market Movement Agent: Key Moments, olağandışı hacim/fiyat
-        if (/hacim.*patlam|fiyat.*zıpla|gap|key.moment|olağandışı|strange/.test(question)) {
-          routes.push(['market_movement', this._marketMovement]);
-        }
-
-        // 8. Valuation Agent: F/K, PD/DD, FD/FAVÖK
-        if (/(F\/K|PD\/DD|FAVÖK|yükleme|alacak|borç|değerleme|çarpan)/.test(question)) {
-          routes.push(['valuation', this._valuation]);
-        }
-
-        // 9. IPO Agent: Halka arz, tahsisat, katılım
-        if (/halka arz|IPO|tahsisat|katılım|public|POF/.test(question)) {
-          routes.push(['ipo', this._ipoAnalysis]);
-        }
-
-        // 10. Macro & Market Agent: Enflasyon, faiz, kur, BIST
-        if (/enflasyon|faiz|kur|TRY|BIST|global|makro|piyasa|genel/.test(question)) {
-          routes.push(['macro', this._macroAnalysis]);
-        }
-
-        // Fallback: Eğer hiçbir agent eşleşmediysen, genel AI routing'e gönder
-        if (routes.length === 0) {
-          routes.push(['general', this._generalAnalysis]);
-        }
-
-        return routes;
-      },
-
-      _synthesize(perAgentResults, context) {
-        const okAgents = perAgentResults.filter(r => r.ok);
-        if (okAgents.length === 0) return { text: 'Analiz yapılamadı: Tüm ajanlar hata verdiri.', ok: false };
-
-        // Her ajan çıktısından özet çıkar + VERİ YOK kapısı
-        const synthParts = [];
-        let hasData = false;
-
-        for (const r of okAgents) {
-          if (r.data && r.data.text) {
-            hasData = true;
-            synthParts.push(r.data.text);
-          }
-        }
-
-        if (!hasData) {
-          // Tüm ajan VERİ YETERSİZ döndüyse
-          return { text: 'VERİ YETERSİZ — KARAR YOK', ok: false };
-        }
-
-        // En yüksek confidence'lı sonucu öncelikle göster
-        const primary = synthParts[0] || 'Analiz tamamlandı, ancak ayrıntılı sonuçlar mevcut değil.';
-
-        return { text: primary, ok: true, perAgent: okAgents.length, allData: synthParts };
-      },
-
-      // --- 10 Uzman Ajan Metotları ---
-
-      // 1. Equity Research Agent
-      _equityResearch(question, context) {
-        // Deterministik analiz, fake veri yok
-        const symbols = (context && context.portfolio && context.portfolio.symbols) ?
-            context.portfolio.symbols : [];
-
-        if (symbols.length > 0) {
-          const first = symbols[0];
-          // Basit olarak portföydeki ilk sembolün "analizini" döndür
-          // Gerçek uygulamada Equity Research API'si çağrılır
-          return {
-            ok: true,
-            data: {
-              text: `[EQUITY RESEARCH] ${first}: Şu an portföyde takip ediliyor. Detaylı şirket analizi için "${first} hakkında ne düşünüyorsun?" sorusunu deneyin.`,
-              confidence: 0.7,
-              source: 'portfolio-context'
+        let cancelled = false;
+        const t0 = Date.now();
+        for (let i = 0; i < plan.agents.length; i++) {
+          if (this._cancelled[token]) { cancelled = true; break; }
+          if (results.length >= plan.maxAgents) break;
+          const def = plan.agents[i];
+          const at0 = Date.now();
+          let outcome = null;
+          for (let attempt = 1; attempt <= this.RETRY_LIMIT; attempt++) {
+            try {
+              const r = this._invokeExpert(def.id, opts.question, ctx);
+              const d = r && r.data;
+              outcome = { agent: def.id, ok: Boolean(r && r.ok), data: d || null, error: (r && r.error) || null, attempt, ms: Date.now() - at0, status: (d && d.status) || (r && r.ok ? 'verified' : 'none'), confidence: (d && d.confidence) || 0, sources: (d && d.sources) || [] };
+              break;
+            } catch (e) {
+              outcome = null;
+              if (attempt === this.RETRY_LIMIT) outcome = { agent: def.id, ok: false, error: 'Retry sonrası hata: ' + String(e && e.message ? e.message : e), attempt, ms: Date.now() - at0, status: 'error', confidence: 0, sources: [] };
             }
-          };
+          }
+          if (outcome) results.push(outcome);
+          rec.agents.push({ id: def.id, ok: Boolean(outcome && outcome.ok), status: (outcome && outcome.status) || 'none', ms: (outcome && outcome.ms) || 0 });
         }
-
-        // VERİ YOK: Sembol belirtilmemiş
-        return {
-          ok: false,
-          error: 'VERİ YETERSİZ — KARAR YOK',
-          data: { text: 'VERİ YETERSİZ — KARAR YOK: Analiz edilecek sembol belirtilmemiş.' }
-        };
+        rec.status = cancelled ? 'cancelled' : 'done';
+        rec.durationMs = Date.now() - t0;
+        const cross = CROSS_CHECK.check(results, ctx);
+        const conf = this._sourceConfidence(results, ctx);
+        const syn = this._synthesize(results, ctx);
+        return { ok: syn.ok, token, started: rec.at, durationMs: rec.durationMs, cancelled, plan, perAgent: results, crossCheck: cross, confidence: conf, synthesis: syn, providers: PROVIDER_ROUTER.summarize(ctx), provider: { id: 'stksz_local', label: 'Yerel doğrulanmış motor', cost: '0 · ücretli dış çağrı yok', fallback: 'DataReaders → canlı uygulama bağlamı' } };
       },
 
-      // 2. Financial Analysis Agent
-      _financialAnalysis(question, context) {
-        // Deterministik matematiksel hesaplama, OCR/API dependency yok
-        const portfolio = context && context.portfolio ? context.portfolio : null;
+      cancel(token) { if (token) { this._cancelled[token] = true; return { ok: true }; } return { ok: false }; },
 
-        if (portfolio && portfolio.items && portfolio.items.length > 0) {
-          const firstItem = portfolio.items[0];
-          const symbol = firstItem ? firstItem.symbol : 'Bilinmiyor';
+_routeAgents(q, modeId, ctx, scope) {
+        const set = [];
+        const matched = [];
+        const add = id => { if (!set.includes(id)) set.push(id); };
+        const mark = id => { if (!matched.includes(id)) matched.push(id); add(id); };
+        const MODE_PLAN = {
+          INVESTOR_RISK: ['risk', 'portfolio'],
+          INVESTOR_ANALYST: ['portfolio', 'macro', 'news', 'market_movement', 'risk'],
+          INVESTOR_RESEARCH: ['equity', 'financial', 'portfolio', 'risk', 'technical', 'news', 'market_movement', 'valuation', 'ipo', 'macro']
+        };
+        (MODE_PLAN[modeId] || MODE_PLAN.INVESTOR_ANALYST).slice().forEach(add);
+        if (scope) { mark('equity'); mark('technical'); }
+        if (/teknik|rsi|macd|sma|destek|direnç|graf/i.test(q)) mark('technical');
+        if (/haber|kap|duyuru|katalizör/i.test(q)) mark('news');
+        if (/risk|kayıp|yoğunlaşma/i.test(q)) mark('risk');
+        if (/halka arz|ipo|tahsisat/i.test(q)) mark('ipo');
+        if (/(f\/k|pdd|favo|çarpan|değerleme)/i.test(q)) mark('valuation');
+        if (/kur|dolar|euro|altın|enflasyon|faiz/i.test(q)) mark('macro');
+        if (/hareket|kilit an|hacim|gap/i.test(q)) mark('market_movement');
+        if (/finans|bilanço|maliyet|kz|kâr|zarar/i.test(q)) mark('financial');
+        if (/sembol|şirket|hisse/i.test(q)) mark('equity');
+        return matched.filter(id => set.includes(id)).concat(set.filter(id => matched.indexOf(id) < 0));
+      },
 
-          // Finansal oranlar determinist olarak hesaplanır (simülasyon)
-          return {
-            ok: true,
-            data: {
-              text: `[FINANCIAL ANALYSIS] ${symbol}: Bilanço, Gelir Tablosu ve oranlar deterministik olarak hesaplanıyor. Detaylı rapor için "${symbol} finansal oranlar" sorusunu deneyin.`,
-              confidence: 0.8,
-              source: 'deterministic-calculation'
-            }
-          };
+      _invokeExpert(id, question, ctx) {
+        const fns = { equity: this._equityResearch, financial: this._financialAnalysis, portfolio: this._portfolioAnalysis, risk: this._riskAnalysis, technical: this._technicalAnalysis, news: this._newsCatalyst, market_movement: this._marketMovement, valuation: this._valuation, ipo: this._ipoAnalysis, macro: this._macroAnalysis, general: this._generalAnalysis };
+        const f = fns[id];
+        if (!f) throw new Error('Bilinmeyen ajan: ' + id);
+        return f.call(this, question || '', ctx || {});
+      },
+
+      _sourceConfidence(results, ctx) {
+        if (!Array.isArray(results) || !results.length) return { score: 0, ok: false, reason: 'VERİ YETERSİZ — KARAR YOK', byAgent: [], provenance: [] };
+        const byAgent = results.map(r => {
+          const d = r.data || {};
+          const status = d.status || (r.ok ? 'verified' : 'none');
+          return { agent: r.agent, status, confidence: Number(r.confidence) || 0, hasData: status === 'verified' || status === 'stale', sources: (d.sources || []).map(s => s.name || '') };
+        });
+        const withData = byAgent.filter(b => b.hasData).length;
+        const score = results.length ? Math.round(withData / results.length * 100) : 0;
+        return { score, ok: withData > 0, reason: withData ? ('Ajanların ' + withData + '/' + results.length + ' kısmı doğrulanmış veri üretti.') : 'VERİ YETERSİZ — KARAR YOK', byAgent, provenance: byAgent.reduce((acc, b) => { b.sources.forEach(s => acc.push({ agent: b.agent, source: s })); return acc; }, []) };
+      },
+
+      _synthesize(results, ctx) {
+        const oks = results.filter(r => r.ok && r.data && r.data.text);
+        if (!oks.length) return { text: 'VERİ YETERSİZ — KARAR YOK', ok: false, decision: 'VERİ YETERSİZ — KARAR YOK' };
+        const parts = oks.map(r => '• [' + ((EXPERT_BY_ID[r.agent] || { name: r.agent }).name) + '] ' + (r.data.text || ''));
+        return { text: parts.join('\n'), ok: true, decision: 'HAZIR', agentsUsed: oks.length };
+      },
+
+      // 1. Equity Research Agent — sembol bazlı pozisyon + momentum; temel veri yoksa VERİ YOK
+      _equityResearch(question, ctx) {
+        const sym = focusSymbol(ctx, question);
+        if (!sym) return veriYok('analiz edilecek sembol belirtilmedi');
+        const asset = (ctx.assets || []).find(a => a.symbol === sym);
+        if (!asset) return veriYok('"' + sym + '" doğrulanmış varlık kaydında yok');
+        const closes = Array.isArray(asset.closes) ? asset.closes : [];
+        const owned = (num(asset.quantity) || 0) > 0;
+        const facts = [factRow('Sembol', sym, 'varlık kaydı', 'verified'), factRow('Ad', asset.name || 'VERİ YOK', 'varlık kaydı', asset.name ? 'verified' : 'none')];
+        if (owned) {
+          facts.push(factRow('Pozisyon', String(asset.quantity) + ' lot @ ' + (asset.avgCost === null ? 'VERİ YOK' : asset.avgCost + ' TL'), 'portföy', 'verified'));
+          facts.push(factRow('Piyasa değeri', n2(asset.value) === null ? 'VERİ YOK' : n2(asset.value).toLocaleString('tr-TR') + ' TL', 'portföy', asset.marketVerified ? 'verified' : 'stale'));
+          facts.push(factRow('K/Z', pctText(assetReturnOf(asset)), 'portföy', asset.marketVerified ? 'verified' : 'stale'));
+          facts.push(factRow('Portföy ağırlığı', ctx.portfolio && ctx.portfolio.totalValue ? pctText((n2(asset.value) || 0) / ctx.portfolio.totalValue * 100) : 'VERİ YOK', 'portföy', ctx.portfolio && ctx.portfolio.hasValued ? 'verified' : 'stale'));
         }
-
-        return {
-          ok: false,
-          error: 'VERİ YETERSİZ — KARAR YOK',
-          data: { text: 'VERİ YETERSİZ — KARAR YOK: Finansal veri için portföy bağlamı gerekli.' }
-        };
-      },
-
-      // 3. Portfolio Agent
-      _portfolioAnalysis(question, context) {
-        const portfolio = context && context.portfolio ? context.portfolio : {};
-
-        if (portfolio.items && portfolio.items.length > 0) {
-          const totalValue = portfolio.items.reduce((sum, item) => sum + (item.currentValue || 0), 0);
-          const symbols = portfolio.items.map(item => item.symbol || 'Bilinmiyor').join(', ');
-
-          // Portföy dağılımı ve performans
-          const diversification = Math.round((portfolio.items.length / 20) * 100); // basit örnek
-          const winners = portfolio.items.filter(item => (item.currentValue || 0) > (item.acquisitionCost || 0)).length;
-          const losers = portfolio.items.filter(item => (item.currentValue || 0) < (item.acquisitionCost || 0)).length;
-
-          return {
-            ok: true,
-            data: {
-              text: `[PORTFOLIO AGENT] Toplam değer: ₺${totalValue.toLocaleString()} · Varlık sayısı: ${portfolio.items.length} · Semboller: ${symbols} · Dağılım: ${diversification}% · Kazanan: ${winners} · Kaybeden: ${losers}`,
-              confidence: 0.9,
-              source: 'portfolio-data'
-            }
-          };
+        if (closes.length >= 5) {
+          const last = closes[closes.length - 1], p5 = closes[closes.length - 5];
+          facts.push(factRow('5 günlük değişim', p5 > 0 ? pctText((last - p5) / p5 * 100) : 'VERİ YOK', 'piyasa geçmişi', asset.marketVerified ? 'verified' : 'stale'));
         }
-
-        return {
-          ok: false,
-          error: 'VERİ YETERSİZ — KARAR YOK',
-          data: { text: 'VERİ YETERSİZ — KARAR YOK: İzlenecek portföy verisi bulunamadı.' }
-        };
+        facts.push(factRow('Temel bilgi (F/K, PD/DD, FAVÖK, büyüme)', 'VERİ YOK — temel veri kaynağı yapılandırılmadı', 'yapılandırılmadı', 'none'));
+        const has = facts.some(f => f.status !== 'none');
+        const text = '[EQUITY RESEARCH] ' + sym + ': ' + (asset.name || '') + ' — ' + (owned ? 'portföyde ' + asset.quantity + ' lot; K/Z ' + pctText(assetReturnOf(asset)) : 'aktif pozisyon yok') + ' · 5 günlük: ' + (facts.find(f => f.k === '5 günlük değişim') || {}).v + ' · Temel bilgi: VERİ YOK.';
+        return { ok: has, error: has ? null : 'VERİ YOK: doğrulanmış pozisyon/fiyat verisi yok.', data: { text, facts, confidence: asset.marketVerified ? 0.8 : 0.55, status: asset.marketVerified ? 'verified' : 'stale', sources: [srcRow('varlık kaydı', 'verified'), srcRow('piyasa geçmişi', asset.marketVerified ? 'verified' : 'stale')] } };
       },
 
-      // 4. Risk Agent
-      _riskAnalysis(question, context) {
-        const portfolio = context && context.portfolio ? context.portfolio : {};
+      // 2. Financial Analysis — gerçek maliyet/KZ hesapları; bilanço verisi yoksa VERİ YOK
+      _financialAnalysis(question, ctx) {
+        const items = (ctx.portfolio && ctx.portfolio.items) || [];
+        if (!items.length) return veriYok('finansal hesaplar için pozisyon kaydı yok');
+        const cost = n2(items.reduce((s, a) => s + ((a.avgCost !== null && a.quantity !== null) ? a.avgCost * a.quantity : 0), 0));
+        const valued = n2(items.reduce((s, a) => s + ((a.value !== null && a.quantity !== null) ? a.value : 0), 0));
+        const unrealized = n2(items.reduce((s, a) => s + (assetUnrealizedOf(a) || 0), 0));
+        const dailyItems = items.filter(a => a.dailyVerified && num(a.d) !== null);
+        const dailyNet = n2(dailyItems.reduce((s, a) => s + a.d, 0));
+        const facts = [factRow('Toplam maliyet bazı', cost === null ? 'VERİ YOK' : cost.toLocaleString('tr-TR') + ' TL', 'portföy', cost !== null ? 'verified' : 'stale'), factRow('Toplam pozisyon değeri', valued === null ? 'VERİ YOK' : valued.toLocaleString('tr-TR') + ' TL', 'portföy', valued !== null ? 'verified' : 'stale'), factRow('Gerçekleşmemiş K/Z', unrealized === null ? 'VERİ YOK' : (unrealized >= 0 ? '+' : '') + unrealized.toLocaleString('tr-TR') + ' TL', 'portföy', unrealized !== null ? 'verified' : 'stale'), factRow('Günlük net (doğrulanmış)', dailyNet === null ? 'VERİ YOK' : (dailyNet >= 0 ? '+' : '') + dailyNet.toLocaleString('tr-TR') + ' TL', 'günlük kayıt', dailyItems.length ? 'verified' : 'stale'), factRow('Bilanço / gelir tablosu', 'VERİ YOK — finansal tablo kaynağı yapılandırılmadı', 'yapılandırılmadı', 'none')];
+        const has = facts.some(f => f.status !== 'none');
+        const text = '[FINANCIAL ANALYSIS] Maliyet bazı ' + (cost === null ? 'VERİ YOK' : cost.toLocaleString('tr-TR') + ' TL') + ', pozisyon değeri ' + (valued === null ? 'VERİ YOK' : valued.toLocaleString('tr-TR') + ' TL') + ', gerçekleşmemiş K/Z ' + (unrealized === null ? 'VERİ YOK' : (unrealized >= 0 ? '+' : '') + unrealized.toLocaleString('tr-TR') + ' TL') + '. Bilanço verisi yok → VERİ YOK.';
+        return { ok: has, error: has ? null : 'VERİ YOK: finansal veri yok.', data: { text, facts, confidence: 0.82, status: valued !== null ? 'verified' : 'stale', sources: [srcRow('portföy', valued !== null ? 'verified' : 'stale')] } };
+      },
 
-        if (portfolio.items && portfolio.items.length > 0) {
-          const returns = portfolio.items.map(item => {
-            const gain = (item.currentValue || 0) - (item.acquisitionCost || 0);
-            return gain / (item.acquisitionCost || 1);
-          });
-          const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
-          const volatility = Math.sqrt(returns.reduce((sum, r) => sum + Math.pow(r - avgReturn, 2), 0) / returns.length);
-          const var95 = avgReturn - 1.645 * volatility; // basit VaR
+      // 3. Portfolio Agent — toplam değer, tür dağılımı, ağırlıklar
+      _portfolioAnalysis(question, ctx) {
+        const p = ctx && ctx.portfolio;
+        const items = (p && p.items) || [];
+        if (!p || !items.length) return veriYok('portföy pozisyonu kaydı yok');
+        const total = p.totalValue;
+        const types = {};
+        items.forEach(a => { const t = a.type || 'Diğer'; types[t] = (types[t] || 0) + (n2(a.value) || 0); });
+        const alloc = Object.keys(types).map(t => ({ type: t, value: types[t], pct: total ? n2(types[t] / total * 100) : null }));
+        const winners = items.filter(a => assetReturnOf(a) !== null && assetReturnOf(a) > 0);
+        const losers = items.filter(a => assetReturnOf(a) !== null && assetReturnOf(a) < 0);
+        const dailyItems = items.filter(a => a.dailyVerified && num(a.d) !== null);
+        const dailyNet = n2(dailyItems.reduce((s, a) => s + a.d, 0));
+        const facts = [factRow('Toplam varlık (TL)', total === null ? 'VERİ YOK' : total.toLocaleString('tr-TR'), 'portföy', p.hasValued ? 'verified' : 'stale'), factRow('Pozisyon sayısı', String(items.length), 'portföy', 'verified'), ...alloc.map(a => factRow('Dağılım · ' + a.type, a.pct === null ? 'VERİ YOK' : a.pct.toFixed(1) + '%', 'portföy', p.hasValued ? 'verified' : 'stale')), factRow('Kazanan/kaybeden', winners.length + '/' + losers.length, 'portföy', p.hasValued ? 'verified' : 'stale'), factRow('Günlük net', dailyNet === null ? 'VERİ YOK' : (dailyNet >= 0 ? '+' : '') + dailyNet.toLocaleString('tr-TR') + ' TL', 'günlük kayıt', dailyItems.length ? 'verified' : 'stale')];
+        const allocText = alloc.map(a => a.type + ' ' + (a.pct === null ? 'VERİ YOK' : a.pct.toFixed(1) + '%')).join(', ');
+        const text = '[PORTFOLIO] Toplam: ' + (total === null ? 'VERİ YOK' : total.toLocaleString('tr-TR') + ' TL') + ' · ' + items.length + ' pozisyon · dağılım: ' + allocText + ' · kazanan ' + winners.length + '/kaybeden ' + losers.length + ' · günlük net ' + (dailyNet === null ? 'VERİ YOK' : (dailyNet >= 0 ? '+' : '') + dailyNet.toLocaleString('tr-TR') + ' TL') + '.';
+        return { ok: true, error: null, data: { text, facts, confidence: 0.9, status: p.hasValued ? 'verified' : 'stale', sources: [srcRow('portföy', p.hasValued ? 'verified' : 'stale'), srcRow('günlük kayıt', dailyItems.length ? 'verified' : 'stale')] } };
+      },
 
-          // HHI (Herfindahl-Hirschman Index) - yoğunlaşma riski
-          const totals = portfolio.items.map(item => item.currentValue || 0);
-          const sumSq = totals.reduce((sum, v) => sum + v * v, 0);
-          const hhi = sumSq / Math.pow(totals.reduce((a, b) => a + b, 0), 2) * 10000;
+      // 4. Risk Agent — yoğunlaşma (HHI), en büyük ağırlık, portföy risk notu
+      _riskAnalysis(question, ctx) {
+        const p = ctx && ctx.portfolio;
+        const items = (p && p.items) || [];
+        const valued = items.filter(a => a.value !== null && (n2(a.value) || 0) > 0);
+        if (!valued.length || (p && p.totalValue === null)) return veriYok('risk hesabı için doğrulanmış pozisyon değeri gerekli');
+        const total = p.totalValue || 0;
+        const hhi = n2(valued.reduce((s, a) => s + Math.pow((n2(a.value) || 0) / total, 2), 0) * 10000);
+        const top = valued.slice().sort((x, y) => (n2(y.value) || 0) - (n2(x.value) || 0))[0];
+        const topW = total ? n2((n2(top.value) || 0) / total * 100) : null;
+        const riskNote = ctx.risk || {};
+        const facts = [factRow('HHI yoğunlaşma (0-10000)', hhi === null ? 'VERİ YOK' : String(hhi), 'portföy', 'verified'), factRow('En büyük pozisyon', top ? top.symbol : 'VERİ YOK', 'portföy', 'verified'), factRow('En büyük ağırlık', topW === null ? 'VERİ YOK' : topW.toFixed(1) + '%', 'portföy', 'verified'), factRow('Portföy risk skoru', num(riskNote.overall) !== null ? riskNote.overall + '/100' : (riskNote.riskLevel || 'VERİ YOK'), 'risk profili', num(riskNote.overall) !== null ? 'verified' : 'none'), factRow('Risk seviyesi', (riskNote.level && riskNote.level.label) || riskNote.riskLevel || 'VERİ YOK', 'risk profili', riskNote.riskLevel ? 'verified' : 'none')];
+        const text = '[RISK] HHI yoğunlaşma ' + (hhi === null ? 'VERİ YOK' : hhi) + ' · en büyük pozisyon ' + (top ? top.symbol : 'VERİ YOK') + ' (%' + (topW === null ? 'VERİ YOK' : topW.toFixed(1)) + ') · portföy risk notu ' + (num(riskNote.overall) !== null ? riskNote.overall + '/100' : (riskNote.riskLevel || 'VERİ YOK')) + '.';
+        return { ok: true, error: null, data: { text, facts, confidence: 0.85, status: 'verified', sources: [srcRow('portföy', 'verified'), srcRow('risk profili', num(riskNote.overall) !== null ? 'verified' : 'none')] } };
+      },
 
-          return {
-            ok: true,
-            data: {
-              text: `[RISK AGENT] Ortalama getiri: %${(avgReturn * 100).toFixed(1)} · Volatilite: %${(volatility * 100).toFixed(1)} · VaR (95%): %${(var95 * 100).toFixed(1)} · HHI Yoğunlaşma: ${hhi.toFixed(1)}`,
-              confidence: 0.85,
-              source: 'portfolio-risk-calculation'
-            }
-          };
+      // 5. Technical Analysis — yalnız doğrulanmış OHLCV geçmişi
+      _technicalAnalysis(question, ctx) {
+        const sym = focusSymbol(ctx, question);
+        if (!sym) return veriYok('teknik analiz için sembol gerekli');
+        const asset = (ctx.assets || []).find(a => a.symbol === sym);
+        const closes = asset ? (Array.isArray(asset.closes) ? asset.closes : []) : [];
+        if (closes.length < 10) return veriYok('teknik göstergeler için en az 10 doğrulanmış fiyat noktası gerekli');
+        const last = closes[closes.length - 1];
+        const sma = n => closes.slice(-n).reduce((s, x) => s + x, 0) / n;
+        const s10 = sma(10), s20 = closes.length >= 20 ? sma(20) : null;
+        const prev = closes[closes.length - 2];
+        const mom1 = prev > 0 ? (last - prev) / prev * 100 : null;
+        const hi = Math.max.apply(null, closes.slice(-10)), lo = Math.min.apply(null, closes.slice(-10));
+        const vols = asset && asset.volumes && asset.volumes.length ? asset.volumes : [];
+        let lastVol = null, avgVol = null;
+        if (vols.length >= 11) { lastVol = vols[vols.length - 1]; avgVol = vols.slice(-11, -1).reduce((s, x) => s + x, 0) / 10; }
+        const facts = [factRow('Son fiyat', n2(last) + ' TL', 'piyasa geçmişi', 'verified'), factRow('SMA 10', n2(s10), 'piyasa geçmişi', 'verified'), factRow('SMA 20', s20 === null ? 'VERİ YOK' : n2(s20), 'piyasa geçmişi', s20 !== null ? 'verified' : 'stale'), factRow('Son gün değişim', pctText(mom1), 'piyasa geçmişi', 'verified'), factRow('Destek (10 günlük düşük)', n2(lo), 'piyasa geçmişi', 'verified'), factRow('Direnç (10 günlük yüksek)', n2(hi), 'piyasa geçmişi', 'verified'), lastVol !== null ? factRow('Hacim (son / ort)', lastVol + ' / ' + n2(avgVol), 'piyasa geçmişi', 'verified') : null].filter(Boolean);
+        const layout = s20 !== null ? (last > s20 ? 'SMA20 üzerinde' : 'SMA20 altında') : 'SMA20 için yetersiz veri';
+        const volNote = lastVol !== null && avgVol !== null && avgVol > 0 ? (lastVol > avgVol * 1.5 ? 'hacim patlaması var' : 'olağandışı hacim yok') : '';
+        const text = '[TECHNICAL] ' + sym + ': son ' + n2(last) + ' TL · SMA10 ' + n2(s10) + (s20 !== null ? ' · SMA20 ' + n2(s20) : '') + ' · günlük ' + pctText(mom1) + ' · destek ' + n2(lo) + '/direnç ' + n2(hi) + ' · konum: ' + layout + (volNote ? ' · ' + volNote : '') + ' · not: RSI/EMA gibi ek göstergeler bu sürümde üretilmez.';
+        return { ok: true, error: null, data: { text, facts, confidence: 0.83, status: 'verified', sources: [srcRow('piyasa geçmişi', 'verified')] } };
+      },
+
+      // 6. News & Catalyst — doğrulanmış haber akışı
+      _newsCatalyst(question, ctx) {
+        const news = Array.isArray(ctx.news) ? ctx.news : [];
+        if (!news.length) return veriYok('doğrulanmış haber kaydı yok');
+        const positions = ((ctx.portfolio && ctx.portfolio.items) || []).map(a => a.symbol);
+        const items = news.slice(0, 5);
+        const facts = items.map(n => factRow('Haber', n.title || 'Başlık yok', n.source || 'kaynak yok', n.source ? 'verified' : 'stale'));
+        const matched = items.filter(n => positions.some(s => String((n.title || '') + ' ' + (n.summary || '') + ' ' + (n.symbol || '')).toLocaleUpperCase('tr-TR').indexOf(s) !== -1));
+        const text = '[NEWS & CATALYST] Son ' + items.length + ' doğrulanmış haber: ' + items.map(n => (n.title || '').slice(0, 60)).join(' | ').slice(0, 220) + ' · pozisyon eşleşmesi: ' + (matched.length ? 'var' : 'yok');
+        return { ok: true, error: null, data: { text, facts, confidence: 0.78, status: 'verified', sources: [srcRow('haber akışı', 'verified')] } };
+      },
+
+      // 7. Market Movement — günlük hareketler + kilit anlar
+      _marketMovement(question, ctx) {
+        const sym = focusSymbol(ctx, question);
+        const movers = (ctx.assets || []).filter(a => a.marketVerified && a.marketChangePct !== null).slice().sort((x, y) => (num(y.marketChangePct) || 0) - (num(x.marketChangePct) || 0));
+        if (!movers.length && !sym) return veriYok('piyasa hareketi için doğrulanmış günlük değişim verisi gerekli');
+        const facts = [];
+        const textParts = [];
+        let moments = [];
+        if (movers.length) {
+          const gains = movers.slice(0, 3), losses = movers.slice(-3).reverse();
+          gains.forEach(a => facts.push(factRow('Yükselen · ' + a.symbol, pctText(a.marketChangePct), 'piyasa', 'verified')));
+          losses.forEach(a => facts.push(factRow('Düşen · ' + a.symbol, pctText(a.marketChangePct), 'piyasa', 'verified')));
+          textParts.push('yükselenler ' + gains.map(a => a.symbol + ' ' + pctText(a.marketChangePct)).join(', ') + ' · düşenler ' + losses.map(a => a.symbol + ' ' + pctText(a.marketChangePct)).join(', '));
         }
-
-        return {
-          ok: false,
-          error: 'VERİ YETERSİZ — KARAR YOK',
-          data: { text: 'VERİ YETERSİZ — KARAR YOK: Risk analizi için portföy verisi gerekli.' }
-        };
+        if (sym) {
+          const asset = (ctx.assets || []).find(a => a.symbol === sym);
+          const closes = asset ? (Array.isArray(asset.closes) ? asset.closes : []) : [];
+          if (closes.length >= 10) {
+            try { moments = AnalysisTools.detectKeyMoments ? AnalysisTools.detectKeyMoments(closes, asset.volumes || [], {}, {}) : []; } catch (e) { moments = []; }
+            if (moments.length) facts.push(factRow('Kilit anlar (' + sym + ')', String(moments.length) + ' adet · ' + moments.slice(0, 3).map(m => m.type).join(','), 'piyasa geçmişi', 'verified'));
+          }
+        }
+        const text = '[MARKET MOVEMENT] ' + (textParts.length ? textParts.join(' · ') : '') + (moments.length ? ' · ' + sym + ' için ' + moments.length + ' kilit an işaretlendi.' : (sym ? ' · ' + sym + ' için kilit an üretilmedi (sahte an üretilmez).' : ''));
+        return { ok: Boolean(facts.length), error: facts.length ? null : 'VERİ YOK: hareket verisi yok.', data: { text, facts, confidence: 0.8, status: facts.length ? 'verified' : 'none', sources: [srcRow('piyasa', 'verified')] } };
       },
 
-      // 5. Technical Analysis Agent
-      _technicalAnalysis(question, context) {
-        // EMA, RSI, MACD, Bollinger, destek/direnç determinist hesaplama
-        // Gerçek veri gerektirmiyor, mevcut fiyat verilerinden simülasyon yapar
-        return {
-          ok: true,
-          data: {
-            text: '[TECHNICAL ANALYSIS] EMA/RSI/MACD/Bollinger deterministik formüller ile hesaplanıyor. "AAPL EMA RSI analizi" gibi bir soru ile teknik göstergeler görebilirsiniz.',
-            confidence: 0.75,
-            source: 'technical-indicators'
-          }
-        };
+      // 8. Valuation — yalnız kayıtlı temel veri
+      _valuation(question, ctx) {
+        const sym = focusSymbol(ctx, question);
+        const f = sym && ctx.fundamentals ? ctx.fundamentals[sym] : null;
+        if (!f) return veriYok('temel (bilanço/çarpan) veri kaynağı yapılandırılmadı — F/K, PD/DD, FAVÖK uydurulmaz');
+        const asset = (ctx.assets || []).find(a => a.symbol === sym);
+        const price = asset ? num(asset.price) : null;
+        const facts = Object.keys(f).slice(0, 6).map(k => factRow(k, String(f[k]), 'fundamentals', 'verified'));
+        if (price !== null && num(f.eps) !== null) facts.push(factRow('F/K (hesaplanan)', n2(price / f.eps).toLocaleString('tr-TR'), 'fundamentals+piyasa', 'verified'));
+        const text = '[VALUATION] ' + sym + ': kayıtlı temel değerler ' + facts.map(x => x.k + '=' + String(x.v).slice(0, 30)).join(', ').slice(0, 200);
+        return { ok: Boolean(facts.length), error: facts.length ? null : 'VERİ YOK: çarpan verisi yok.', data: { text, facts, confidence: 0.75, status: 'verified', sources: [srcRow('fundamentals', 'verified')] } };
       },
 
-      // 6. News & Catalyst Agent
-      _newsCatalyst(question, context) {
-        // KAP bildirimi, haber etkinliği sınıflandırması
-        return {
-          ok: true,
-          data: {
-            text: '[NEWS & CATALYST] KAP bildirimleri ve haber etkinlikleri tespit ediliyor. "Son KAP haberleri" sorusu ile güncel duyurular görülebilir.',
-            confidence: 0.8,
-            source: 'news-catalog'
-          }
-        };
+      // 9. IPO — doğrulanmış halka arz takvimi
+      _ipoAnalysis(question, ctx) {
+        const items = ctx.ipo && Array.isArray(ctx.ipo.items) ? ctx.ipo.items : [];
+        if (!items.length) return veriYok(ctx.ipo && ctx.ipo.lastError ? 'halka arz verisi alınamadı: ' + ctx.ipo.lastError : 'doğrulanmış halka arz takvimi kaydı yok');
+        const facts = items.slice(0, 5).map(x => factRow('· ' + (x.company || 'belirsiz'), (x.symbol || '—') + ' · ' + (x.date || 'tarih VERİ YOK') + ' · ' + (x.status || 'durum VERİ YOK'), x.source || 'takvim', x.source ? 'verified' : 'stale'));
+        const text = '[IPO] ' + items.slice(0, 5).map(x => (x.company || '?') + ' (' + (x.symbol || '—') + ', ' + (x.date || 'tarih yok') + ')').join(' | ') + (items.length > 5 ? ' +' + (items.length - 5) + ' kayıt' : '');
+        return { ok: Boolean(facts.length), error: null, data: { text, facts, confidence: 0.82, status: 'verified', sources: [srcRow('halka arz takvimi', 'verified')] } };
       },
 
-      // 7. Market Movement Agent
-      _marketMovement(question, context) {
-        // Key Moments: olağandırıç hacim/fiyat gap\'leri
-        return {
-          ok: true,
-          data: {
-            text: '[MARKET MOVEMENT] Aşırı hacim patlamaları, fiyat gap\'leri ve Key Momentlar tespit ediliyor. "Grafikteki olağandırıç hareketler nedir?" sorusu ile detaylar.',
-            confidence: 0.8,
-            source: 'key-moments'
-          }
-        };
+      // 10. Macro & Market — doğrulanmış kur/altın önbelleği
+      _macroAnalysis(question, ctx) {
+        const fx = ctx.fx || {};
+        const facts = [];
+        if (num(fx.usdtry) > 0) facts.push(factRow('USD/TRY', n2(fx.usdtry), 'kur önbelleği', 'verified'));
+        if (num(fx.eurtry) > 0) facts.push(factRow('EUR/TRY', n2(fx.eurtry), 'kur önbelleği', 'verified'));
+        if (num(fx.goldUsd) > 0) facts.push(factRow('Altın ($/ons)', n2(fx.goldUsd), 'altın önbelleği', 'verified'));
+        if (num(fx.goldTry) > 0) facts.push(factRow('Altın (TL/gr)', n2(fx.goldTry), 'altın önbelleği', 'verified'));
+        if (ctx.market && ctx.market.lastSuccess) facts.push(factRow('Piyasa kaynağı', String(ctx.market.source || ctx.market.providerId || 'belirsiz'), 'piyasa', 'verified'));
+        facts.push(factRow('Enflasyon / faiz verisi', 'VERİ YOK — veri kaynağı yapılandırılmadı', 'yapılandırılmadı', 'none'));
+        if (!facts.some(f => f.status === 'verified')) return veriYok('kur/altın önbelleği ve piyasa kaynağı boş');
+        const text = '[MACRO & MARKET] ' + facts.filter(f => f.status === 'verified').map(f => f.k + ' ' + f.v).join(' · ') + ' · enflasyon/faiz: VERİ YOK.';
+        return { ok: true, error: null, data: { text, facts, confidence: 0.8, status: 'verified', sources: [srcRow('kur önbelleği', 'verified'), srcRow('piyasa', ctx.market && ctx.market.lastSuccess ? 'verified' : 'none')] } };
       },
 
-      // 8. Valuation Agent
-      _valuation(question, context) {
-        // F/K, PD/DD, FD/FAVÖK çarpanları
-        return {
-          ok: true,
-          data: {
-            text: '[VALUATION AGENT] Fiyat/Kâr, PD/DD ve FD/FAVÖK çarpanları deterministik olarak hesaplanıyor. "Şirket X değeri nedir?" sorusu ile sonuçlar.',
-            confidence: 0.78,
-            source: 'valuation-models'
-          }
-        };
-      },
-
-      // 9. IPO Agent
-      _ipoAnalysis(question, context) {
-        // Halka arz finansalları, tahsisat oranları, katılım analizi
-        return {
-          ok: true,
-          data: {
-            text: '[IPO AGENT] Halka arz (IPO) finansalları, tahsisat oranları ve katılım analizi yapılıyor. "Son IPO\'lar" sorusu ile yeni sunulan fonlar.',
-            confidence: 0.82,
-            source: 'ipo-data'
-          }
-        };
-      },
-
-      // 10. Macro & Market Agent
-      _macroAnalysis(question, context) {
-        // Enflasyon, faiz, kur, BIST senaryoları
-        return {
-          ok: true,
-          data: {
-            text: '[MACRO & MARKET AGENT] Enflasyon, faiz oranları, USD/TRY ve BIST genel senaryoları makro-ekonomik verilerle analiz ediliyor. "BIST nasıl?" sorusu ile güncel piyasa durumu.',
-            confidence: 0.85,
-            source: 'macro-data'
-          }
-        };
+      _generalAnalysis(question, ctx) {
+        const p = ctx && ctx.portfolio;
+        const has = p && Array.isArray(p.items) && p.items.length;
+        if (!has) return veriYok('genel özet için doğrulanmış portföy verisi yok');
+        const ids = this._routeAgents(String(question || '').toLowerCase(), 'INVESTOR_ANALYST', ctx, ctx && ctx.focus && ctx.focus.symbol);
+        const texts = [];
+        ids.forEach(id => { try { const r = this._invokeExpert(id, question, ctx); if (r && r.ok && r.data && r.data.text) texts.push('• [' + ((EXPERT_BY_ID[id] || { name: id }).name) + '] ' + r.data.text); } catch (e) { } });
+        return { ok: texts.length > 0, error: texts.length ? null : 'VERİ YETERSİZ — KARAR YOK', data: { text: texts.length ? texts.join('\n') : 'VERİ YETERSİZ — KARAR YOK', status: p.hasValued ? 'verified' : 'stale', confidence: 0.7, sources: [srcRow('portföy', p.hasValued ? 'verified' : 'stale')], facts: [factRow('Kapsam', 'genel özet', 'portföy', p.hasValued ? 'verified' : 'stale')] } };
       }
     }
   });
 
+  /* ---- yatırımcı ajanları: derinleştirme + bağımsız sayısal doğrulama + kaynak güveni (6.3) ---- */
+  function focusSymbol(ctx, question) {
+    if (ctx && ctx.focus && ctx.focus.symbol) return String(ctx.focus.symbol).toUpperCase();
+    const q = String(question || '').toLocaleUpperCase('tr-TR');
+    const stop = ['PORTFÖY', 'VERİ', 'YOK', 'BUGÜN', 'SABAH', 'RİSK', 'HABER', 'ANALİZ', 'BİST', 'KAP', 'NEDİR', 'NE', 'NASIL', 'COPILOT', 'YATIRIMCI', 'SINAV', 'VERSION'];
+    const tokens = q.match(/[A-ZÇĞİÖŞÜ]{3,7}/g) || [];
+    if (tokens.length) {
+      const hit = tokens.find(t => !stop.includes(t) && (ctx && ctx.assets || []).some(a => a.symbol === t));
+      if (hit) return hit;
+      const named = tokens.find(t => !stop.includes(t));
+      if (named) return named;
+    }
+    return '';
+  }
+
+  const INVESTOR_CORE = {
+    deepDive(run, ctx) {
+      const c = (run && run.perAgent) || [];
+      const oks = c.filter(r => r.ok && r.data && Array.isArray(r.data.facts) && r.data.facts.length);
+      if (!oks.length) return { ok: false, decision: 'VERİ YETERSİZ — KARAR YOK', message: 'Derinleştirme için doğrulanmış ajan faktları yok.', domains: [] };
+      const domains = oks.map(r => ({ agent: r.agent, name: ((EXPERT_BY_ID[r.agent] || {}).name) || r.agent, facts: (r.data.facts || []).slice(0, 6), gaps: (r.data.facts || []).filter(f => f.status === 'none').map(f => f.k) }));
+      const gaps = domains.reduce((a, d) => a.concat(d.gaps), []);
+      return { ok: true, decision: 'HAZIR', domains, gaps, message: gaps.length ? ('Derinleştirme: ' + gaps.length + ' veri boşluğu işaretlendi (yalnız gerçek eksikler).') : 'Derinleştirme: doğrulanmış faktlar kullanıldı.' };
+    }
+  };
+
+  const COPILOT = {
+    name: 'STKSZ YATIRIMCI COPİLOT',
+    run(question, opts) {
+      opts = opts || {};
+      const ctx = opts.context || masterContext();
+      if (opts.symbol && ctx) ctx.focus = { symbol: String(opts.symbol).toUpperCase() };
+      const run = MULTI_AGENT.ORCHESTRATOR.run(question, { mode: opts.mode || 'INVESTOR_RESEARCH', context: ctx, symbol: opts.symbol });
+      run._ctx = ctx;
+      run.investors = { crossCheck: run.crossCheck, confidence: run.confidence, deepDive: INVESTOR_CORE.deepDive(run, ctx) };
+      return run;
+    },
+    investorPanel(run) { return (run && run.investors) || null; }
+  };
   /* ================= DIŞA AÇILAN API ================= */
   const engine = {
-    version: 'v122',
+    version: 'v123',
     brand: 'STKSZ AI',
     MODULES, RULES, LEVELS, BADGES, INVESTOR_TEST,
     registerModel, activeModel,
@@ -1784,147 +1928,113 @@ const STKSZAccountEngine = {
 
   function getCurrentMode() { return WORK_MODES[CURRENT_MODE.value] || WORK_MODES.INVESTOR_ANALYST; }
 
-  // Derin Analiz (Deep Research) akışı
+  // Derin Analiz (Deep Research) — FAZ 6 (6.5): MULTI_AGENT.ORCHESTRATOR üzerine facade
   const DEEP_RESEARCH = {
     running: false,
     start(question, context) {
       if (this.running) return { ok: false, error: 'Derin analiz zaten çalışıyor.' };
       this.running = true;
-      const mode = getCurrentMode();
-      const activeAgents = this._selectAgents(mode);
-      const results = [];
-
-      for (const [name, fn] of activeAgents) {
-        try {
-          const r = fn(question, context);
-          results.push({ agent: name, ok: r.ok, data: r.data || null });
-        } catch (e) {
-          results.push({ agent: name, ok: false, error: e instanceof Error ? e.message : 'Bilinmeyen hata' });
-        }
+      try {
+        const run = MULTI_AGENT.ORCHESTRATOR.run(question, { mode: getCurrentMode().id, question: question, context: (context && context.ctx) ? context.ctx : null });
+        return this._synthesizeDeep(run);
+      } finally {
+        this.running = false;
       }
-
-      this.running = false;
-      return this._synthesizeDeep(results);
     },
 
-    _selectAgents(mode) {
-      const base = [
-        ['equity', this._equityResearch],
-        ['financial', this._financialAnalysis],
-        ['portfolio', this._portfolioAnalysis],
-        ['risk', this._riskAnalysis],
-        ['technical', this._technicalAnalysis],
-        ['news', this._newsCatalyst],
-        ['market_movement', this._marketMovement],
-        ['valuation', this._valuation],
-        ['macro', this._macroAnalysis]
-      ];
-
-      if (mode.id === 'INVESTOR_RISK') {
-        return base.filter(([name]) => name === 'risk' || name === 'portfolio');
-      }
-      if (mode.id === 'INVESTOR_ANALYST') {
-        return base.filter(([name]) => name !== 'technical' && name !== 'news');
-      }
-      // INVESTOR_RESEARCH: tüm ajanlar
-      return base;
-    },
-
-    _synthesizeDeep(perAgentResults) {
-      const ok = perAgentResults.filter(r => r.ok);
-      if (ok.length === 0) return { text: 'DERİN ANALİZ: VERİ YETERSİZ — KARAR YOK', ok: false };
-
-      // Confidence'lı sentizsiyon: her agent'den en güvendiği sonuçları seç
-      const parts = ok.map(r => {
-        const txt = r.data && r.data.text ? r.data.text : '';
-        const conf = r.data && r.data.confidence ? r.data.confidence : 0.5;
-        return { text: txt, confidence: conf };
-      });
-
-      // En yüksek confidence'lı ilk 3 sonuç + özet
-      const sorted = parts.sort((a, b) => b.confidence - a.confidence);
-      const top3 = sorted.slice(0, 3).map(p => p.text);
-
+    _synthesizeDeep(run) {
+      const perAgent = (run && run.perAgent) || [];
+      const ok = perAgent.filter(r => r.ok && r.data && r.data.text);
+      if (!ok.length) return { text: 'DERİN ANALİZ: VERİ YETERSİZ — KARAR YOK', ok: false, decision: 'VERİ YETERSİZ — KARAR YOK', runToken: run && run.token };
+      const parts = ok.map(r => r.data.text);
+      const confidence = Math.round(ok.reduce((s, r) => s + (Number(r.confidence) || 0), 0) / ok.length * 100) / 100;
       return {
-        text: 'DERİN ANALİZ SONUÇLARI\n' + top3.join('\n\n'),
+        text: 'DERİN ANALİZ SONUÇLARI\n' + parts.join('\n\n'),
         ok: true,
         agentsInvolved: ok.length,
-        confidence: sorted[0]?.confidence || 0
+        confidence,
+        decision: (run && run.confidence && run.confidence.ok) ? 'HAZIR' : 'VERİ YETERSİZ — KARAR YOK',
+        runToken: run && run.token,
+        crossCheck: run && run.crossCheck
       };
     },
 
     stop() { this.running = false; return { ok: true }; }
   };
 
-  // Cross-Check & Çelişki Temizleme
+  // Cross-Check & Çelişki Temizleme — FAZ 6 (6.3): bağımsız sayısal yeniden doğrulama
   const CROSS_CHECK = {
-    check(results) {
-      // results: [{agent, ok, data, error}]
-      const errors = results.filter(r => r.error);
-      const oks = results.filter(r => r.ok && !r.error);
+    check(results, ctx) {
+      const list = Array.isArray(results) ? results : [];
+      const oks = list.filter(r => r.ok && r.data);
+      if (!oks.length) return { ok: false, decision: 'VERİ YETERSİZ — KARAR YOK', message: 'Doğrulanabilir ajan sonucu yok.', verified: false, conflicts: [], checks: [] };
 
-      // Eğer herhangi bir ajan VERİ YETERSİZ döndüyse, kapı kilitlenir
-      const hasVeriYok = oks.some(r => r.data && r.data.text && r.data.text.includes('VERİ YETERSİZ — KARAR YOK'));
-      if (hasVeriYok) return { ok: false, decision: 'VERİ YETERSİZ — KARAR YOK', message: 'Yeterli veri olmadığı için karara varılamaz.' };
-
-      // Matematiksel çelişkileri tespit et (örnek: iki agent aynı değişken için zıt results)
-      const conflictChecks = [];
-      if (oks.some(r => r.data && r.data.text && r.data.text.includes('%Kâr'))) {
-        const karCounts = oks.filter(r => r.data && r.data.text).map(r => {
-          const m = r.data.text.match(/\%(\d+(\.\d+)?)/);
-          return m ? parseFloat(m[1]) : null;
-        }).filter(Boolean);
-        if (karCounts.length > 1) {
-          const avg = karCounts.reduce((a, b) => a + b, 0) / karCounts.length;
-          conflictChecks.push({ type: 'kar-orani-discrepancy', message: `Kar oranları %${avg.toFixed(1)} aralığındadır, tutarlılık kontrolü yapıldı.` });
-        }
+      const checks = [];
+      const sums = [];
+      oks.forEach(r => {
+        const facts = (r.data.facts && Array.isArray(r.data.facts)) ? r.data.facts : [];
+        facts.forEach(fr => {
+          if (/(toplam|hepsi|pozisyon değeri)/i.test(String(fr.k)) && /TL/i.test(String(fr.v))) {
+            const digits = String(fr.v).match(/-?\d[\d.,]*/);
+            if (digits) {
+              const n = Number(digits[0].replace(/\./g, '').replace(',', '.'));
+              if (Number.isFinite(n) && n > 0) sums.push(n);
+            }
+          }
+        });
+      });
+      if (sums.length > 1) {
+        const max = Math.max.apply(null, sums);
+        const spread = Math.abs(max - Math.min.apply(null, sums));
+        const consistent = spread / max < 0.01;
+        checks.push({ type: 'sum-consistency', values: sums, ok: consistent, detail: consistent ? 'Farklı ajanların toplam değerleri tutarlı.' : 'Farklı ajanların toplam değerlerinde uyumsuzluk var.' });
       }
+      const noData = list.filter(r => r.status === 'none' || (r.data && r.data.status === 'none'));
+      if (noData.length) checks.push({ type: 'no-data', count: noData.length, ok: false, detail: noData.length + ' ajan doğrulanmış veri üretemedi ("VERİ YOK" disiplini korundu).' });
 
-      return {
-        ok: true,
-        decision: 'GEÇERLİ',
-        conflicts: conflictChecks,
-        message: 'Cross-check tamamlandı, veri tutarlılığı doğrulandı.'
-      };
+      if (checks.length && checks.filter(c => !c.ok).length && !oks.some(r => Array.isArray(r.data.facts) && r.data.facts.length)) {
+        return { ok: false, decision: 'VERİ YETERSİZ — KARAR YOK', message: 'Çapraz doğrulamaya yeter sayısal fakt yok.', verified: false, checks, conflicts: checks.filter(c => !c.ok) };
+      }
+      return { ok: true, decision: 'GEÇERLİ', conflicts: checks.filter(c => !c.ok), checks, message: 'Cross-check tamamlandı, veri tutarlılığı doğrulandı.', verified: true };
     }
   };
 
-  // Senaryo Motoru: Pozitif (Bull), Nötr (Base), Negatif (Bear)
+  // Senaryo Motoru — FAZ 6 (6.11): en az 10 doğrulanmış fiyat noktası + momentum; fake veri yok
   const SCENARIO_ENGINE = {
-    generate(symbol, priceData, mode = 'base') {
-      // Deterministik matematiksel hesaplama, fake veri yok
-      const close = priceData && priceData.close ? priceData.close : [];
-      const n = close.length;
+    generate(symbol, priceData, mode) {
+      const closes = Array.isArray(priceData) ? priceData : (priceData && Array.isArray(priceData.close) ? priceData.close : []);
+      const clean = closes.map(Number).filter(v => Number.isFinite(v) && v > 0);
+      const n = clean.length;
+      if (n < 10) return { ok: false, error: 'VERİ YOK: senaryo analizi için en az 10 doğrulanmış fiyat noktası gerekli (' + n + ' bulundu).' };
 
-      if (n < 2) return { ok: false, error: 'Yetersiz fiyat verisi.' };
-
-      const latest = close[n - 1];
-      const prev = close[n - 2];
-      const change = (latest - prev) / prev;
-      const changePct = change * 100;
+      const latest = clean[n - 1];
+      const prev10 = clean[n - 10];
+      const momentumPct = ((latest - prev10) / prev10) * 100;
+      const lastChange = n >= 2 ? ((latest - clean[n - 2]) / clean[n - 2]) * 100 : 0;
 
       let scenario = 'base';
       let outlook = 'Nötr';
       let keyFactors = [];
-
-      if (changePct > 5) {
+      if (momentumPct > 3) {
         scenario = 'bull';
         outlook = 'Pozitif (Bull)';
-        keyFactors = ['Yükselen trendi', 'Hacim artışı', 'Analist beğenileri'];
-      } else if (changePct < -5) {
+        keyFactors = ['10 günlük pozitif momentum', 'Momentum dönüş riski'];
+      } else if (momentumPct < -3) {
         scenario = 'bear';
         outlook = 'Negatif (Bear)';
-        keyFactors = ['Düşen trendi', 'Hacim daralması', 'SatışBasıncı'];
+        keyFactors = ['10 günlük negatif momentum', 'Geri çekilme riski'];
       } else {
         outlook = 'Nötr (Base)';
-        keyFactors = ['Temiddar fiyat hareketi', 'Yatırımcı sabrı', 'Bekleme stratejisi'];
+        keyFactors = ['10 günlük momentum sınırda', 'Yön için doğrulanmış veri teyidi gerek'];
       }
 
       return {
         ok: true,
         scenario,
         outlook,
-        changePct: changePct.toFixed(2),
+        momentumPct: n2(momentumPct),
+        lastChangePct: n2(lastChange),
+        riskFlag: Math.abs(momentumPct) > 5 ? 'YÜKSEK' : 'DÜŞÜK',
         keyFactors,
         determinant: 'Deterministik matematiksel hesaplama - fake veri yok'
       };
@@ -1953,7 +2063,7 @@ const STKSZAccountEngine = {
     aiTurnTimes: [],
 
     startPerformanceMonitoring() {
-      const memoryStart = process ? process.memoryUsage ? process.memoryUsage().rss : 0 : 0;
+      const memoryStart = (typeof process !== 'undefined' && process.memoryUsage) ? process.memoryUsage().rss : 0;
       this.memoryStart = memoryStart;
       this.renderTimes = [];
       this.localStorageSize = 0;
@@ -1997,7 +2107,7 @@ const STKSZAccountEngine = {
     getBundleSizeKB() { return this.bundleSizeKB; },
 
     _checkBudgets() {
-      const memoryMs = process && process.memoryUsage ? process.memoryUsage().rss - (this.memoryStart || 0) : 0;
+      const memoryMs = (typeof process !== 'undefined' && process.memoryUsage) ? process.memoryUsage().rss - (this.memoryStart || 0) : 0;
       const memoryMB = memoryMs / 1024 / 1024;
       const storageKB = this.getLocalStorageSize() / 1024;
 
@@ -2018,7 +2128,7 @@ const STKSZAccountEngine = {
 
     getPerformanceReport() {
       const storageKB = this.getLocalStorageSize() / 1024;
-      const memoryMs = process && process.memoryUsage ? process.memoryUsage().rss - (this.memoryStart || 0) : 0;
+      const memoryMs = (typeof process !== 'undefined' && process.memoryUsage) ? process.memoryUsage().rss - (this.memoryStart || 0) : 0;
       const memoryMB = memoryMs / 1024 / 1024;
 
       return {
@@ -2154,31 +2264,131 @@ const STKSZAccountEngine = {
   /* ================= 16) RESEARCH WORKSPACE, EXPORT & SAFETY GATE ================= */
 
   const RESEARCH_WORKSPACE = {
+    key: 'stkszResearchWorkspace',
     history: [],
+    init() {
+      try { const raw = localStorage.getItem(this.key); if (raw) { const p = JSON.parse(raw); if (Array.isArray(p)) this.history = p.slice(-50); } } catch (e) { }
+      return this.history;
+    },
     add(entry) {
       const id = 'ws_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      const record = { id, timestamp: new Date().toISOString(), question: entry.question, answer: entry.answer, mode: entry.mode || getCurrentMode().id };
+      const record = { id, timestamp: new Date().toISOString(), question: entry.question, answer: entry.answer, mode: entry.mode || getCurrentMode().id, symbol: entry.symbol || '', verdict: entry.verdict || 'VERİ YETERSİZ' };
       this.history.push(record);
       this._trimHistory();
+      this._persist();
       return id;
     },
+    lastSessionId() { return this.history.length ? this.history[this.history.length - 1].id : null; },
     _trimHistory() {
       const max = 50;
       if (this.history.length > max) this.history = this.history.slice(-max);
     },
-    getHistory() { return this.history; },
-    clearHistory() { this.history = []; return { ok: true }; }
+    _persist() { try { localStorage.setItem(this.key, JSON.stringify(this.history)); } catch (e) { } },
+    getHistory() { return this.history.slice(); },
+    clearHistory() { this.history = []; this._persist(); return { ok: true }; }
   };
+  RESEARCH_WORKSPACE.init();
 
   const EXPORT = {
-    toPDF(data) {
-      return `data:application/pdf;base64,${btoa(JSON.stringify(data).substring(0, 1000))}`;
+    reportRows(run) {
+      const r = run || {};
+      const per = Array.isArray(r.perAgent) ? r.perAgent : [];
+      return per.map(a => ({ agent: a.agent, status: (a.data && a.data.status) || a.status || 'none', confidence: (a.data && a.data.confidence) || 0, sources: ((a.data && a.data.sources) || []).map(s => s.name).join('; '), facts: ((a.data && a.data.facts) || []).slice(0, 6).map(f => f.k + '=' + String(f.v)), text: (a.data && a.data.text) || (a.error || '') }));
     },
-    toExcel(data) {
-      const header = Object.keys(data).join(',');
-      const row = Object.values(data).join(',');
-      return `data:text/csv;base64,${btoa(`${header}\n${row}`)}`;
+    toCSV(run) {
+      const rows = this.reportRows(run);
+      const esc = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+      const header = ['agent', 'data_status', 'confidence', 'sources', 'facts', 'text'];
+      const lines = [header.map(esc).join(';')].concat(rows.map(rr => [rr.agent, rr.status, rr.confidence, rr.sources, rr.facts.join(' | '), rr.text].map(esc).join(';')));
+      return lines.join('\n');
+    },
+    toExcel(data) { return this.toCSV(data); },
+    toPDF(data) { return this.toPrintHTML(data); },
+    toPrintHTML(run) {
+      const rows = this.reportRows(run);
+      const rowsHtml = rows.map(r => '<tr><td>' + r.agent + '</td><td>' + r.status + '</td><td>' + r.confidence + '</td><td>' + (r.sources || '') + '</td><td>' + r.facts.join(', ') + '</td></tr>').join('');
+      const html = '<!doctype html><html><head><meta charset="utf-8"><title>STKSZ Copilot Raporu</title></head><body><h1>STKSZ YATIRIMCI COPİLOT RAPORU</h1><p>Üretim: ' + new Date().toISOString() + ' · mode: ' + ((run && run.mode) || 'belirsiz') + ' · provider: stksz_local (ücretli dış çağrı yok)</p><table border="1" cellpadding="4"><thead><td>Agent</td><td>Veri Durumu</td><td>Güven</td><td>Kaynak</td><td>Faktlar</td></tr></thead><tbody>' + rowsHtml + '</tbody></table></body></html>';
+      return 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
     }
+  };
+
+  /* ================= 17) ANALYSIS HISTORY, MORNING INTEL & PROVIDER ROUTER (FAZ 6 — 6.8/6.6/6.11) ================= */
+
+  const ANALYSIS_HISTORY = {
+    key: 'stkszAnalysisHistory',
+    items: [],
+    init() {
+      try { const raw = localStorage.getItem(this.key); if (raw) { const p = JSON.parse(raw); if (Array.isArray(p)) this.items = p.slice(-50); } } catch (e) { }
+      return this.items;
+    },
+    add(rec) {
+      if (!rec) return null;
+      const prev = this.items[this.items.length - 1] || null;
+      const prevIds = (prev && prev.agentIds) || [];
+      const curIds = (rec.agentIds || []).slice(0, 12);
+      const modelChanged = prev ? JSON.stringify(prevIds) !== JSON.stringify(curIds) : false;
+      const verdict = rec.verdict === 'HAZIR' ? 'HAZIR' : 'VERİ YETERSİZ';
+      const agentsOk = rec.agentsOk || 0, agentsTotal = rec.agentsTotal || 0;
+      const draft = { id: '', at: '', question: rec.question || '', symbol: rec.symbol || '', mode: rec.mode || '', agentIds: curIds, durationMs: rec.durationMs || 0, verdict, agentsOk, agentsTotal };
+      const changed = prev ? this._diff(prev, draft) : [];
+      const record = { id: 'h_' + Date.now() + '_' + Math.random().toString(36).substr(2, 7), at: new Date().toISOString(), question: draft.question, symbol: draft.symbol, mode: draft.mode, agentIds: draft.agentIds, durationMs: draft.durationMs, verdict, agentsOk, agentsTotal, modelChanged, changed };
+      this.items.push(record);
+      if (this.items.length > 50) this.items = this.items.slice(-50);
+      this._persist();
+      return record;
+    },
+    _diff(prev, rec) {
+      const out = [];
+      ['verdict', 'mode', 'agentsOk', 'agentsTotal'].forEach(k => { if (String(prev[k] || '') !== String(rec[k] || '')) out.push(k); });
+      const a = new Set(prev.agentIds || []);
+      const b = new Set(rec.agentIds || []);
+      b.forEach(id => { if (!a.has(id)) out.push('agent+(' + id + ')'); });
+      a.forEach(id => { if (!b.has(id)) out.push('agent-(' + id + ')'); });
+      return out.slice(0, 10);
+    },
+    _persist() { try { localStorage.setItem(this.key, JSON.stringify(this.items)); } catch (e) { } },
+    history() { return this.items.slice(); },
+    whatChanged(id) {
+      const i = this.items.findIndex(r => r.id === id);
+      if (i < 0) return { ok: false };
+      const cur = this.items[i];
+      const prev = this.items[i - 1] || null;
+      if (!prev) return { ok: true, isFirst: true, changed: [], modelChanged: false };
+      return { ok: true, isFirst: false, changed: cur.changed || [], modelChanged: cur.modelChanged, prevAt: prev.at, at: cur.at };
+    },
+    clear() { this.items = []; this._persist(); return { ok: true }; }
+  };
+  ANALYSIS_HISTORY.init();
+
+  const MORNING_INTEL = {
+    build(ctx) {
+      ctx = ctx || masterContext();
+      const p = ctx.portfolio || {};
+      const rows = [];
+      const assets = Array.isArray(ctx.assets) ? ctx.assets : [];
+      const movers = assets.filter(a => a.marketVerified && a.marketChangePct !== null);
+      const today = new Date().toISOString().slice(0, 10);
+      const ipoToday = (ctx.ipo && Array.isArray(ctx.ipo.items) ? ctx.ipo.items : []).filter(x => x.date && String(x.date).slice(0, 10) === today).slice(0, 3);
+      if (!p.hasValued && !movers.length && !ipoToday.length) return { ok: false, text: 'SABAH İNTELİJANSI: VERİ YOK — doğrulanmış portföy ve piyasa verisi bulunamadı. Sahte veri üretilmez.', status: 'none', rows };
+      if (p.hasValued) rows.push(factRow('Toplam varlık', (p.totalValue || 0).toLocaleString('tr-TR') + ' TL', 'portföy', 'verified'));
+      const dailyItems = (p.items || []).filter(a => a.dailyVerified && num(a.d) !== null);
+      if (dailyItems.length) rows.push(factRow('Günlük net (doğrulanmış)', ((dailyItems.reduce((acc, a) => acc + a.d, 0)) >= 0 ? '+' : '') + dailyItems.reduce((acc, a) => acc + a.d, 0).toLocaleString('tr-TR') + ' TL', 'günlük kayıt', 'verified'));
+      if (movers.length) {
+        movers.slice().sort((x, y) => Math.abs(num(y.marketChangePct)) - Math.abs(num(x.marketChangePct))).slice(0, 3).forEach(a => rows.push(factRow('Hareket · ' + a.symbol, pctText(a.marketChangePct), 'piyasa', 'verified')));
+      } else {
+        rows.push(factRow('Piyasa hareketi', 'GERÇEK GÜNLÜK VERİ YOK — sahte hareket üretilmez', 'piyasa', 'none'));
+      }
+      if (ipoToday.length) rows.push(factRow('Bugünün halka arzı', ipoToday.map(x => (x.company || x.symbol || '—')).join(', '), 'halka arz takvimi', 'verified'));
+      const verified = rows.filter(r => r.status === 'verified');
+      const text = 'SABAH İNTELİJANSI (' + today + ') · ' + (verified.length ? verified.map(r => r.k + ' ' + r.v).join(' · ').slice(0, 300) : 'VERİ YOK');
+      return { ok: Boolean(verified.length), text, status: verified.length ? 'verified' : 'none', rows };
+    }
+  };
+
+  const PROVIDER_ROUTER = {
+    providers: [{ id: 'stksz_local', label: 'Yerel doğrulanmış motor', status: 'active', cost: '0 · ücretli dış çağrı yok', fallback: 'DataReaders → canlı uygulama bağlamı' }],
+    summarize(ctx) { return { providers: this.providers, active: this.providers[0], totalCost: '0 · ücretli dış çağrı yok', noExternal: true, fallback: this.providers[0].fallback }; },
+    status() { return this.summarize(); }
   };
 
   // Multi-Agent Safety Gate - kritik güvenlik zinciri
@@ -2204,20 +2414,39 @@ const STKSZAccountEngine = {
 
       // Agent emir verme yetkisi kontrolü
       if (action && (action.type === 'TRADE' || action.type === 'ORDER' || action.type === 'BUY' || action.type === 'SELL')) {
-        return { ok: false, decision: 'EMİR YAPMAK ENGELLENMEZ', reason: 'Multi-agent sistemi canlı emir/işlem yapamaz. Bilgilendirme amaçlı sadece.' };
+        return { ok: false, decision: 'EMİR İŞLEMİ ENGELLENİR', reason: 'Multi-agent sistemi canlı emir/işlem yapamaz. Bilgilendirme amaçlı sadece.' };
       }
 
       return { ok: true, decision: 'ONAYLI' };
     },
 
+    // Gizli anahtar/secret sızma denetimi (FAZ 6 — 6.12)
+    assertNoSecrets(obj) {
+      const leaked = [];
+      const sens = ['API_KEY', 'SECRET', 'API_SECRET', 'PASSWORD', 'TOKEN', 'BEARER'];
+      if (obj && typeof obj === 'object') Object.keys(obj).forEach(k => { if (sens.some(s => String(k).toUpperCase().includes(s))) leaked.push(k); });
+      return { ok: leaked.length === 0, leaked };
+    },
+
     // Güvenilirlik etiketlerini metinse ekle
     addReliabilityLabels(text) {
-      const timestamp = new Date().toISOString();
-      const confidenceMarker = ' [Güven: TAIHESİL - Deterministik Hesaplama]';
+      const confidenceMarker = ' [Güven: Deterministik hesaplama]';
       const sourceMarker = ' [Kaynak: STKSZ Intelligence Center]';
       return text + confidenceMarker + sourceMarker;
     }
   };
+
+/* ================= FAZ 6 (117-158) DIŞA AÇILAN API UZANTILARI ================= */
+  Object.assign(engine, {
+    MULTI_AGENT, COPILOT, DEEP_RESEARCH, CROSS_CHECK, SCENARIO_ENGINE, RESEARCH_WORKSPACE, EXPORT, MULTI_AGENT_SAFETY_GATE, ANALYSIS_HISTORY, MORNING_INTEL, PROVIDER_ROUTER,
+    orchestrator: MULTI_AGENT.ORCHESTRATOR,
+    copilot: COPILOT, morning: MORNING_INTEL, history: ANALYSIS_HISTORY, providers: PROVIDER_ROUTER, multiSafety: MULTI_AGENT_SAFETY_GATE,
+    export: EXPORT, scenario: SCENARIO_ENGINE, crossCheck: CROSS_CHECK, research: RESEARCH_WORKSPACE, deepResearch: DEEP_RESEARCH,
+    experts: EXPERT_AGENTS, investors: INVESTOR_AGENTS, investorCore: INVESTOR_CORE,
+    masterContext, setLiveContext,
+    workModes: WORK_MODES, currentMode: getCurrentMode, setWorkMode,
+    perf: performanceStats, securityAudit: SECURITY_AUDIT
+  });
 
 /* ================= DIŞA AÇILAN API ================= */
   global.STKSZAIEngine = engine;

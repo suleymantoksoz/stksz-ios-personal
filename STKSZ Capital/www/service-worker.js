@@ -1,4 +1,4 @@
-const CACHE_NAME = "stksz-shell-v123-20260820-auth-v2";
+const CACHE_NAME = "stksz-shell-v124-20260909-auth-v2";
 const OFFLINE_URL = "./offline.html";
 const APP_SHELL = [
   "./",

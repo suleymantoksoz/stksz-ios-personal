@@ -7,7 +7,7 @@
 <meta name="color-scheme" content="dark light">
 <meta name="application-name" content="STKSZ">
 <meta name="format-detection" content="telephone=no,address=no,email=no">
-<meta name="stksz-build" content="2026.08.20-ai-v122">
+<meta name="stksz-build" content="2026.08.20-ai-v123">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,7 +24,7 @@
 <link rel="apple-touch-icon" href="assets/icons/icon-120.png" sizes="120x120">
 <link rel="apple-touch-startup-image" href="assets/splash/splash-2732.png">
 <title>STKSZ Komuta Merkezi</title>
-<link rel="stylesheet" href="style.css?v=123">
+<link rel="stylesheet" href="style.css?v=124">
 </head>
 <body>
 <div id="appBootSplash" class="app-boot-splash" role="status" aria-label="STKSZ açılıyor"><div class="boot-splash-inner"><img src="assets/icons/stksz-logo.png" alt="STKSZ CAPITAL"><span class="boot-splash-brand">STKSZ CAPITAL</span><span class="boot-splash-loading" aria-hidden="true"></span></div></div>
@@ -1797,6 +1797,7 @@
     <button type="button" onclick="askStkszAi('radar')">📡 Radarım</button>
     <button type="button" onclick="askStkszAi('portfolioimport')">📥 İçe aktar</button>
     <button type="button" onclick="openResearchFromAi()">🔬 Araştırma</button>
+    <button type="button" class="ai-copilot-btn" onclick="openCopilotFromAi()">🧠 Yatırımcı Copilot</button>
    </div>
    <button type="button" class="aiqc-arrow aiqc-next" onclick="aiQuickScroll(1)" aria-label="Sonraki sorular"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></svg></button>
   </div>
@@ -1836,15 +1837,17 @@
    <button type="button" class="intel-tab-btn" id="intelTab_moments" onclick="intelMoments()">KİLİT ANLAR</button>
    <button type="button" class="intel-tab-btn" id="intelTab_research" onclick="intelResearch()">ARAŞTIRMA</button>
    <button type="button" class="intel-tab-btn" id="intelTab_reports" onclick="intelReports()">RAPORLAR</button>
-   <button type="button" class="intel-tab-btn" id="intelTab_data" onclick="intelData()">VERİ DURUMU</button>
-  </div>
+<button type="button" class="intel-tab-btn" id="intelTab_data" onclick="intelData()">VERİ DURUMU</button>
+   <button type="button" class="intel-tab-btn" id="intelTab_copilot" onclick="intelCopilot()">COPİLOT</button>
+   </div>
   <div class="intel-pane" id="intelPane_genel"><div id="intelGenelBox"></div></div>
   <div class="intel-pane" id="intelPane_premarket" hidden><div id="intelPremarketBox"></div></div>
   <div class="intel-pane" id="intelPane_moments" hidden><div id="intelMomentsBox"></div></div>
   <div class="intel-pane" id="intelPane_research" hidden><div id="intelResearchBox"><p class="muted">Araştırma Merkezi burada açılır.</p><button type="button" class="btn small primary" onclick="intelResearch()">ARAŞTIRMAYI AÇ</button></div></div>
   <div class="intel-pane" id="intelPane_reports" hidden><div id="intelReportsBox"></div><div id="intelSchedLast" class="help"></div></div>
-  <div class="intel-pane" id="intelPane_data" hidden><div id="intelDataBox"></div></div>
- </div>
+<div class="intel-pane" id="intelPane_data" hidden><div id="intelDataBox"></div></div>
+   <div class="intel-pane" id="intelPane_copilot" hidden><div id="intelCopilotBox"><div class="empty-state">COPİLOT — yalnız doğrulanmış veriyle üretilen çok ajanlı yatırımcı analizi.</div></div></div>
+  </div>
 </div>
 
 <div class="modal price-alert-modal" id="priceAlertModal" role="dialog" aria-modal="true" aria-labelledby="priceAlertTitle">
@@ -1976,7 +1979,7 @@ SİNYAL   : crossover(a,b) crossunder(a,b) → true/false dizisi
 <script src="api-client.js"></script>
 <script src="stksz-secret-vault.js?v=148"></script>
 <script src="stksz-data-engine.js?v=150"></script>
-<script src="stksz-ai-engine.js?v=121"></script>
+<script src="stksz-ai-engine.js?v=122"></script>
 <script src="stksz-entitlement.js"></script>
 <script src="portfolio-data-engine.js?v=1"></script>
 <script src="market-view-model.js"></script>
@@ -4272,7 +4275,7 @@ function requestNotificationPermission(){
 }
 
 /* ===== FAZ 5: UNIFIED INTELLIGENCE CENTER (Tasks 107-113) ===== */
-const INTEL_TABS=["genel","premarket","moments","research","reports","data"];
+const INTEL_TABS=["genel","premarket","moments","research","reports","data","copilot"];
 function openIntelligenceCenter(){
   const overlay=document.getElementById("stkszIntelOverlay");
   if(!overlay)return;
@@ -4312,7 +4315,7 @@ function renderIntelOverview(){
     ${intelKpi("STKSZ Skor",score.valid?score.score+"/100":"VERİ YOK")}
    </div>
    ${renderDataSufficiencySummary()}
-   <div class="toolbar"><button type="button" class="btn small" onclick="intelPreMarket()">PRE-MARKET</button><button type="button" class="btn small" onclick="intelMoments()">KİLİT ANLAR</button><button type="button" class="btn small" onclick="intelResearch()">ARAŞTIRMA</button><button type="button" class="btn small" onclick="intelReports()">RAPORLAR</button><button type="button" class="btn small" onclick="intelData()">VERİ DURUMU</button></div>`;
+   <div class="toolbar"><button type="button" class="btn small" onclick="intelPreMarket()">PRE-MARKET</button><button type="button" class="btn small" onclick="intelMoments()">KİLİT ANLAR</button><button type="button" class="btn small" onclick="intelResearch()">ARAŞTIRMA</button><button type="button" class="btn small" onclick="intelReports()">RAPORLAR</button><button type="button" class="btn small" onclick="intelData()">VERİ DURUMU</button><button type="button" class="btn small" onclick="intelCopilot()">COPİLOT</button><button type="button" class="btn small" onclick="intelCopilot('morning')">SABAH</button></div>`;
 }
 function intelPreMarket(){
   openIntelTab("premarket");
@@ -4522,7 +4525,7 @@ function aiRoleLevel(){
     return String(r||(typeof isGuest==="function"&&isGuest()?"GUEST":"FREE")).toLowerCase();
   }catch(e){return "free";}
 }
-const AI_FEATURE_GATE={ask:"guest",image:"free",timeline:"free",intel:"free",research:"pro",scheduled:"pro"};
+const AI_FEATURE_GATE={ask:"guest",image:"free",timeline:"free",intel:"free",research:"pro",scheduled:"pro",copilot:"pro"};
 function aiAllowed(feature){
   const order=["guest","free","pro","elite","admin"];
   return order.indexOf(aiRoleLevel())>=order.indexOf(AI_FEATURE_GATE[feature]||"guest");
@@ -4536,6 +4539,8 @@ function aiGateMessage(feature){
 function routeAiCommand(question){
   const q=String(question||"").toLocaleLowerCase("tr-TR").trim();
   if(!q)return null;
+  if(/(copilot|yatırımcı analizi|çok ajanlı|derin değerlendirme|what changed|ne değişti)/.test(q))return {action:"copilot"};
+  if(/(sabah intel|sabah özeti)/.test(q))return {action:"morning"};
   if(/(araştır|arastır|derinlemesine)/.test(q))return {action:"research"};
   if(/(rapor (üret|hazırla|oluştur|indir)|raporumu (üret|hazırla|oluştur|indir))/.test(q))return {action:"report"};
   if(/(aktar|import|içe aktar|yükle|görsel|ekran görüntüsü)/.test(q))return {action:"import"};
@@ -4553,6 +4558,8 @@ function aiPortfolioSnapshot(){
   };
 }
 async function runAiCommand(cmd,q){
+  if(cmd.action==="copilot"){openCopilotFromAi();return;}
+  if(cmd.action==="morning"){intelCopilot("morning");return;}
   if(cmd.action==="research"){openResearchFromAi();return;}
   if(cmd.action==="import"){
     openImportCenter();
@@ -4579,6 +4586,164 @@ async function runAiCommand(cmd,q){
   }
 }
 let __aiSkipRoute=false;
+
+/* ===== FAZ 6: YATIRIMCI COPİLOT (md 117-158) — çok ajanlı, sadece doğrulanmış veri ===== */
+let lastCopilotRun=null,lastCopilotQuestion="";
+function stkszLiveContext(){
+  try{
+    const risk=riskAnalysis();
+    return {
+      assets:Array.isArray(data.assets)?data.assets:[],
+      cashTl:finite(data.midasCash),cashUsd:finite(data.midasCashUsd),cashEur:finite(data.midasCashEur),
+      fx:(typeof fxRates==="object"&&fxRates)?fxRates:{},
+      market:(typeof data.market==="object")?data.market:{},
+      news:Array.isArray(newsCache&&newsCache.items)?newsCache.items:[],
+      ipo:(typeof data.ipoCalendar==="object")?data.ipoCalendar:{},
+      fundamentals:(typeof data.fundamentals==="object")?data.fundamentals:{},
+      risk:(risk&&risk.valid)?{overall:Math.round(risk.overall),level:(risk.level&&risk.level.label)||risk.level||"VERİ YOK"}:{},
+      watchlist:Array.isArray(data.watchlist)?data.watchlist:[],
+      transactions:Array.isArray(data.transactions)?data.transactions:[],
+      reportedPortfolioTotal:calc(),
+      focus:{symbol:""}
+    };
+  }catch(e){return {assets:[]};}
+}
+function registerAiCopilotLiveContext(){try{window.STKSZAIEngine?.setLiveContext?.(stkszLiveContext);}catch(e){}}
+function intelCopilot(which){
+  if(!aiAllowed("copilot")){showToast(aiGateMessage("copilot"));return;}
+  const overlay=document.getElementById("stkszIntelOverlay");
+  if(overlay){overlay.hidden=false;lockBodyScroll();}
+  openIntelTab("copilot");
+  if(which==="morning"){renderCopilotReport(null,null,true);return;}
+  renderCopilotReport();
+}
+function openCopilotFromAi(){
+  if(!aiAllowed("copilot")){showToast(aiGateMessage("copilot"));return;}
+  const overlay=document.getElementById("stkszIntelOverlay");
+  if(overlay){overlay.hidden=false;lockBodyScroll();}
+  openIntelTab("copilot");
+  renderCopilotReport();
+  runInvestorCopilot("Yatırımcı Copilot ile genel değerlendirme yap: toplam varlık, dağılım, risk, piyasa hareketleri ve dikkat noktaları. Yalnız doğrulanmış veri; eksikse VERİ YOK de.");
+}
+async function runInvestorCopilot(question){
+  const box=document.getElementById("intelCopilotBox");if(!box)return;
+  const eng=window.STKSZAIEngine;
+  if(!eng||!eng.copilot){box.innerHTML='<div class="empty-state">COPİLOT: STKSZ AI motoru hazır değil — AI servisi gerektirmez, yalnız yerel motor yeterlidir.</div>';return;}
+  registerAiCopilotLiveContext();
+  lastCopilotQuestion=String(question||lastCopilotQuestion||"").trim();
+  box.innerHTML='<div class="empty-state">COPİLOT analiz ediyor… (yalnız doğrulanmış yerel veri · deterministik)</div>';
+  try{
+    const run=eng.copilot.run(lastCopilotQuestion,{mode:"INVESTOR_RESEARCH"});
+    lastCopilotRun=run;
+    try{eng.research.add({question:lastCopilotQuestion,symbol:(run&&run.symbol)||"",answer:(run&&run.synthesis&&run.synthesis.text)||"",mode:(run&&run.mode)||"INVESTOR_RESEARCH",verdict:(run&&run.synthesis&&run.synthesis.ok)?"HAZIR":"VERİ YETERSİZ"});}catch(e){}
+    try{eng.history.add({question:lastCopilotQuestion,symbol:(run&&run.symbol)||"",mode:(run&&run.mode)||"INVESTOR_RESEARCH",agentIds:(run.perAgent||[]).map(a=>a.agent),durationMs:run.durationMs||0,verdict:(run&&run.synthesis&&run.synthesis.ok)?"HAZIR":"VERİ YETERSİZ",agentsOk:(run.perAgent||[]).filter(a=>a.ok).length,agentsTotal:(run.perAgent||[]).length});}catch(e){}
+    renderCopilotReport(run,lastCopilotQuestion);
+  }catch(error){
+    box.innerHTML='<div class="empty-state">COPİLOT hatası: '+esc(String(error&&error.message?error.message:error))+'</div>';
+  }
+}
+function renderProviderStatus(){
+  const eng=window.STKSZAIEngine;
+  if(!eng||!eng.providers)return '<div class="help">Sağlayıcı durumu VERİ YOK.</div>';
+  const st=eng.providers.status();
+  return `<div class="ai-provider-chips">${st.providers.map(p=>`<div class="provider-chip ok"><span>${esc(p.label)}</span><b>${esc(p.cost)}</b></div>`).join("")}</div>`;
+}
+function renderCopilotReport(run,question,isMorning){
+  const box=document.getElementById("intelCopilotBox");if(!box)return;
+  const eng=window.STKSZAIEngine;registerAiCopilotLiveContext();
+  if(isMorning){
+    let mi=null;try{mi=eng?eng.morning.build():null;}catch(e){mi=null;}
+    const mor=mi||{ok:false,text:"SABAH İNTELİJANSI: VERİ YOK",status:"none",rows:[]};
+    const rowsHtml=(mor.rows||[]).map(r=>`<div class="research-row"><span>${esc(r.k)}</span><b>${esc(String(r.v))}</b></div>`).join("");
+    box.innerHTML=`<div class="ai-copilot-head"><div><small class="ai-eyebrow">SABAH İNTELİJANSI</small><h3>SABAH ÖZETİ (${esc(new Date().toISOString().slice(0,10))})</h3></div></div>
+     <div class="ai-copilot-verdict ${mor.ok?"ok":"empty"}">${esc(mor.text).replace(/\n/g,"<br>")}</div>
+     ${rowsHtml}
+     <div class="help">Veri yoksa empty state sunulur; sahte değer üretilmez. Kaynak: doğrulanmış portföy/piyasa kaydı.</div>`;
+    return;
+  }
+  if(!run)run=lastCopilotRun;
+  if(!run){box.innerHTML='<div class="empty-state">İlk analiz için "ANALİZİ ÇALIŞTIR" butonuna bas.</div>';return;}
+  const synthesis=run.synthesis||{};
+  const decision=synthesis.ok?"HAZIR":"VERİ YETERSİZ — KARAR YOK";
+  const provHtml=renderProviderStatus();
+  const per=(run.perAgent||[]).map(a=>{
+    const d=a.data||{};
+    const status=String(d.status||a.status||"none").toUpperCase();
+    const conf=Math.round((Number(d.confidence)||0)*100);
+    const facts=Array.isArray(d.facts)?d.facts.slice(0,6).map(f=>`<div class="research-row"><span>${esc(f.k)}</span><b>${esc(String(f.v))}</b></div>`).join(""):"";
+    const sources=Array.isArray(d.sources)?d.sources.map(s=>esc(s.name||"")).join(", "):"";
+    return `<div class="ai-agent-card"><div class="ai-agent-head"><b>${esc(a.agent)}</b><span class="ai-agent-meta">${esc(status)} · güven %${conf}</span>${a.ok?"":" <span class='ai-agent-err'>"+esc(a.error||"hatalı")+"</span>"}</div><div class="ai-agent-body">${facts?'<div class="ai-facts">'+facts+'</div>':""}<p>${esc(d.text||"").replace(/\n/g,"<br>")}</p>${sources?'<small class="muted">Kaynak: '+sources+"</small>":""}</div></div>`;
+  }).join("");
+  const cross=run.crossCheck||{};
+  const confScore=run.confidence||{};
+  const investors=run.investors||{};
+  const deep=investors.deepDive||{};
+  const gapsHtml=((deep.gaps)||[]).map(g=>`<span class="tag-copilot-gap">${esc(g)}</span>`).join("");
+  const prov=(investors.confidence&&investors.confidence.provenance)||[];
+  box.innerHTML=`
+   <div class="ai-copilot-head"><div><small class="ai-eyebrow">STKSZ YATIRIMCI COPİLOT</small><h3>COPİLOT ANALİZİ</h3></div>
+    <div class="toolbar"><button type="button" class="btn small" onclick="runInvestorCopilot()">▶ ANALİZİ YENİLE</button><button type="button" class="btn small primary" onclick="copilotDownloadCsv()">CSV</button><button type="button" class="btn small primary" onclick="copilotOpenPrint()">YAZDIR/PDF</button><button type="button" class="btn small" onclick="copilotWhatChanged()">WHAT CHANGED</button></div></div>
+   <div class="ai-question-line">${esc(question||lastCopilotQuestion||"")}</div>
+   ${provHtml}
+   <div class="ai-copilot-verdict ${synthesis.ok?"ok":"empty"}"><b>${esc(decision)}</b> · veri kaynağı: yerel doğrulanmış motor · maliyet: 0 · ücretli dış çağrı yok</div>
+   <div class="intel-kpi-row">
+     ${intelKpi("Ajanlar",((run.perAgent||[]).filter(a=>a.ok)).length+"/"+(run.perAgent||[]).length)}
+     ${intelKpi("Veri güveni",confScore.score+"%")}
+     ${intelKpi("Süre",(run.durationMs||0)+"ms")}
+     ${intelKpi("Çapraz kontrol",esc(cross.decision||"VERİ YETERSİZ"))}
+   </div>
+   ${prov.length?`<div class="ai-provenance"><b>Provenance (kaynak kökeni)</b><br>${prov.map(p=>`<span class="tag-copilot-gap">${esc(p.agent)} ← ${esc(p.source)}</span>`).join("")}</div>`:""}
+   ${gapsHtml?'<div class="ai-data-gaps"><b>Veri boşlukları (yalnız gerçek eksikler)</b><br>'+gapsHtml+'</div>':""}
+   <div class="ai-copilot-notes"><b>NOT / TEZ (yalnız cihazında)</b><textarea id="copilotNoteInput" rows="2" placeholder="Bu analiz için not veya tez yaz — API anahtarı/PII yazma.">${esc(storageGet("stkszCopilotNote_"+aiUserScope())||"")}</textarea><button type="button" class="btn small" onclick="copilotSaveNote()">NOTU KAYDET</button></div>
+   <div class="ai-agent-list">${per}</div>
+   <p class="ai-disclaimer">Yalnız uygulamadaki doğrulanmış veriyle üretilir; eksik veri "VERİ YOK" olarak bildirilir, değer uydurulmaz. Bu bilgilendirmedir; yatırım tavsiyesi değildir. Emir/trade otomasyonu yoktur (safety gate kapalı: canExecuteTrade=false).</p>`;
+}
+function copilotDownloadCsv(){
+  const eng=window.STKSZAIEngine;
+  if(!eng||!lastCopilotRun){showToast("Önce analiz çalıştır.");return;}
+  const csv=eng["export"].toCSV(lastCopilotRun);
+  try{
+    const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="stksz-copilot-"+new Date().toISOString().slice(0,10)+".csv";
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+    showToast("CSV indirildi (yalnız doğrulanmış veri).");
+  }catch(e){showToast("İndirme engellendi: "+String(e&&e.message?e.message:e));}
+}
+function copilotOpenPrint(){
+  const eng=window.STKSZAIEngine;
+  if(!eng||!lastCopilotRun){showToast("Önce analiz çalıştır.");return;}
+  const html=eng["export"].toPrintHTML(lastCopilotRun);
+  try{
+    const w=window.open("about:blank","_blank");
+    if(!w){showToast("Açılır pencere engellendi.");return;}
+    w.document.write(html);w.document.close();
+    setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300);
+  }catch(e){showToast("Yazdırma görünümü açılamadı: "+String(e&&e.message?e.message:e));}
+}
+function copilotSaveNote(){
+  const input=document.getElementById("copilotNoteInput");
+  if(!input)return;
+  try{storageSet("stkszCopilotNote_"+aiUserScope(),String(input.value||"").slice(0,2000));showToast("Copilot notu cihaza kaydedildi (kullanıcı kapsamlı).");}catch(e){showToast("Not kaydedilemedi.");}
+}
+function copilotWhatChanged(){
+  const eng=window.STKSZAIEngine;
+  const box=document.getElementById("intelCopilotBox");
+  if(!eng||!box)return;
+  const hist=eng.history.history();
+  const last=hist[hist.length-1];
+  let wc=null;try{wc=last?eng.history.whatChanged(last.id):null;}catch(e){wc=null;}
+  const rows=hist.slice(-6).reverse().map(h=>`<div class="research-row"><span>${esc(String(h.at||"").replace("T"," ").slice(0,16))} · ${esc(h.mode||"")} · ${esc(h.verdict||"")}</span><b>${h.agentsOk}/${h.agentsTotal} ajan</b></div>`).join("");
+  box.innerHTML=`
+   <div class="ai-copilot-head"><div><small class="ai-eyebrow">RESEARCH HISTORY</small><h3>WHAT CHANGED</h3></div><div class="toolbar"><button type="button" class="btn small" onclick="renderCopilotReport()">← DÖN</button></div></div>
+   ${wc?`<div class="ai-what-changed"><b>Karşılaştırma:</b> ${wc.isFirst?"ilk analiz kaydı — karşılaştırma yok.":"model/ajan değişikliği: "+(wc.modelChanged?"VAR":"YOK")+" · değişen alanlar: "+(wc.changed&&wc.changed.length?wc.changed.map(esc).join(", "):"yok")}</div>`:'<div class="empty-state">Geçmiş kayıt yok.</div>'}
+   <div class="help">Sırasıyla: zaman · çalışma modu · karar (HAZIR / VERİ YETERSİZ) · doğrulanmış ajan sayısı</div>
+   ${rows?'<div class="ai-agent-list">'+rows+'</div>':'<div class="empty-state">Analiz geçmişi yok.</div>'}
+   <div class="toolbar"><button type="button" class="btn small" onclick="copilotClearHistory()">GEÇMİŞİ TEMİZLE</button></div>`;
+}
+function copilotClearHistory(){try{window.STKSZAIEngine?.history?.clear?.();showToast("Analiz geçmişi temizlendi.");copilotWhatChanged();}catch(e){}}
 
 /* ===== SECURITY: AI/OCR ISOLATION (Task 99-113) ===== */
 /* Already enforced: AI provider only receives redacted context via stkszAiContext()
@@ -6519,8 +6684,9 @@ const AI_QUICK_PROMPTS={
  ipo:"Yaklaşan halka arzlar neler? Yalnızca uygulamadaki doğrulanmış halka arz takvimi kayıtlarını listele; kayıt yoksa VERİ YOK de ve Fırsatlar sayfasındaki taramayı öner.",/* v120 */
  gaps:"Uygulamadaki eksik (VERİ YOK) alanları listeledim. Her eksik için hangi veri kaynağını kontrol etmem gerektiğini kısa maddelerle söyle (örn: fiyat yoksa fiyat kaynağı testi, haber yoksa haber bağlantısı). API anahtarlarından ASLA bahsetme, anahtar değeri isteme.",
   radar:"Radar göstergelerimi özetle: portföy sağlığı, senaryo, kazanç/risk oranı ve son günün fırsat taraması. Yalnız doğrulanmış tarayıcı/yerel veri; eksikse VERİ YOK de.",
-  portfolioimport:"Portföy verimi içe aktarmalıyım: mevcut kayıtları, eksik verileri göster ve içe aktarma için öneri ver."
-};
+  portfolioimport:"Portföy verimi içe aktarmalıyım: mevcut kayıtları, eksik verileri göster ve içe aktarma için öneri ver.",
+  copilot:"Yatırımcı Copilot ile genel değerlendirme yap: toplam varlık, dağılım, risk, piyasa hareketleri ve dikkat noktaları. Yalnız doğrulanmış veri; eksikse VERİ YOK de."
+ };/* v122+ FAZ 6: copilot, genel toolbar ve Intelligence sekmesiyle entegredir */
 /* VERİ YOK tarayıcısı: uygulamadaki eksik alanları güvenli özetler (anahtar içermez) */
 function stkszAiGapReport(){
  const gaps=[];
@@ -8567,7 +8733,7 @@ function initEvents(){
  document.addEventListener("keydown",event=>{if(event.key!=="Escape")return;if(!document.getElementById("stkszAiOverlay")?.hidden){closeStkszAi();return;}if(document.getElementById("manualModal")?.classList.contains("show")){closeManual();return;}document.querySelectorAll(".modal.show").forEach(modal=>closeModalById(modal.id));closeAssetDetail();});
 }
 async function reconcileBuildCache(){const build=document.querySelector('meta[name="stksz-build"]')?.content||"";const previous=storageGet("stkszBuild");if(previous&&previous!==build&&"caches" in window){for(const key of await caches.keys())if(key.startsWith("stksz-shell-"))await caches.delete(key);}storageSet("stkszBuild",build);try{storageRemove("stkszAlgolabSession");}catch(error){}/* v91: AlgoLab kaldırıldı — eski cihazlardaki oturum kalıntısı temizlenir */}
-function registerServiceWorker(){if(!("serviceWorker" in navigator)||!/^https?:$/.test(location.protocol))return;window.addEventListener("load",async()=>{try{await reconcileBuildCache();const hadController=Boolean(navigator.serviceWorker.controller),registration=await navigator.serviceWorker.register("./service-worker.js?v=20260820-auth-v123",{updateViaCache:"none"});let refreshing=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(refreshing||!hadController)return;refreshing=true;location.reload();});registration.addEventListener("updatefound",()=>{const worker=registration.installing;worker?.addEventListener("statechange",()=>{if(worker.state==="installed"&&navigator.serviceWorker.controller){showToast("STKSZ güncellemesi hazırlandı.");worker.postMessage({type:"SKIP_WAITING"});}});});registration.waiting?.postMessage({type:"SKIP_WAITING"});await registration.update();setInterval(()=>registration.update().catch(()=>{}),6*60*60*1000);}catch(error){}});}
+function registerServiceWorker(){if(!("serviceWorker" in navigator)||!/^https?:$/.test(location.protocol))return;window.addEventListener("load",async()=>{try{await reconcileBuildCache();const hadController=Boolean(navigator.serviceWorker.controller),registration=await navigator.serviceWorker.register("./service-worker.js?v=20260909-auth-v124",{updateViaCache:"none"});let refreshing=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(refreshing||!hadController)return;refreshing=true;location.reload();});registration.addEventListener("updatefound",()=>{const worker=registration.installing;worker?.addEventListener("statechange",()=>{if(worker.state==="installed"&&navigator.serviceWorker.controller){showToast("STKSZ güncellemesi hazırlandı.");worker.postMessage({type:"SKIP_WAITING"});}});});registration.waiting?.postMessage({type:"SKIP_WAITING"});await registration.update();setInterval(()=>registration.update().catch(()=>{}),6*60*60*1000);}catch(error){}});}
 function maybeAutoUpdate(){if(!prefs.autoUpdate||prefs.provider==="local"||!providerInfo("market")?.configured)return;const freshness=providerInfo("market")?.freshness||"eod",ttl=freshness==="realtime"?60*1000:freshness==="delayed"?15*60*1000:6*60*60*1000,last=Date.parse(data.market?.lastAttempt||"");if(!Number.isFinite(last)||Date.now()-last>ttl)setTimeout(()=>refreshMarket(false),500);}
 
 /* ============ MANUEL YENİLE + 15 DK OTOMATİK GÜNCELLEME (v68) ============
@@ -8624,6 +8790,7 @@ const systemThemeMedia=matchMedia("(prefers-color-scheme: light)");systemThemeMe
 function initApp(){
   try{
     applyAppearance();initEvents();render();renderAuthGate();renderProfileAuth();initializeNativeEnrStorage();initEnrSecurity();
+    try{registerAiCopilotLiveContext();}catch(e){}
   }catch(error){console.error("[boot] initApp senkron hata:",error);}
   (function hideBootSplash(){const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}})();
   setTimeout(()=>{const s=document.getElementById("appBootSplash");if(s){s.classList.add("hide");setTimeout(()=>s.remove(),600);}},3000);
