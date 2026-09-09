@@ -1,10 +1,11 @@
-const {JSDOM}=require("jsdom");const fs=require("fs");const httpMod=require("http");
-const html=fs.readFileSync("/home/user/www/index.html","utf8");
-const apiSrc=fs.readFileSync("/home/user/www/api-client.js","utf8");
-const vwSrc=fs.readFileSync("/home/user/www/virtual-wallet.js","utf8");
-const syncSrc=fs.readFileSync("/home/user/www/sync-client.js","utf8");
-const brokerSrc=fs.readFileSync("/home/user/www/broker-adapter.js","utf8");
-const serverSrc=fs.readFileSync("/home/user/server/stksz-ai-server.js","utf8");
+const {JSDOM}=require("jsdom");const fs=require("fs");const httpMod=require("http");const path=require("path");const os=require("os");const {webcrypto}=require("crypto");
+const R=path.join(__dirname,"..");
+const html=fs.readFileSync(path.join(R,"www","index.html"),"utf8");
+const apiSrc=fs.readFileSync(path.join(R,"www","api-client.js"),"utf8");
+const vwSrc=fs.readFileSync(path.join(R,"www","virtual-wallet.js"),"utf8");
+const syncSrc=fs.readFileSync(path.join(R,"www","sync-client.js"),"utf8");
+const brokerSrc=fs.readFileSync(path.join(R,"www","broker-adapter.js"),"utf8");
+const serverSrc=fs.readFileSync(path.join(R,"server","stksz-ai-server.js"),"utf8");
 let pass=0,fail=0;function t(n,c){c?(pass++,console.log("✅ "+n)):(fail++,console.log("❌ "+n));}
 
 console.log("── STATİK ──");
@@ -15,8 +16,8 @@ t("UI onay modalı: [İPTAL] + [EMRİ ONAYLA]", html.includes("EMRİ ONAYLA")&&h
 t("Gerçek gönderim kapalı uyarısı modalda", html.includes("gerçek gönderim KAPALIDIR")||html.includes("GERÇEK EMİR GÖNDERİMİ bu sürümde kapalı"));
 
 process.env.GEMINI_API_KEY="GEM-SECRET-42";process.env.BROKER_API_KEY="BRK-KEY-SECRET-1";process.env.BROKER_API_SECRET="BRK-IMZA-SECRET-2";
-process.env.SYNC_DATA_DIR="/tmp/audit-test-"+Date.now();process.env.PORT="9891";delete process.env.BROKER_LIVE_ENABLED;
-const {server}=require("/home/user/server/stksz-ai-server.js");
+process.env.SYNC_DATA_DIR=fs.mkdtempSync(path.join(os.tmpdir(),"audit-test-"));process.env.PORT="9891";delete process.env.BROKER_LIVE_ENABLED;
+const {server}=require(path.join(R,"server","stksz-ai-server.js"));
 server.listen(9891,"127.0.0.1",async()=>{
  const call=(p,b,hdr)=>new Promise((res2,rej2)=>{const rq=httpMod.request({hostname:"127.0.0.1",port:9891,path:p,method:b?"POST":"GET",headers:Object.assign({"Content-Type":"application/json"},hdr||{})},rs=>{let d="";rs.on("data",c=>d+=c);rs.on("end",()=>res2({status:rs.statusCode,json:JSON.parse(d||"{}")}));});rq.on("error",rej2);if(b)rq.write(JSON.stringify(b));rq.end();});
  console.log("── INTENT ZİNCİRİ (canlı backend) ──");
@@ -51,6 +52,7 @@ server.listen(9891,"127.0.0.1",async()=>{
  t("Audit'te API anahtarı/token YOK", !audit.includes("GEM-SECRET-42")&&!audit.includes("BRK-KEY-SECRET-1")&&!audit.includes("BRK-IMZA-SECRET-2"));
  console.log("── UI AKIŞI (jsdom + canlı backend) ──");
  const dom=new JSDOM(html,{runScripts:"dangerously",url:"http://localhost/",pretendToBeVisual:true,beforeParse(w){
+ Object.defineProperty(w,"crypto",{value:webcrypto});
   w.HTMLCanvasElement.prototype.getContext=function(){return new Proxy({},{get:(t,p)=>p==="measureText"?()=>({width:10}):()=>{}});};
   w.matchMedia=w.matchMedia||(()=>({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}));
   w.scrollTo=()=>{};

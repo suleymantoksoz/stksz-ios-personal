@@ -1,4 +1,4 @@
-const fs=require("fs");const src=fs.readFileSync("/home/user/www/stksz-chart.js","utf8");
+const fs=require("fs");const path=require("path");const R=path.join(__dirname,"..");const src=fs.readFileSync(path.join(R,"www","stksz-chart.js"),"utf8");
 let pass=0,fail=0;function t(n,c){c?(pass++):(fail++,console.log("❌ "+n));}
 const calls=[];const ctx=new Proxy({},{get:(tg,p)=>{if(p==="measureText")return()=>({width:20});return(...a)=>{calls.push(p);};},set:()=>true});
 const listeners={};

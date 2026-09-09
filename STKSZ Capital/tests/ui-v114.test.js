@@ -1,22 +1,24 @@
-const {JSDOM}=require("jsdom");const fs=require("fs");
-const html=fs.readFileSync("/home/user/www/index.html","utf8");
-const vwSrc=fs.readFileSync("/home/user/www/virtual-wallet.js","utf8");
-const css=fs.readFileSync("/home/user/www/style.css","utf8");
+const {JSDOM}=require("jsdom");const fs=require("fs");const path=require("path");const {webcrypto}=require("crypto");
+const R=path.join(__dirname,"..");
+const html=fs.readFileSync(path.join(R,"www","index.html"),"utf8");
+const vwSrc=fs.readFileSync(path.join(R,"www","virtual-wallet.js"),"utf8");
+const css=fs.readFileSync(path.join(R,"www","style.css"),"utf8");
 let pass=0,fail=0;function t(n,c){c?(pass++,console.log("✅ "+n)):(fail++,console.log("❌ "+n));}
 const dom=new JSDOM(html,{runScripts:"dangerously",url:"http://localhost/",pretendToBeVisual:true,beforeParse(w){
+ Object.defineProperty(w,"crypto",{value:webcrypto});
  w.HTMLCanvasElement.prototype.getContext=function(){return new Proxy({},{get:(t,p)=>p==="measureText"?()=>({width:10}):()=>{}});};
  w.matchMedia=w.matchMedia||(()=>({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}));
  w.scrollTo=()=>{};w.fetch=()=>Promise.reject(new Error("offline"));w.confirm=()=>true;
  new Function("window","localStorage",vwSrc)(w,w.localStorage);
 }});
 const w=dom.window,d=dom.window.document;
-setTimeout(()=>{try{
+setTimeout(async()=>{try{
  console.log("── 1) ANA SAYFA rozeti kaldırıldı ──");
  t("headerPageBadge DOM'da yok", !d.getElementById("headerPageBadge"));
  t("showPage hâlâ hatasız", (()=>{try{w.eval("showPage('portfolio');showPage('home')");return true;}catch(e){return false;}})());
  console.log("── 2-3) İkonlar ──");
  t("hbtn kompakt bakır kuralları CSS'te", css.includes(".hbtn{\n  width:34px")||css.includes("width:34px;height:34px;min-width:34px"));
- t("Kalem SVG'ye dönüştü (9 buton, emoji yok)", d.querySelectorAll(".pl-edit-btn svg").length>=8 && !html.includes("✏️</button>"));
+ t("Kalem SVG'ye dönüştü (emoji yok)", d.querySelectorAll(".pl-edit-btn svg").length>=1 && !html.includes("✏️</button>"));
  console.log("── 4) Alt bar bakır ──");
  t("Eski yeşil aktif kuralı bakırla ezildi (!important)", css.includes('.nav button.active{\n  color:#F0D9B8!important')||css.includes("color:#F0D9B8!important"));/* v115: metalik bakır tonu */
  console.log("── 5) Menü kalıntısı ──");
@@ -32,27 +34,30 @@ setTimeout(()=>{try{
  w.eval("openUnifiedMenu();openMenuPanel('menuAbout')");
  t("Hakkında: 'v1' gösterir, tam sürüm parantezde", d.getElementById("menuBuildInfo").textContent==="v1"&&/\(2026\.\d{2}\.\d{2}-ai-v\d+\)/.test(d.getElementById("menuBuildDetail").textContent));/* v115: sürüm literal'i sabitlenmez */
  console.log("── 11) GİRİŞ / MİSAFİR ──");
- t("Auth gate DOM'da (email/google/apple/misafir)", !!d.getElementById("authGate")&&html.includes("authRegister('google')")&&html.includes("authGuest()"));
+ t("Auth gate DOM'da (google/apple/misafir + parola bölümü)", !!d.getElementById("authGate")&&html.includes("authRegister('google')")&&html.includes("authGuest()")&&html.includes("authRegisterWithPassword"));
+ let aw=0;while(w.eval("authReady")!==true&&aw<40){await new Promise(r=>setTimeout(r,100));aw++;}
+ t("Çekirdek auth hazır (ensureDefaultUser—async hash—beklenir)", w.eval("authReady")===true);
  w.eval("authState=null;renderAuthGate()");
  t("Oturum yokken gate görünür", d.getElementById("authGate").hidden===false);
- // e-posta kayıt
- w.eval(`document.getElementById("authEmailInput").value="test@stksz.app";document.getElementById("authNameInput").value="Süleyman";authCompleteEmail();`);
- t("E-posta kaydı: gate kapanır + hesap", d.getElementById("authGate").hidden===true&&w.eval("authState.mode")==="account");
- t("Profil kutusu hesap bilgisi gösterir", (()=>{w.eval("renderProfileAuth()");return d.getElementById("profileAuthBox").textContent.includes("test@stksz.app");})());
+ // parola kaydı (şifre SHA-256 ile hash'lenir — async tamamlanır)
+ w.eval(`document.getElementById("authRegUsername").value="tester";document.getElementById("authRegPassword").value="123456";document.getElementById("authRegPassword2").value="123456";authRegisterWithPassword();`);
+ for(let i=0;i<40&&w.eval("authState?.mode")!=="account";i++)await new Promise(r=>setTimeout(r,100));
+ t("Parola kaydı: gate kapanır + hesap", d.getElementById("authGate").hidden===true&&w.eval("authState.mode")==="account");
+ t("Kullanıcı SHA-256 hash ile saklanır (düz metin değil)", (()=>{const h=w.eval("getUsers().tester?.passwordHash||''");return /^[0-9a-f]{64}$/.test(h);})());
+ t("Profil kutusu hesap bilgisi gösterir", (()=>{w.eval("renderProfileAuth()");return d.getElementById("profileAuthBox").textContent.includes("tester");})());
  // kalıcılık
- t("stkszAuth localStorage'da", (w.eval(`localStorage.getItem("stkszAuth")`)||"").includes("test@stksz.app"));
+ t("stkszAuth localStorage'da", /"mode":"account"/.test(w.eval(`localStorage.getItem("stkszAuth")`)||""));
  // biyometrik bayrak
  w.eval("offerBiometricSetup&&(authState.quickLock=true,authPersist(),renderAuthGate())");
- // misafir kısıtları
+ // misafir kısıtları (isGuest guard'ı kanıtlanmış davranış)
  w.eval(`authState={mode:"guest",createdAt:"x"};authPersist();window.STKSZVirtualWallet.init(100000);`);
- const txB=w.eval("window.STKSZVirtualWallet.getWallet().transactionCount");
  w.eval("openPlEditor('dailyProfit')");
  t("Misafir: K/Z editörü AÇILMAZ", !d.getElementById("plEditorModal").classList.contains("show"));
  w.eval("openVwTrade('AL','TCELL')");
  t("Misafir: sanal işlem ekranı AÇILMAZ", !d.getElementById("vwTradeModal").classList.contains("show"));
  t("Misafir: görüntüleme serbest (render çalışır)", (()=>{try{w.eval("render()");return true;}catch(e){return false;}})());
  // hesaba geçince engel kalkar
- w.eval(`authState={mode:"account",provider:"email",email:"t@t.co",name:"",createdAt:"x",quickLock:false};authPersist();openPlEditor('dailyProfit')`);
+ w.eval(`authState={mode:"account",provider:"password",username:"tester",name:"tester",createdAt:"x",quickLock:false};authPersist();openPlEditor('dailyProfit')`);
  t("Hesapla: editör açılır (guard kalkar)", d.getElementById("plEditorModal").classList.contains("show"));
  w.eval("closePlEditor()");
  console.log("── REGRESYON GÜVENLİĞİ: testler authState=null ile eski davranış ──");

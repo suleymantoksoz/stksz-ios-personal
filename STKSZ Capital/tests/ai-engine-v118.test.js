@@ -57,13 +57,13 @@ const html = read("www/index.html");
 t("Bağlantı rozeti: 'GEMINI BAĞLI' metni kalktı", !html.includes('"GEMINI BAĞLI') && html.includes("STKSZ AI · BAĞLI DEĞİL"));
 t("AI panel etiketi: STKSZ AI ENGINE", html.includes('"STKSZ AI ENGINE · yalnızca doğrulanmış verilerle"'));
 t("Engine bağlamı askStkszAi'a bağlandı", html.includes("STKSZAIEngine?.context?.(question)"));
-t("stksz-ai-engine.js yüklendi + SW listesinde", html.includes("stksz-ai-engine.js?v=118") && read("www/service-worker.js").includes("./stksz-ai-engine.js"));
+t("stksz-ai-engine.js yüklendi + SW listesinde", /stksz-ai-engine\.js\?v=1(1[89]|[2-9][0-9])/.test(html) && read("www/service-worker.js").includes("./stksz-ai-engine.js"));
 t("Sohbet balonu markası STKSZ AI (değişmedi)", html.includes("<b>STKSZ AI"));
 
 console.log("═══ 5) PROFİL UI + ADMIN UI ═══");
 t("Yatırımcı testi kartı profilde", html.includes('id="investorTestCard"') && html.includes("YATIRIMCI PROFİLİNİ BELİRLE"));
 t("Rozet satırı profilde", html.includes('id="profileBadgeRow"'));
-t("Rozet kodu kartı: kod backend'de doğrulanır notu", html.includes('id="badgeCodeCard"') && html.includes("/api/entitlement/redeem"));
+t("Rozet kodu kartı: kod backend'de doğrulanır notu", html.includes('id="badgeCodeCard"') && html.includes("Kod doğrulaması sunucuda yapılır"));
 t("API Yönetimi: admin-only sarmalayıcı + normal kullanıcı notu", html.includes("data-admin-only") && html.includes("STKSZ sistemi yönetici tarafından yapılandırılmıştır."));
 t("Normal kullanıcıya yalnız BAĞLI/BAĞLI DEĞİL", html.includes('id="nonAdminAiState"'));
 t("Frontend'de düz rozet kodu YOK (STKSZ-hex deseni)", !/STKSZ-[0-9A-F]{12}/.test(html.replace('placeholder="STKSZ-XXXXXXXXXXXX"', "")));

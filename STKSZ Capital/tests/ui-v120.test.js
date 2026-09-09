@@ -7,8 +7,10 @@ let pass = 0, fail = 0;
 const t = (name, ok) => { if (ok) { pass++; console.log("  ✅ " + name); } else { fail++; console.log("  ❌ " + name); } };
 
 const html = read("www/index.html");
-const css = read("www/style.css");
+const css = read("www/style.css").replace(/\r\n/g, "\n");
 const sw = read("www/service-worker.js");
+const server = read("server/stksz-ai-server.js");
+const engineSrc = read("www/stksz-ai-engine.js");
 
 console.log("═══ 1) PORTAL DAĞITIMI (bilgi kaybı yok) ═══");
 t("Portal klasörü kaldırıldı (www + iOS + Android)", !fs.existsSync(path.join(R, "www/portal")) && !fs.existsSync(path.join(R, "ios/App/App/public/portal")) && !fs.existsSync(path.join(R, "android/app/src/main/assets/public/portal")));
@@ -17,7 +19,7 @@ t("Piyasa özeti/CORE/SCORE Durum'da duruyor", html.includes("coreCurrentScore")
 t("Halka arz Fırsatlar'da duruyor (ipoCalendar)", html.includes("ipoCalendar") && html.includes("Halka Arz Takvimi"));
 t("Portföy sayfası duruyor", html.includes('id="page-portfolio"'));
 t("Haberler sayfası duruyor", html.includes('id="page-news"'));
-t("Menü: portal linki yerine iç yönlendirme kartları", !html.includes("portal/index.html") && html.includes("PİYASA DURUMU") && html.includes("HALKA ARZ &amp; FIRSATLAR"));
+t("Menü: portal linki yerine iç yönlendirme (PORTFÖY DURUMU + Halka Arz Takvimi menü aksiyonu)", !html.includes("portal/index.html") && html.includes("PORTFÖY DURUMU") && html.includes("Halka Arz Takvimi"));
 
 console.log("═══ 2) MENÜ BAŞLIĞI ═══");
 t("Menü başlığında küçük STKSZ yazısı kalktı (yalnız MENÜ)", !html.includes("<small>STKSZ</small><h2>MENÜ</h2>"));
@@ -63,12 +65,11 @@ console.log("═══ 8) ENTITLEMENT + API GÜVENLİĞİ (tekrar kontrol) ═�
 t("Entitlement altyapısı duruyor (özellik kilitleme YOK — mevcut özellikler alınmadı)", engine.BADGES.KRAL.entitlements.includes("ai_pro") && !html.includes("hasEntitlement('advanced_chart')&&") );
 t("Normal kullanıcı API notu duruyor", html.includes("STKSZ sistemi yönetici tarafından yapılandırılmıştır."));
 t("data-admin-only sarmalayıcı duruyor", html.includes("data-admin-only"));
-t("Rozet kodu backend doğrulaması duruyor", html.includes("/api/entitlement/redeem"));
-const server = read("server/stksz-ai-server.js");
+t("Rozet kodu backend doğrulaması duruyor", server.includes("/api/entitlement/redeem") && server.includes("timingSafeEqual") && engineSrc.includes("kod doğrulaması yalnız backend'dedir"));
 t("Backend admin uçları token korumalı", server.includes("isAdminReq(req)") && server.includes("timingSafeEqual"));
 
 console.log("═══ 9) SÜRÜM + BÜTÜNLÜK ═══");
-t("Build v120 + SW v121", html.includes('content="2026.08.19-ai-v120"') && sw.includes("stksz-shell-v121"));
+t("Build + SW sürüm zinciri yüksek (güncel v123/v124; literal sabitlenmez)", /content="2026\.\d{2}\.\d{2}-ai-v1(2[0-9]|[3-9][0-9])"/.test(html) && /stksz-shell-v1(2[1-9]|[3-9][0-9])/.test(sw));
 t("Alt bar STKSZ AI merkez butonu korundu (v119)", html.includes('class="nav-ai-btn"'));
 t("Risk→Durum birleşmesi korundu (v119)", html.includes('if(id==="risk")id="status"'));
 

@@ -1,9 +1,10 @@
-const {JSDOM}=require("jsdom");const fs=require("fs");const httpMod=require("http");
-const html=fs.readFileSync("/home/user/www/index.html","utf8");
-const apiSrc=fs.readFileSync("/home/user/www/api-client.js","utf8");
-const vwSrc=fs.readFileSync("/home/user/www/virtual-wallet.js","utf8");
-const syncSrc=fs.readFileSync("/home/user/www/sync-client.js","utf8");
-const serverSrc=fs.readFileSync("/home/user/server/stksz-ai-server.js","utf8");
+const {JSDOM}=require("jsdom");const fs=require("fs");const httpMod=require("http");const path=require("path");const os=require("os");const {webcrypto}=require("crypto");
+const R=path.join(__dirname,"..");
+const html=fs.readFileSync(path.join(R,"www","index.html"),"utf8");
+const apiSrc=fs.readFileSync(path.join(R,"www","api-client.js"),"utf8");
+const vwSrc=fs.readFileSync(path.join(R,"www","virtual-wallet.js"),"utf8");
+const syncSrc=fs.readFileSync(path.join(R,"www","sync-client.js"),"utf8");
+const serverSrc=fs.readFileSync(path.join(R,"server","stksz-ai-server.js"),"utf8");
 let pass=0,fail=0;function t(n,c){c?(pass++,console.log("✅ "+n)):(fail++,console.log("❌ "+n));}
 
 console.log("── STATİK ──");
@@ -15,17 +16,18 @@ t("İstemci: ENR + API anahtarları senkron DIŞI", syncSrc.includes("delete dat
 t("Motor replay fonksiyonu", vwSrc.includes("replayFromTransactions"));
 t("Offline-first: online olunca otomatik senkron", syncSrc.includes("addEventListener('online'"));
 
-process.env.GEMINI_API_KEY="X";process.env.SYNC_DATA_DIR="/tmp/stksz-sync-test-"+Date.now();process.env.PORT="9591";
-const {server}=require("/home/user/server/stksz-ai-server.js");
+process.env.GEMINI_API_KEY="X";process.env.SYNC_DATA_DIR=fs.mkdtempSync(path.join(os.tmpdir(),"stksz-sync-test-"));process.env.PORT="9591";
+const {server}=require(path.join(R,"server","stksz-ai-server.js"));
 server.listen(9591,"127.0.0.1",()=>{
  function makeDevice(label){
   return new Promise(resolve=>{
    const dom=new JSDOM(html,{runScripts:"dangerously",url:"http://localhost/",pretendToBeVisual:true,beforeParse(w){
+ Object.defineProperty(w,"crypto",{value:webcrypto});
     w.HTMLCanvasElement.prototype.getContext=function(){return new Proxy({},{get:(t,p)=>p==="measureText"?()=>({width:10}):()=>{}});};
     w.matchMedia=w.matchMedia||(()=>({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}));
     w.scrollTo=()=>{};w.confirm=()=>true;
     w.fetch=(url,opts={})=>new Promise((res2,rej2)=>{const u=new URL(url);if(u.hostname!=="127.0.0.1"){rej2(new Error("dış ağ yok"));return;}
-     const rq=httpMod.request({hostname:u.hostname,port:u.port,path:u.pathname+u.search,method:opts.method||"GET",headers:opts.headers||{}},rs=>{let d="";rs.on("data",c=>d+=c);rs.on("end",()=>res2({ok:rs.statusCode<300,status:rs.statusCode,text:()=>Promise.resolve(d),json:()=>Promise.resolve(JSON.parse(d))}));});rq.on("error",rej2);if(opts.body)rq.write(opts.body);rq.end();});
+     const rq=httpMod.request({hostname:u.hostname,port:u.port,path:u.pathname+u.search,method:opts.method||"GET",headers:opts.headers||{}},rs=>{let d="";rs.on("data",c=>d+=c);rs.on("end",()=>res2({ok:rs.statusCode<300,status:rs.statusCode,text:()=>Promise.resolve(d)}));});rq.on("error",rej2);if(opts.body)rq.write(opts.body);rq.end();});
     new Function("window","localStorage",vwSrc)(w,w.localStorage);
     new Function("window","localStorage","document","fetch",apiSrc)(w,w.localStorage,{addEventListener(){},createElement:()=>({style:{}})},w.fetch);
     new Function("window","localStorage",syncSrc)(w,w.localStorage);
@@ -95,7 +97,7 @@ server.listen(9591,"127.0.0.1",()=>{
 
   console.log("── UI PANELİ ──");
   t("Senkron paneli Veri Yönetimi'nde", html.includes("CİHAZLAR ARASI SENKRON")&&html.includes("syncCreateAccount"));
-  t("AI geçmişi senkron listesinde", syncSrc.includes("stkszAiHistory")&&html.includes('storageSet("stkszAiHistory"'));
+  t("AI geçmişi senkron listesinde", syncSrc.includes("stkszAiHistory")&&html.includes("aiHistoryKey")&&html.includes("markTouched"));
   t("Mevcut iOS yapısı bozulmadı (render çalışır)", (()=>{try{iphone.w.eval("render()");return true;}catch(e){return false;}})());
   console.log(`\nSONUÇ: ${pass}/${pass+fail}`);process.exit(fail?1:0);
  }catch(e){console.error("HATA:",e);process.exit(1);}})();

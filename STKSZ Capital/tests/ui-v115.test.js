@@ -17,19 +17,19 @@ let pass = 0, fail = 0;
 const t = (name, ok) => { if (ok) { pass++; console.log("  ✅ " + name); } else { fail++; console.log("  ❌ " + name); } };
 
 const html = read("www/index.html");
-const css = read("www/style.css");
+const css = read("www/style.css").replace(/\r\n/g, "\n");
 const chart = read("www/stksz-chart.js");
 const sw = read("www/service-worker.js");
 /* v120 (3. ADIM): portal kaldırıldı — içerik Durum/Haberler/Fırsatlar/Portföy sayfalarına dağıtıldı */
 
 console.log("═══ 1) ALT BAR: 3D SVG ikonlar ═══");
 const navBlock = html.slice(html.indexOf('<nav class="nav"'), html.indexOf("</nav>"));
-t("Alt bar 5 sayfa SVG ikonu içeriyor (v119: Risk→Durum birleşti)", (navBlock.match(/<svg viewBox="0 0 24 24">/g) || []).length === 5);
+t("Alt bar 6 sayfa SVG ikonu içeriyor (v119 Risk→Durum birleşmesi + v12x Kripto sayfası; merkez AI düğmede metin rozeti)", (navBlock.match(/<svg viewBox="0 0 24 24"[^>]*>/g) || []).length === 6);
 t("Eski unicode nav ikonları kalktı", !/[⌂▣▤◫◉◎]/.test(navBlock));
 t("nav-icon svg 1.5px stroke kuralı var", css.includes(".nav-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.5"));
-t("Aktif nav ikonu 3D bakır kapsül", css.includes('.nav button.active .nav-icon{\n  background:linear-gradient(145deg,#E2A968 0%,#B87333 45%,#6E3F17 100%)'));
+t("Aktif nav ikonu 3D bakır kapsül", css.includes('body:not([data-theme="light"]) .nav button.active .nav-icon{\n  background:linear-gradient(145deg,#E2A968 0%,#B87333 45%,#6E3F17 100%)'));
 t("Nav etiketleri (v119): Ana Sayfa/Portföy/Haberler/Durum/Fırsatlar + merkez STKSZ AI", ["Ana Sayfa","Portföy","Haberler","Durum","Fırsatlar"].every(l => navBlock.includes(l)) && navBlock.includes("nav-ai-btn"));
-t("showPage onclick bağları korundu (5 sayfa)", (navBlock.match(/onclick="showPage\(/g) || []).length === 5);
+t("showPage onclick bağları korundu (6 sayfa: Ana Sayfa/Portföy/Haberler/Durum/Fırsatlar/Kripto)", (navBlock.match(/onclick="showPage\(/g) || []).length === 6);
 
 console.log("═══ 2) MENÜ: eski yeşil kart kalıntıları ═══");
 t("menu-nav-card hover bakır kuralı (v115)", css.includes('body:not([data-theme="light"]) .menu-nav-card:hover'));
@@ -75,7 +75,7 @@ console.log("═══ 8) PORTAL KALDIRILDI (v120: içerik ana sayfalara dağıt
 t("www/portal klasörü yok", !fs.existsSync(path.join(R, "www/portal")));
 t("SW listesinde portal yok", !sw.includes("portal/"));
 t("index.html'de portal linki yok", !html.includes("portal/index.html"));
-t("Menüde Piyasa Durumu + Halka Arz yönlendirme kartları", html.includes("PİYASA DURUMU") && html.includes("HALKA ARZ &amp; FIRSATLAR"));
+t("Portal içeriği ana sayfalara dağıtıldı: Durum sayfası PORTFÖY DURUMU + menüde Halka Arz Takvimi yönlendirmesi", html.includes("PORTFÖY DURUMU") && html.includes("Halka Arz Takvimi"));
 
 console.log("═══ 9) WORKSPACE TEMİZLİĞİ ═══");
 t("mountain-neon.png dosyası silindi", !fs.existsSync(path.join(R, "www/assets/icons/mountain-neon.png")));

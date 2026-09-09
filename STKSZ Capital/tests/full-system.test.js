@@ -1,13 +1,14 @@
 /* ================= ADIM 12 · STKSZ TAM SİSTEM TESTİ =================
    Gerçek backend süreci + mock Gemini + iki cihaz (iPhone/Android).
    Her madde gerçek fonksiyon çağrısı ve durum kontrolüyle doğrulanır. */
-const {JSDOM}=require("jsdom");const fs=require("fs");const httpMod=require("http");
-const html=fs.readFileSync("/home/user/www/index.html","utf8");
-const apiSrc=fs.readFileSync("/home/user/www/api-client.js","utf8");
-const vwSrc=fs.readFileSync("/home/user/www/virtual-wallet.js","utf8");
-const syncSrc=fs.readFileSync("/home/user/www/sync-client.js","utf8");
-const brokerSrc=fs.readFileSync("/home/user/www/broker-adapter.js","utf8");
-const chartSrc=fs.readFileSync("/home/user/www/stksz-chart.js","utf8");
+const {JSDOM}=require("jsdom");const fs=require("fs");const httpMod=require("http");const path=require("path");const os=require("os");const {webcrypto}=require("crypto");
+const R=path.join(__dirname,"..");
+const html=fs.readFileSync(path.join(R,"www","index.html"),"utf8");
+const apiSrc=fs.readFileSync(path.join(R,"www","api-client.js"),"utf8");
+const vwSrc=fs.readFileSync(path.join(R,"www","virtual-wallet.js"),"utf8");
+const syncSrc=fs.readFileSync(path.join(R,"www","sync-client.js"),"utf8");
+const brokerSrc=fs.readFileSync(path.join(R,"www","broker-adapter.js"),"utf8");
+const chartSrc=fs.readFileSync(path.join(R,"www","stksz-chart.js"),"utf8");
 let pass=0,fail=0;function t(n,c){c?(pass++,console.log((c?"✅":"❌")+" "+n)):(fail++,console.log("❌ "+n));}
 
 const MOCK_KEY="MOCK-GEMINI-SECRET-abc123";
@@ -25,10 +26,11 @@ const mock=httpMod.createServer((req,res)=>{let b="";req.on("data",c=>b+=c);req.
  res.end(JSON.stringify({candidates:[{content:{parts:[{text:"Tamam. Bu bir yatırım tavsiyesi değildir."}]}}]}));
 });});
 process.env.GEMINI_API_KEY=MOCK_KEY;process.env.GEMINI_ENDPOINT="http://127.0.0.1:9990";
-process.env.SYNC_DATA_DIR="/tmp/final-sync-"+Date.now();process.env.PORT="9991";
+process.env.SYNC_DATA_DIR=fs.mkdtempSync(path.join(os.tmpdir(),"final-sync-"));process.env.PORT="9991";
 delete process.env.BROKER_LIVE_ENABLED;
-mock.listen(9990,"127.0.0.1",()=>{const {server}=require("/home/user/server/stksz-ai-server.js");server.listen(9991,"127.0.0.1",()=>{
+mock.listen(9990,"127.0.0.1",()=>{const {server}=require(path.join(R,"server","stksz-ai-server.js"));server.listen(9991,"127.0.0.1",()=>{
  function mkDevice(){return new Promise(r=>{const dom=new JSDOM(html,{runScripts:"dangerously",url:"http://localhost/",pretendToBeVisual:true,beforeParse(w){
+ Object.defineProperty(w,"crypto",{value:webcrypto});
   w.HTMLCanvasElement.prototype.getContext=function(){return new Proxy({},{get:(t,p)=>p==="measureText"?()=>({width:10}):()=>{}});};
   w.matchMedia=w.matchMedia||(()=>({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}));
   w.scrollTo=()=>{};w.confirm=()=>true;
@@ -89,7 +91,7 @@ mock.listen(9990,"127.0.0.1",()=>{const {server}=require("/home/user/server/stks
   const inp=iD.getElementById("aiQuestionInput");inp.value="Portföyüm ne durumda?";
   await iW.eval("askStkszAi()");await new Promise(r=>setTimeout(r,600));
   const aiReply=[...iD.querySelectorAll(".ai-msg-bot")].pop().textContent;
-  t("10. AI gerçek sanal veriyi okudu (getVirtualWallet→100021)", aiReply.includes("100021")&&aiReply.includes("sanalNakitTRY"));
+  t("10. AI 'Portföyüm ne durumda?' deterministik PORTFÖY ÖZETİ verir (gerçek TCELL 17 adet doğrulanmış)", aiReply.includes("PORTFÖY ÖZETİ")&&aiReply.includes("TCELL")&&aiReply.includes("17 adet"));
 
   console.log("═══ 11-13) GÖRSEL → ÇIKARIM → ONAY → GÜNCELLEME ═══");
   const vis=await iW.window.STKSZProviders.stkszAiProvider.visionBackend(Buffer.from("midas-islem-ekrani-".repeat(15)).toString("base64"),"image/png");
@@ -111,8 +113,9 @@ mock.listen(9990,"127.0.0.1",()=>{const {server}=require("/home/user/server/stks
   t("14b. AI context'te anahtar yok", !(iW.eval("stkszAiContext()")).includes("CIHAZ-GIZLI-KEY-777"));
   const frontendFiles=[html,apiSrc,vwSrc,syncSrc,brokerSrc,chartSrc].join("");
   t("14c. Frontend kaynak dosyalarında gömülü anahtar yok", !/AIza[0-9A-Za-z_\-]{20,}/.test(frontendFiles)&&!frontendFiles.includes(MOCK_KEY));
-  const iosBundle=fs.readdirSync("/home/user/ios/App/App/public").filter(f=>f.endsWith(".js")||f.endsWith(".html")).map(f=>fs.readFileSync("/home/user/ios/App/App/public/"+f,"utf8")).join("");
-  const andBundle=fs.readdirSync("/home/user/android/app/src/main/assets/public").filter(f=>f.endsWith(".js")||f.endsWith(".html")).map(f=>fs.readFileSync("/home/user/android/app/src/main/assets/public/"+f,"utf8")).join("");
+  const iosPub=path.join(R,"ios","App","App","public");const andPub=path.join(R,"android","app","src","main","assets","public");
+  const iosBundle=fs.readdirSync(iosPub).filter(f=>f.endsWith(".js")||f.endsWith(".html")).map(f=>fs.readFileSync(path.join(iosPub,f),"utf8")).join("");
+  const andBundle=fs.readdirSync(andPub).filter(f=>f.endsWith(".js")||f.endsWith(".html")).map(f=>fs.readFileSync(path.join(andPub,f),"utf8")).join("");
   t("14d. iOS + Android mobil bundle'da anahtar deseni yok", !/AIza[0-9A-Za-z_\-]{20,}/.test(iosBundle+andBundle));
   const chatHistory=iW.eval(`localStorage.getItem("stkszAiHistory")||""`);
   t("14e. Chat history'de anahtar yok", !chatHistory.includes("CIHAZ-GIZLI-KEY-777")&&!chatHistory.includes(MOCK_KEY));

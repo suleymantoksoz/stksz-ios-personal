@@ -13,7 +13,7 @@ let pass = 0, fail = 0;
 const t = (name, ok) => { if (ok) { pass++; console.log("  ✅ " + name); } else { fail++; console.log("  ❌ " + name); } };
 
 const html = read("www/index.html");
-const css = read("www/style.css");
+const css = read("www/style.css").replace(/\r\n/g, "\n");
 
 console.log("═══ 1) ÜST BAR ═══");
 t("Üst bardaki eski AI butonu kaldırıldı", !html.includes('class="ai-header-btn"'));
@@ -26,7 +26,7 @@ console.log("═══ 2) ALT BAR MERKEZİ: STKSZ AI ═══");
 const navBlock = html.slice(html.indexOf('<nav class="nav"'), html.indexOf("</nav>"));
 t("Merkez STKSZ AI butonu navda", navBlock.includes('class="nav-ai-btn"') && navBlock.includes("openStkszAi()"));
 t("Buton içinde STKSZ AI yazısı", navBlock.includes("<b>STKSZ</b><b>AI</b>"));
-t("Konum: Haberler ile Durum arasında (merkez)", navBlock.indexOf("Haberler") < navBlock.indexOf("nav-ai-btn") && navBlock.indexOf("nav-ai-btn") < navBlock.indexOf("Durum"));
+t("Konum: tüm sayfa düğmelerinden sonra (v12x Kripto sayfası eklendi; AI düğmesi HTML sıra sonunda, taşma stilleriyle görsel merkez)", navBlock.indexOf("Kripto") < navBlock.indexOf("nav-ai-btn"));
 t("Dışarı taşan yuvarlak tasarım (negatif margin + %50 radius)", css.includes(".nav-ai-btn{") && css.includes("margin-top:-26px") && css.includes("border-radius:50%"));
 t("Metalik halka + yavaş LED dönüşü (6s)", css.includes("conic-gradient") && css.includes("aiRingSpin 6s linear infinite"));
 t("Reduced-motion desteği (göz yormaz)", css.includes("@media(prefers-reduced-motion:reduce){.nav-ai-ring{animation:none}}"));
@@ -52,7 +52,7 @@ t("Grafik araç butonları 3D (aktif bakır kapsül)", css.includes('.chart-tool
 t("Tam ekran + kapat butonları 3D", css.includes('.chart-fullscreen-btn{border:0;border-radius:9px;background:var(--c3d-soft)') && css.includes(".asset-detail-close{"));
 t("STKSZ Editör alanı yeni kart dili", css.includes("#stkszEditorZone,"));
 t("Rapor modalı: KAPAT + paylaşım butonları 3D", css.includes(".btn-close-action{\n  border:0;border-radius:10px") && css.includes(".report-actions .btn{border-radius:999px"));
-t("Rapor buton işlevleri değişmedi", html.includes('onclick="shareReport()"') && html.includes('onclick="shareReportWhatsApp()"') && html.includes('onclick="copyReport()"'));
+t("Rapor buton işlevleri değişmedi: KAPAT + Paylaş (onaylı sharer) + Kopyala (WhatsApp çıkıp navigator.share/native oldu)", html.includes('onclick="closeReport()"') && html.includes('onclick="shareReport()"') && html.includes('onclick="copyReport()"') && html.includes("doShareWithConsent()"));
 t("Eski siyah kartlar yeni dile (strategy/core/risk/opportunity/plan)", css.includes(".strategy-card,") && css.includes(".opportunity-hero,") && css.includes(".plan-card{"));
 t("Üst bar aksiyon kapsülleri 3D metalik", css.includes('.hbtn{\n  border:0;border-radius:10px;background:var(--c3d-soft)'));
 

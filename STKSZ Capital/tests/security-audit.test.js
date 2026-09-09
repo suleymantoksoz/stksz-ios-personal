@@ -1,12 +1,13 @@
-/* ADIM 14 GÜVENLİK DENETİMİ — salt test, dosya değiştirmez */
-const {JSDOM}=require("jsdom");const fs=require("fs");const httpMod=require("http");
-const html=fs.readFileSync("/home/user/www/index.html","utf8");
-const apiSrc=fs.readFileSync("/home/user/www/api-client.js","utf8");
-const vwSrc=fs.readFileSync("/home/user/www/virtual-wallet.js","utf8");
-const syncSrc=fs.readFileSync("/home/user/www/sync-client.js","utf8");
-const brokerSrc=fs.readFileSync("/home/user/www/broker-adapter.js","utf8");
+const {JSDOM}=require("jsdom");const fs=require("fs");const httpMod=require("http");const path=require("path");const os=require("os");const {webcrypto}=require("crypto");
+const R=path.join(__dirname,"..");
+const html=fs.readFileSync(path.join(R,"www","index.html"),"utf8");
+const apiSrc=fs.readFileSync(path.join(R,"www","api-client.js"),"utf8");
+const vwSrc=fs.readFileSync(path.join(R,"www","virtual-wallet.js"),"utf8");
+const syncSrc=fs.readFileSync(path.join(R,"www","sync-client.js"),"utf8");
+const brokerSrc=fs.readFileSync(path.join(R,"www","broker-adapter.js"),"utf8");
+const chartSrc=fs.readFileSync(path.join(R,"www","stksz-chart.js"),"utf8");
 let pass=0,fail=0,findings=[];
-function t(n,c,critical){c?(pass++,console.log("✅ "+n)):(fail++,findings.push((critical?"KRİTİK: ":"")+n),console.log("❌ "+n));}
+function t(n,c){c?(pass++,console.log("✅ "+n)):(fail++,findings.push(n),console.log("❌ "+n));}
 
 const MOCK_KEY="MOCK-GEMINI-AUDIT-KEY";let geminiMode="ok";
 const mock=httpMod.createServer((req,res)=>{let b="";req.on("data",c=>b+=c);req.on("end",()=>{
@@ -25,16 +26,17 @@ const mock=httpMod.createServer((req,res)=>{let b="";req.on("data",c=>b+=c);req.
  res.end(JSON.stringify({candidates:[{content:{parts:[{text:"Tamam."}]}}]}));
 });});
 process.env.GEMINI_API_KEY=MOCK_KEY;process.env.GEMINI_ENDPOINT="http://127.0.0.1:10090";
-process.env.SYNC_DATA_DIR="/tmp/audit14-"+Date.now();process.env.PORT="10091";delete process.env.BROKER_LIVE_ENABLED;
-mock.listen(10090,"127.0.0.1",()=>{const {server}=require("/home/user/server/stksz-ai-server.js");server.listen(10091,"127.0.0.1",()=>{
+process.env.SYNC_DATA_DIR=fs.mkdtempSync(path.join(os.tmpdir(),"audit14-"));process.env.PORT="10091";delete process.env.BROKER_LIVE_ENABLED;
+mock.listen(10090,"127.0.0.1",()=>{const {server}=require(path.join(R,"server","stksz-ai-server.js"));server.listen(10091,"127.0.0.1",()=>{
  function mk(){return new Promise(r=>{const dom=new JSDOM(html,{runScripts:"dangerously",url:"http://localhost/",pretendToBeVisual:true,beforeParse(w){
+ Object.defineProperty(w,"crypto",{value:webcrypto});
   w.HTMLCanvasElement.prototype.getContext=function(){return new Proxy({},{get:(t,p)=>p==="measureText"?()=>({width:10}):()=>{}});};
   w.matchMedia=w.matchMedia||(()=>({matches:false,addEventListener(){},removeEventListener(){},addListener(){},removeListener(){}}));
   w.scrollTo=()=>{};w.confirm=()=>true;
   w.fetch=(url,opts={})=>new Promise((res2,rej2)=>{const u=new URL(url);if(u.hostname!=="127.0.0.1"){rej2(new Error("dış ağ engellendi (test)"));return;}
    const rq=httpMod.request({hostname:u.hostname,port:u.port,path:u.pathname+u.search,method:opts.method||"GET",headers:opts.headers||{}},rs=>{let d="";rs.on("data",c=>d+=c);rs.on("end",()=>res2({ok:rs.statusCode<300,status:rs.statusCode,text:()=>Promise.resolve(d),json:()=>Promise.resolve(JSON.parse(d))}));});rq.on("error",rej2);if(opts.body)rq.write(opts.body);rq.end();});
   new Function("window","localStorage",vwSrc)(w,w.localStorage);
-  try{const chartSrc=fs.readFileSync("/home/user/www/stksz-chart.js","utf8");new Function("window","localStorage","document","requestAnimationFrame",chartSrc)(w,w.localStorage,{createElement:()=>({style:{},getContext:()=>new Proxy({},{get:()=>()=>{}})}),addEventListener(){}},f=>{});}catch(e){}
+  try{new Function("window","localStorage","document","requestAnimationFrame",chartSrc)(w,w.localStorage,{createElement:()=>({style:{},getContext:()=>new Proxy({},{get:()=>()=>{}})}),addEventListener(){}},f=>{});}catch(e){}
   new Function("window","localStorage",brokerSrc)(w,w.localStorage);
   new Function("window","localStorage","document","fetch",apiSrc)(w,w.localStorage,{addEventListener(){},createElement:()=>({style:{}})},w.fetch);
   new Function("window","localStorage",syncSrc)(w,w.localStorage);
@@ -191,7 +193,7 @@ mock.listen(10090,"127.0.0.1",()=>{const {server}=require("/home/user/server/stk
   const clientLogs=(apiSrc+vwSrc+syncSrc+brokerSrc).match(/console\.(log|debug)\(/g)||[];
   const htmlInline=html.match(/console\.(log|debug)\(/g)||[];
   t("İstemci kodunda console.log dökümü yok/minimal ("+(clientLogs.length+htmlInline.length)+")", clientLogs.length+htmlInline.length<=3);
-  const serverSrc2=fs.readFileSync("/home/user/server/stksz-ai-server.js","utf8");
+  const serverSrc2=fs.readFileSync(path.join(R,"server","stksz-ai-server.js"),"utf8");
   t("Server logları redactSecrets'ten geçiyor (payload dump yok)", serverSrc2.includes("parts.map(p => redactSecrets")&&!/console\.log\((?!new Date)[^)]*payload/.test(serverSrc2));
 
   console.log(`\n════ DENETİM SONUCU: ${pass}/${pass+fail} ════`);
