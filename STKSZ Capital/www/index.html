@@ -1769,9 +1769,10 @@
    <div class="ai-head-text"><small class="ai-eyebrow">STKSZ YAPAY ZEKÂ KATMANI</small><h2 id="aiOverlayTitle">STKSZ AI</h2><small id="aiEngineLabel">Yalnızca doğrulanmış verilerle yorum yapar · API anahtarları asla gösterilmez</small></div>
    <span class="ai-conn-badge ai-conn-pill" id="aiConnBadge" data-state="unknown" aria-live="polite"><i class="ai-conn-dot" aria-hidden="true"></i><span class="ai-conn-label">BAĞLANTI KONTROL EDİLİYOR…</span></span>
   </div>
+  <button type="button" class="hbtn ai-intel-btn" onclick="openIntelligenceCenter()" aria-label="STKSZ Intelligence Center'ı aç" title="Intelligence Center">Intelligence</button>
   <button type="button" class="hbtn ai-close-btn" onclick="closeStkszAi()" aria-label="STKSZ AI'yı kapat"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
  </div>
- <div id="aiKeyWarning" class="ocr-warning ai-key-warning" hidden>STKSZ AI için bağlantı gerekli. <button type="button" class="btn small" onclick="closeStkszAi();openUnifiedMenu();openMenuPanel('menuApiKeys')">API Yönetimi</button> → STKSZ AI kartından Backend URL veya yedek anahtar ekle.</div>
+ <div id="aiKeyWarning" class="ocr-warning ai-key-warning" hidden>STKSZ AI servisi şu anda hazır değil — yalnızca doğrulanmış yerel verilerle sınırlı yanıt üretilir. Teknik yapılandırma normal kullanıcı panelinde gizlidir (yalnız yönetici).</div>
   <div id="aiChatLog" class="ai-chat-log ai-chat-log-full"><div class="ai-msg ai-msg-bot"><b>STKSZ AI</b><p>Merhaba! Portföyün, risklerin, haberler veya BIST hakkında soru sorabilirsin. Yalnızca uygulamadaki doğrulanmış verilerle yorum yaparım; verisi olmayan konuda "VERİ YOK" derim. API anahtarların bana asla gösterilmez.</p></div></div>
   <div class="ai-decision-panel" id="aiDecisionPanel"><div class="empty-state">STKSZ Karar Paneli — veri bekleniyor…</div></div>
   
@@ -1790,10 +1791,15 @@
    <button type="button" onclick="askStkszAi('tcell')">TCELL analiz et</button>
    <button type="button" onclick="askStkszAi('lasttx')">Son işlemlerimi göster</button>
    <button type="button" onclick="document.getElementById('aiImageFile').click()">📷 Görsel analiz et</button>
-   <button type="button" onclick="askStkszAi('gaps')">VERİ YOK analizi</button>
+<button type="button" onclick="askStkszAi('gaps')">VERİ YOK analizi</button>
+   </div>
+   <div class="ai-quick-commands">
+    <button type="button" onclick="askStkszAi('radar')">📡 Radarım</button>
+    <button type="button" onclick="askStkszAi('portfolioimport')">📥 İçe aktar</button>
+    <button type="button" onclick="openResearchFromAi()">🔬 Araştırma</button>
+   </div>
+   <button type="button" class="aiqc-arrow aiqc-next" onclick="aiQuickScroll(1)" aria-label="Sonraki sorular"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></svg></button>
   </div>
-  <button type="button" class="aiqc-arrow aiqc-next" onclick="aiQuickScroll(1)" aria-label="Sonraki sorular"><svg viewBox="0 0 24 24"><path d="m10 6 6 6-6 6"/></svg></button>
- </div>
  <div class="ai-composer">
   <div class="ai-input-neon" id="aiInputNeon">
    <button type="button" class="ai-image-btn" id="aiImageBtn" onclick="document.getElementById('aiImageFile').click()" aria-label="Görsel yükle" title="Görsel yükle (kamera/galeri)"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="10.2" r="1.7"/><path d="m5 18 4.6-4.6a1.5 1.5 0 0 1 2.1 0L18 19.5M14.5 15l1.9-1.9a1.5 1.5 0 0 1 2.1 0L21 15.5"/></svg><span>+ GÖRSEL</span></button>
@@ -1802,6 +1808,42 @@
    <button type="button" class="ai-send-btn-v2" id="aiSendBtn" onclick="askStkszAi()" aria-label="Gönder"><svg viewBox="0 0 24 24"><path d="M4.5 12 20 4.5 15.5 12 20 19.5 4.5 12Z"/><path d="M20 4.5 9.5 12"/></svg></button>
   </div>
   <small class="ai-disclaimer">Yanıtlar bilgilendirme amaçlıdır, yatırım tavsiyesi değildir. API anahtarların ve ENR verilerin AI'ya asla gönderilmez.</small>
+ </div>
+</div>
+
+<!-- FAZ 5: AI RESEARCH CENTER (Task 99) — varlık bazlı araştırma çalışma alanı; yalnız doğrulanmış veri -->
+<div class="ai-overlay" id="stkszResearchOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="researchTitle">
+ <div class="ai-overlay-inner research-overlay-inner">
+  <div class="ai-overlay-head">
+   <div class="ai-overlay-title"><small class="ai-eyebrow">STKSZ ARAŞTIRMA</small><h2 id="researchTitle">Araştırma Merkezi</h2><small class="ai-disclaimer">Yalnız uygulamadaki doğrulanmış veriyle üretilir; kaynağı olmayan değer uydurulmaz · yatırım tavsiyesi değildir.</small></div>
+   <button type="button" class="hbtn ai-close-btn" onclick="closeResearchCenter()" aria-label="Kapat"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="field"><label for="researchSymbolSelect">Araştırılan varlık (yalnız doğrulanmış kayıtlar)</label><select id="researchSymbolSelect" onchange="changeResearchSymbol(this.value)"></select></div>
+  <div id="researchWorkspace" class="research-workspace"><div class="empty-state">VERİ YOK — araştırma alanı hazırlanıyor…</div></div>
+ </div>
+</div>
+
+<!-- FAZ 5: UNIFIED INTELLIGENCE CENTER (Tasks 107-113) — tek istihbarat merkezi -->
+<div class="ai-overlay" id="stkszIntelOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="intelTitle">
+ <div class="ai-overlay-inner intel-overlay-inner">
+  <div class="ai-overlay-head">
+   <div class="ai-overlay-title"><small class="ai-eyebrow">STKSZ İSTİHBARAT</small><h2 id="intelTitle">Intelligence Center</h2><small class="ai-disclaimer">Tek merkez: özet, pre-market, kilit anlar, araştırma, raporlar, veri durumu — tümü aynı doğrulanmış veri motorundan.</small></div>
+   <button type="button" class="hbtn ai-close-btn" onclick="closeIntelligenceCenter()" aria-label="Kapat"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="intel-tabs" role="tablist">
+   <button type="button" class="intel-tab-btn" id="intelTab_genel" onclick="openIntelTab('genel');renderIntelOverview()">GENEL</button>
+   <button type="button" class="intel-tab-btn" id="intelTab_premarket" onclick="intelPreMarket()">PRE-MARKET</button>
+   <button type="button" class="intel-tab-btn" id="intelTab_moments" onclick="intelMoments()">KİLİT ANLAR</button>
+   <button type="button" class="intel-tab-btn" id="intelTab_research" onclick="intelResearch()">ARAŞTIRMA</button>
+   <button type="button" class="intel-tab-btn" id="intelTab_reports" onclick="intelReports()">RAPORLAR</button>
+   <button type="button" class="intel-tab-btn" id="intelTab_data" onclick="intelData()">VERİ DURUMU</button>
+  </div>
+  <div class="intel-pane" id="intelPane_genel"><div id="intelGenelBox"></div></div>
+  <div class="intel-pane" id="intelPane_premarket" hidden><div id="intelPremarketBox"></div></div>
+  <div class="intel-pane" id="intelPane_moments" hidden><div id="intelMomentsBox"></div></div>
+  <div class="intel-pane" id="intelPane_research" hidden><div id="intelResearchBox"><p class="muted">Araştırma Merkezi burada açılır.</p><button type="button" class="btn small primary" onclick="intelResearch()">ARAŞTIRMAYI AÇ</button></div></div>
+  <div class="intel-pane" id="intelPane_reports" hidden><div id="intelReportsBox"></div><div id="intelSchedLast" class="help"></div></div>
+  <div class="intel-pane" id="intelPane_data" hidden><div id="intelDataBox"></div></div>
  </div>
 </div>
 
@@ -4013,8 +4055,8 @@ function refreshInsightsBenchmarks(){
   }catch(error){console.error("Benchmarks insights error:",error);showToast("Benchmark analizi hatası");}
 }
 
-/* ===== FAZ 3: PRE-MARKET BRIEFING (Task 94) ===== */
-async function generatePreMarketBriefing(){
+/* ===== FAZ 3: PRE-MARKET BRIEFING (Task 94) · FAZ 5 (5.4): targeting ===== */
+async function generatePreMarketBriefing(targetEl){
   const eng=window.STKSZAIEngine;
   if(!eng?.analysis?.generatePreMarketBriefing){showToast("Pre-market motoru hazır değil.");return;}
   try{
@@ -4022,14 +4064,17 @@ async function generatePreMarketBriefing(){
     const marketData={overview:"VERİ YOK",keyLevels:{bist100:"VERİ YOK",usdtry:"VERİ YOK",gold:"VERİ YOK"}};
     const newsData=(eng.data.news()||[]).slice(0,10);
     const briefing=eng.analysis.generatePreMarketBriefing(portfolioData,marketData,newsData);
-    renderPreMarketBriefing(briefing);
+    /* FAZ 5 (5.4): kaynak/zaman/güven eklendi — doğrulanmamış dış veri kullanılmaz */
+    briefing.verified=Boolean(data.market?.lastSuccess);
+    briefing.source="doğrulanmış kayıt: "+(data.market?.source||"belirsiz");
+    renderPreMarketBriefing(briefing,targetEl);
     showToast("Pre-market bülteni hazırlandı.");
   }catch(error){console.error("Pre-market error:",error);showToast("Pre-market bülteni hatası");}
 }
 
-function renderPreMarketBriefing(briefing){
+function renderPreMarketBriefing(briefing,targetEl){
   if(!briefing)return;
-  const container=document.getElementById("preMarketContainer");
+  const container=targetEl||document.getElementById("preMarketContainer");
   if(!container)return;
   const movers=briefing.topMovers.map(m=>`<div class="pre-market-mover"><span class="mover-symbol">${m.symbol}</span><span class="mover-change ${m.changePct>=0?"positive":"negative"}">${m.changePct>=0?"+":""}${m.changePct.toFixed(2)}%</span></div>`).join("");
   container.innerHTML=`
@@ -4037,6 +4082,7 @@ function renderPreMarketBriefing(briefing){
       <div class="pre-market-title">📊 PRE-MARKET BÜLTENİ</div>
       <div class="pre-market-time">${new Date(briefing.timestamp).toLocaleString("tr-TR")}</div>
     </div>
+    <div class="pre-market-meta">Veri durumu: ${briefing.verified?"doğrulanmış":"güncel değil"} · Kaynak: ${esc(briefing.source||"belirsiz")} · Güven: ${briefing.verified?"yüksek":"DÜŞÜK — dış veri kullanılmadı"}</div>
     <div class="pre-market-grid">
       <div class="pre-market-item"><div class="pm-label">Portföy Değeri</div><div class="pm-value">${money(briefing.portfolioValue)}</div><div class="pm-change ${briefing.portfolioDailyChange>=0?"positive":"negative"}">${briefing.portfolioDailyChange>=0?"+":""}${briefing.portfolioDailyChange}%</div></div>
       <div class="pre-market-item"><div class="pm-label">BIST100</div><div class="pm-value">${briefing.keyLevels.bist100}</div></div>
@@ -4046,7 +4092,8 @@ function renderPreMarketBriefing(briefing){
     <div class="section-title" style="margin-top:12px">ÖNE ÇIKAN HAREKETLER</div>
     <div class="pre-market-movers">${movers||'<div class="muted">Veri yok</div>'}</div>
     <div class="section-title" style="margin-top:12px">HABER ÖZETİ</div>
-    <div>${(briefing.newsHighlights||[]).map(n=>`<div class="help" style="margin:4px 0">• ${esc(n.title)} <small>(${n.source})</small></div>`).join("")||'<div class="muted">Haber yok</div>'}</div>
+    <div>${(briefing.newsHighlights||[]).map(n=>{const s=n.source&&typeof n.source==="object"?n.source.name:n.source;return `<div class="help" style="margin:4px 0">• ${esc(n.title)} <small>(${esc(s||"kaynak yok")})</small></div>`;}).join("")||'<div class="muted">Haber yok</div>'}</div>
+    <div class="help" style="margin-top:8px">Bu bilgilendirmedir; yatırım tavsiyesi değildir.</div>
   `;
 }
 
@@ -4072,8 +4119,8 @@ function buildMomentSeries(asset){
   return [];
 }
 
-function renderKeyMomentsOnChart(symbol,moments,closes){
-  const canvas=document.getElementById("chartCanvas")||document.getElementById("cryptoChartCanvas");
+function renderKeyMomentsOnChart(symbol,moments,closes,canvasEl){
+  const canvas=canvasEl||document.getElementById("chartCanvas")||document.getElementById("cryptoChartCanvas");
   if(!canvas||!Array.isArray(moments))return;
   const series=Array.isArray(closes)&&closes.length?closes.slice():[];
   if(!series.length)return;
@@ -4110,10 +4157,10 @@ function generateMovementTimeline(symbol){
   }catch(error){console.error("Timeline error:",error);showToast("Timeline hatası");}
 }
 
-function renderMovementTimeline(symbol,timeline){
-  const container=document.getElementById("movementTimelineContainer");
+function renderMovementTimeline(symbol,timeline,containerEl){
+  const container=containerEl||document.getElementById("movementTimelineContainer");
   if(!container)return;
-  container.innerHTML=timeline.slice(-20).reverse().map(t=>`
+  container.innerHTML=!timeline||!timeline.length?'<div class="muted">zaman çizelgesi verisi yok — sahte hareket üretilmedi.</div>':timeline.slice(-20).reverse().map(t=>`
     <div class="movement-timeline-item">
       <div class="movement-timeline-time">${new Date(t.timestamp).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})}</div>
       <div class="movement-timeline-change ${t.change>=0?"positive":"negative"}">${t.change>=0?"+":""}${t.change}%</div>
@@ -4164,7 +4211,7 @@ function saveScheduledReports(){
   localStorage.setItem("stkszScheduledReports",JSON.stringify(scheduledReports));
 }
 
-async function generateAndSendReport(type){
+async function generateAndSendReport(type,opts){
   const eng=window.STKSZAIEngine;
   if(!eng)return;
   try{
@@ -4177,6 +4224,8 @@ async function generateAndSendReport(type){
     reportText+=`Günlük K/Z: ${signedMoney(insights.portfolio.dailyPnl)}\n`;
     reportText+=`Toplam K/Z: ${signedMoney(insights.portfolio.totalPnl)} (${insights.portfolio.totalPnlPercent}%)\n`;
     reportText+=`Risk: ${insights.risk.level} (HHI: ${insights.risk.hhi})\n`;
+    /* FAZ 5 (5.4): rapora da veri durumu satırı eklenir — dürüst kaynak bilgisi */
+    reportText+="Veri durumu: "+(data.market?.lastSuccess?"doğrulanmış · kaynak: "+(data.market?.source||"belirsiz"):"piyasa verisi güncel değil")+"\n";
     if(insights.performance.topGainers.length){
       reportText+=`\nKazananlar: ${insights.performance.topGainers.map(g=>g.symbol+" %"+g.change.toFixed(1)).join(", ")}\n`;
     }
@@ -4184,10 +4233,20 @@ async function generateAndSendReport(type){
       reportText+=`Kaybedenler: ${insights.performance.topLosers.map(l=>l.symbol+" %"+l.change.toFixed(1)).join(", ")}\n`;
     }
     reportText+="\n---\nBu rapor yatırım tavsiyesi değildir. VERİ YETERSİZ — KARAR YOK.";
-    /* Send notification */
+    /* FAZ 5 (5.7): no-change guard — değerler aynıysa bildirim/rapor basılmaz (spam yok).
+       Önizleme (preview) her zaman sohbete yazılır ama bildirim göndermez. */
+    const sig=JSON.stringify({v:Math.round(Number(insights.portfolio.totalValue)||0),d:Math.round(Number(insights.portfolio.dailyPnl)||0),p:Math.round(Number(insights.portfolio.totalPnl)||0),r:insights.risk.level,h:insights.risk.hhi});
+    const lastKey="last"+String(type).charAt(0).toUpperCase()+String(type).slice(1)+"Value";
+    const preview=Boolean(opts&&opts.preview);
+    const unchanged=scheduledReports[lastKey]===sig;
+    if(unchanged&&!preview){
+      console.info(`Scheduled ${type} report skipped: no value change.`);
+      const w=document.getElementById("intelSchedLast");if(w){try{renderSchedLast();}catch(e){}}
+      return;
+    }
     await sendNotification(`STKSZ ${type} Rapor`,reportText);
-    /* Also send to AI chat if open */
-    aiAppendMessage("bot",`📅 <b>Otomatik ${type} raporu</b><pre>${esc(reportText)}</pre>`);
+    aiAppendMessage("bot",`📅 <b>${preview?"ÖNİZLEME · ":"Otomatik "}${type} raporu</b><pre>${esc(reportText)}</pre>${unchanged?"<br><i>(Değer farkı bulunmadı — bildirim gönderilmedi, önizleme gösterildi.)</i>":""}`);
+    if(!preview){scheduledReports[lastKey]=sig;saveScheduledReports();}
   }catch(error){console.error("Scheduled report error:",error);}
 }
 
@@ -4212,14 +4271,314 @@ function requestNotificationPermission(){
   }
 }
 
-/* ===== FAZ 3: UNIFIED INTELLIGENCE CENTER (Tasks 99-113) ===== */
+/* ===== FAZ 5: UNIFIED INTELLIGENCE CENTER (Tasks 107-113) ===== */
+const INTEL_TABS=["genel","premarket","moments","research","reports","data"];
 function openIntelligenceCenter(){
-  /* Open a unified modal with all intelligence tools */
-  showToast("STKSZ Intelligence Center açılıyor...");
-  /* For now, navigate to Opportunities page which has Radar + AI + Reports */
-  showPage("opportunities");
-  setTimeout(()=>{openStkszAi();},300);
+  const overlay=document.getElementById("stkszIntelOverlay");
+  if(!overlay)return;
+  overlay.hidden=false;lockBodyScroll();
+  openIntelTab("genel");
+  renderIntelOverview();
 }
+function closeIntelligenceCenter(){
+  const overlay=document.getElementById("stkszIntelOverlay");
+  if(overlay)overlay.hidden=true;
+  unlockBodyScroll();
+}
+function openIntelTab(tab){
+  INTEL_TABS.forEach(t=>{
+    const tabBtn=document.getElementById("intelTab_"+t);
+    if(tabBtn)tabBtn.classList.toggle("active",t===tab);
+    const pane=document.getElementById("intelPane_"+t);
+    if(pane)pane.hidden=t!==tab;
+  });
+}
+/* Veri yeterliliği kapısı Intelligence Center içinde de dürüst çalışır */
+function renderDataSufficiencySummary(){
+  const g=checkDataSufficiency();
+  const missing=g.gaps.length?g.gaps.map(x=>"• "+esc(x)).join("<br>"):"Tüm ana alanlar dolu.";
+  const st=data.market?.lastSuccess?"veri güncel":"piyasa verisi güncel değil";
+  return `<div class="intel-sufficient ${g.gaps.length?"intel-warn":""}"><b>VERİ YETERLİLİĞİ: ${g.gaps.length?"EKSİK — VERİ YETERSİZ — KARAR YOK":"YETERLİ"}</b> · ${esc(st)}<br><small>${missing}</small></div>`;
+}
+function intelKpi(label,value){return `<div class="intel-kpi"><span>${esc(label)}</span><b>${value}</b></div>`;}
+function renderIntelOverview(){
+  const box=document.getElementById("intelGenelBox");if(!box)return;
+  const total=calc(),daily=dailyResults(),risk=riskAnalysis(),score=scoreDetails();
+  box.innerHTML=`
+   <div class="intel-kpi-row">
+    ${intelKpi("Toplam Varlık",total===null?"VERİ YOK":money(total))}
+    ${intelKpi("Günlük K/Z",daily.net===null?"VERİ YOK":signedMoney(daily.net))}
+    ${intelKpi("Risk",risk.valid?esc(risk.level.label)+" · "+risk.overall+"/100":"VERİ YOK")}
+    ${intelKpi("STKSZ Skor",score.valid?score.score+"/100":"VERİ YOK")}
+   </div>
+   ${renderDataSufficiencySummary()}
+   <div class="toolbar"><button type="button" class="btn small" onclick="intelPreMarket()">PRE-MARKET</button><button type="button" class="btn small" onclick="intelMoments()">KİLİT ANLAR</button><button type="button" class="btn small" onclick="intelResearch()">ARAŞTIRMA</button><button type="button" class="btn small" onclick="intelReports()">RAPORLAR</button><button type="button" class="btn small" onclick="intelData()">VERİ DURUMU</button></div>`;
+}
+function intelPreMarket(){
+  openIntelTab("premarket");
+  generatePreMarketBriefing(document.getElementById("intelPremarketBox"));
+}
+function intelMoments(){
+  openIntelTab("moments");
+  const box=document.getElementById("intelMomentsBox");if(!box)return;
+  const cands=activeAssets().filter(a=>a.s);
+  const sel=document.getElementById("intelSymbolSelect");
+  const symbol=sel&&sel.value?sel.value:(cands[0]?.s||"");
+  box.innerHTML=`<div class="field"><label for="intelSymbolSelect">Varlık</label><select id="intelSymbolSelect" onchange="intelMomentsRender()">${cands.map(a=>`<option value="${esc(a.s)}" ${a.s===symbol?"selected":""}>${esc(a.s)}</option>`).join("")||'<option value="">VERİ YOK</option>'}</select></div>
+   <canvas id="intelKeyCanvas" class="intel-chart-canvas" width="600" height="220"></canvas>
+   <div id="intelMomentList" class="muted">—</div>
+   <div id="intelTimelineBox"></div>
+   <div class="help">Kaynak: doğrulanmış fiyat/hacim geçmişi; an yoksa sahte an üretilmez. İşaretler yalnız üstüne çizilir, grafik baştan çizilmez.</div>`;
+  intelMomentsRender();
+}
+function intelMomentsRender(){
+  const sel=document.getElementById("intelSymbolSelect");
+  const sym=sel?.value||"";
+  const eng=window.STKSZAIEngine;
+  const asset=data.assets.find(a=>a.s===sym);
+  if(!sym||!asset)return;
+  const closes=buildMomentSeries(asset);
+  const listBox=document.getElementById("intelMomentList");
+  const tBox=document.getElementById("intelTimelineBox");
+  const volumes=Array.isArray(asset.volumeHistory)?asset.volumeHistory:(Array.isArray(asset.history)?asset.history.map(h=>h.volume!==undefined?h.volume:(h.v||0)):[]);
+  intelDrawSpark(closes,document.getElementById("intelKeyCanvas"));
+  if(closes.length<10){
+    if(listBox)listBox.textContent="VERİ YETERSİZ — kilit anlar ve zaman çizelgesi için en az 10 gerçek fiyat noktası gerekli.";
+    return;
+  }
+  let moments=[];
+  try{moments=eng?.analysis?.detectKeyMoments?eng.analysis.detectKeyMoments(closes,volumes,{},{}):[];}catch(e){}
+  try{renderKeyMomentsOnChart(sym,moments,closes,document.getElementById("intelKeyCanvas"));}catch(e){}
+  if(listBox)listBox.innerHTML=moments.length?moments.map(m=>`<div class="help">• ${esc(String(m.type||"AN"))} @ nokta ${Number(m.index>>>0)+1} · ${formatNumber(Number(m.price)||(closes[Number(m.index)]||0),2,2)} TL</div>`).join(""):"kilit an tespit edilmedi — sahte an üretilmedi.";
+  try{const tl=eng?.analysis?.generateMovementTimeline?eng.analysis.generateMovementTimeline(closes,volumes,{},{},asset.trades||[]):[];renderMovementTimeline(sym,tl,tBox);}catch(e){}
+}
+function intelDrawSpark(closes,canvas){
+  if(!canvas)return;
+  const ctx=canvas.getContext?canvas.getContext("2d"):null;if(!ctx)return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!closes||closes.length<2)return;
+  const min=Math.min.apply(null,closes),max=Math.max.apply(null,closes),range=max-min||1;
+  ctx.beginPath();ctx.strokeStyle="#D0904E";ctx.lineWidth=2;
+  closes.forEach((v,i)=>{const x=i/(closes.length-1)*canvas.width;const y=canvas.height-((v-min)/range)*(canvas.height-12)-6;if(i)ctx.lineTo(x,y);else ctx.moveTo(x,y);});
+  ctx.stroke();
+}
+function intelResearch(){
+  openIntelTab("research");
+  openResearchFromAi();
+}
+function intelReports(){openIntelTab("reports");renderSchedSettings();renderSchedLast();}
+function renderSchedSettings(){
+  const box=document.getElementById("intelReportsBox");if(!box)return;
+  box.innerHTML=`
+   <div class="intel-report-row"><label class="check-row"><input id="schedDaily" type="checkbox" ${scheduledReports.dailyEnabled?"checked":""} onchange="saveSchedToggle('dailyEnabled',this.checked)"> Günlük rapor (otomatik bildirim)</label><div class="field"><input id="schedDailyTime" type="time" value="${esc(scheduledReports.dailyTime||"18:00")}" onchange="saveSchedValue('dailyTime',this.value)"></div></div>
+   <div class="intel-report-row"><label class="check-row"><input id="schedWeekly" type="checkbox" ${scheduledReports.weeklyEnabled?"checked":""} onchange="saveSchedToggle('weeklyEnabled',this.checked)"> Haftalık rapor (Cuma 09:00)</label></div>
+   <div class="intel-report-row"><label class="check-row"><input id="schedMonthly" type="checkbox" ${scheduledReports.monthlyEnabled?"checked":""} onchange="saveSchedToggle('monthlyEnabled',this.checked)"> Aylık rapor (Ayın 1'i 09:00)</label></div>
+   <div class="toolbar"><button type="button" class="btn small" onclick="requestNotificationPermission()">BİLDİRİM İZNİ</button><button type="button" class="btn small" onclick="previewScheduledReport('daily')">GÜNLÜK ÖNİZLE</button></div>
+   <p class="help">Rapor yalnız doğrulanmış veriyle üretilir; veride değişiklik yoksa bildirim gönderilmez (spam yok). Bildirim izni yoksa rapor yalnız AI sohbetinde görünür.</p>`;
+}
+function renderSchedLast(){
+  const last=document.getElementById("intelSchedLast");if(!last)return;
+  last.innerHTML="Son günlük rapor: "+(scheduledReports.lastDaily?scheduledReports.lastDaily:"yok")+" · Son haftalık: "+(scheduledReports.lastWeekly?scheduledReports.lastWeekly:"yok")+" · Son aylık: "+(scheduledReports.lastMonthly?scheduledReports.lastMonthly:"yok");
+}
+function saveSchedToggle(key,checked){scheduledReports[key]=Boolean(checked);saveScheduledReports();showToast("Rapor tercihi kaydedildi.");}
+function saveSchedValue(key,value){scheduledReports[key]=String(value||"");saveScheduledReports();showToast("Zaman kaydedildi.");}
+async function previewScheduledReport(type){
+  showToast("Rapor önizlemesi üretiliyor…");
+  const key="last"+type.charAt(0).toUpperCase()+type.slice(1)+"Value";
+  const before=scheduledReports[key];
+  await generateAndSendReport(type,{preview:true});
+  const last=document.getElementById("intelSchedLast");if(last){try{renderSchedLast();}catch(e){}}
+  if(before!==undefined&&before===scheduledReports[key])showToast("Bu rapor öncekinden farklı değer içermiyor; yine de önizleme sohbete yazıldı.");
+}
+function intelData(){openIntelTab("data");renderIntelDataStatus();}
+function providerChip(label,value,ok){return `<div class="provider-chip ${ok?"ok":""}"><span>${esc(label)}</span><b>${esc(value)}</b></div>`;}
+function renderIntelDataStatus(){
+  const box=document.getElementById("intelDataBox");if(!box)return;
+  const g=checkDataSufficiency();
+  box.innerHTML=`${renderDataSufficiencySummary()}
+   <div class="intel-provider-chips">
+    ${providerChip("Piyasa",data.market?.lastSuccess?"GÜNCEL":"BAĞLI DEĞİL",Boolean(data.market?.lastSuccess))}
+    ${providerChip("Haber",(newsCache.items||[]).length?"AKTİF":"BOŞ",Boolean((newsCache.items||[]).length))}
+    ${providerChip("Doğrulanmış fiyatlar",activeAssets().some(a=>a.marketVerified)?"VAR":"YOK",activeAssets().some(a=>a.marketVerified))}
+   </div>
+   <div class="help">Eksik alanlar: ${g.gaps.length?g.gaps.map(esc).join(", "):"yok"}</div>`;
+}
+
+/* ===== FAZ 5: AI RESEARCH CENTER (Task 99) ===== */
+let researchSymbol="";
+function stkszResearchKey(symbol){return "stkszResearchThesis_"+String(symbol||"").toUpperCase()+"_"+aiUserScope();}
+function aiUserScope(){
+  try{
+    if(typeof authState!=="undefined"&&authState&&authState.email)return String(authState.email).replace(/[^a-zA-Z0-9]/g,"_").slice(0,40);
+    if(typeof isGuest==="function"&&isGuest())return "misafir";
+  }catch(e){}
+  return "yerel";
+}
+function openResearchFromAi(){
+  if(!aiAllowed("research")){showToast(aiGateMessage("research"));return;}
+  const candidates=activeAssets().filter(a=>a.s);
+  openResearchCenter(candidates[0]?.s||"");
+}
+function openResearchCenter(symbol){
+  if(!aiAllowed("research")){showToast(aiGateMessage("research"));return;}
+  const candidates=activeAssets().filter(a=>a.s);
+  const asset=candidates.find(a=>a.s===String(symbol||"").toUpperCase())||candidates[0];
+  researchSymbol=asset?.s||"";
+  const overlay=document.getElementById("stkszResearchOverlay");if(!overlay)return;
+  const sel=document.getElementById("researchSymbolSelect");
+  if(sel)sel.innerHTML=candidates.map(a=>`<option value="${esc(a.s)}" ${a.s===researchSymbol?"selected":""}>${esc(a.s)}${a.name?" · "+esc(a.name):""}</option>`).join("")||'<option value="">VERİ YOK</option>';
+  overlay.hidden=false;lockBodyScroll();
+  renderResearchWorkspace(researchSymbol);
+}
+function closeResearchCenter(){
+  const overlay=document.getElementById("stkszResearchOverlay");
+  if(overlay)overlay.hidden=true;
+  unlockBodyScroll();
+}
+function changeResearchSymbol(symbol){researchSymbol=String(symbol||"").toUpperCase();renderResearchWorkspace(researchSymbol);}
+function renderResearchWorkspace(symbol){
+  const box=document.getElementById("researchWorkspace");if(!box)return;
+  const asset=data.assets.find(a=>a.s===symbol);
+  const eng=window.STKSZAIEngine;
+  const thesis=String(storageGet(stkszResearchKey(symbol))||"").slice(0,2000);
+  box.innerHTML=`
+   <div class="research-sections">
+    ${researchSection("TEZ (sadece cihazında · kullanıcı kapsamlı)",`<textarea id="researchThesisInput" rows="3" placeholder="Bu varlık için tezini not al — API anahtarı/PII yazma.">${esc(thesis)}</textarea><div class="toolbar"><button type="button" class="btn small primary" onclick="saveResearchThesis()">TEZİ KAYDET</button></div>`)}
+    ${researchSection("TEKNİK (yalnız doğrulanmış geçmiş)",researchTechnical(asset))}
+    ${researchSection("KATALİZÖRLER / HABERLER",researchCatalysts(symbol))}
+    ${researchSection("RİSKLER (deterministik)",researchRisks(asset))}
+    ${researchSection("FİNANSALLAR",researchFundamentals(asset))}
+    ${researchSection("KAYNAKLAR",researchSources(asset))}
+   </div>
+   <div class="toolbar"><button type="button" class="btn primary" onclick="researchAiDraft()">AI DERLE</button>${eng?"":"<small class='muted'>AI motoru hazır değil — yalnız doğrulanmış veri bölümleri gösterilir.</small>"}</div>
+   <p class="ai-disclaimer">Araştırma yalnız uygulamadaki doğrulanmış veriyle üretilir; kaynağı olmayan değer uydurulmaz. Bu bilgilendirmedir; yatırım tavsiyesi değildir.</p>`;
+}
+function researchSection(title,content){return `<div class="research-section"><div class="research-section-title">${esc(title)}</div>${content}</div>`;}
+function researchTechnical(asset){
+  const closes=asset?buildMomentSeries(asset):[];
+  if(closes.length<10)return '<div class="muted">VERİ YETERSİZ — teknik özet için en az 10 gerçek fiyat noktası gerekli.</div>';
+  const last=closes[closes.length-1];
+  const sma=n=>closes.slice(-n).reduce((s,x)=>s+x,0)/n;
+  const s10=sma(10),s20=closes.length>=20?sma(20):null;
+  const prev=closes[closes.length-2];
+  const mom=prev>0?100*(last-prev)/prev:0;
+  const layout=s20!==null?(last>s20?"SMA20 üzerinde":"SMA20 altında"):"SMA20 için yetersiz veri";
+  return [["Son fiyat",formatNumber(last,2,2)+" TL"],["SMA 10",formatNumber(s10,2,2)],s20?["SMA 20",formatNumber(s20,2,2)]:null,["Son gün değişim",formatNumber(mom,2,2)+"%"]].filter(Boolean)
+   .map(r=>`<div class="research-row"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("")
+   +`<div class="help" style="margin-top:6px">Konum: ${esc(layout)} — sinyal değildir, yalnız doğrulanmış geçmiş.</div>`;
+}
+function researchCatalysts(symbol){
+  const up=String(symbol||"").toLocaleUpperCase("tr-TR");
+  const items=Array.isArray(newsCache&&newsCache.items)?newsCache.items:[];
+  const hits=items.filter(n=>((n.title||"")+(n.description||"")).toLocaleUpperCase("tr-TR").indexOf(up)!==-1).slice(0,5);
+  const div=Array.isArray(data.pendingDividends&&data.pendingDividends.items)?data.pendingDividends.items.find(x=>x.symbol===symbol):null;
+  const parts=[];
+  hits.forEach(n=>{const sp=n.source&&typeof n.source==="object"?n.source.name:n.source;parts.push(`<div class="research-catalyst">• ${esc(n.title||"Başlık yok")} <small>${sp?esc(sp):"kaynak yok"}</small>${n.publishedAt?"<small> · "+esc(String(n.publishedAt).slice(0,10))+"</small>":""}</div>`);});
+  if(div)parts.push(`<div class="research-catalyst">• Bekleyen temettü: ${esc(div.note||"kayıt")} (${esc(div.date||"tarih belirsiz")})</div>`);
+  return parts.length?parts.join(""):'<div class="muted">Bu varlıkla eşleşen doğrulanmış haber/temettü kaydı yok — katalizör uydurulmaz.</div>';
+}
+function researchRisks(asset){
+  const total=calc();
+  if(total===null||!asset||finite(asset.v)===null)return '<div class="muted">VERİ YETERSİZ — risk hesaplanamıyor (portföy/pozisyon fiyatı eksik).</div>';
+  const weight=total>0?(asset.v/total*100):0;
+  const st=riskAnalysis();
+  const rows=[["Pozisyon ağırlığı",formatNumber(weight,1,1)+"%"],["Portföy risk skoru",st.valid?st.overall+"/100":"VERİ YOK"],["Risk seviyesi",st.valid?st.level.label:"VERİ YOK"]];
+  if(weight>50)rows.push(["Yoğunlaşma","%50 üzerinde — yoğun"]);
+  return rows.map(r=>`<div class="research-row"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("");
+}
+function researchFundamentals(asset){
+  const f=asset&&(asset.fundamentals||(data.fundamentals&&data.fundamentals[asset.s]));
+  if(!f)return '<div class="muted">VERİ YOK — temel veri kaynağı bu varlık için yapılandırılmadı; değer uydurulmaz.</div>';
+  return Object.entries(f).map(([k,v])=>`<div class="research-row"><span>${esc(k)}</span><b>${esc(String(v))}</b></div>`).join("");
+}
+function researchSources(asset){
+  if(!asset)return '<div class="muted">VERİ YOK</div>';
+  return [["Fiyat kaynağı",(asset.source||"belirsiz")+(asset.marketVerified?" · doğrulanmış":" · doğrulanmamış")],["Piyasa verisi son güncelleme",data.market?.lastSuccess?String(data.market.lastSuccess):"güncel çekim yok"],["Geçmiş nokta sayısı",String((buildMomentSeries(asset)||[]).length)]]
+   .map(r=>`<div class="research-row"><span>${esc(r[0])}</span><b>${esc(r[1])}</b></div>`).join("");
+}
+function saveResearchThesis(){
+  const input=document.getElementById("researchThesisInput");
+  if(!input)return;
+  if(!researchSymbol)return showToast("Önce araştırılacak varlığı seç.");
+  try{storageSet(stkszResearchKey(researchSymbol),String(input.value||"").slice(0,2000));showToast("Tez notu cihaza kaydedildi (kullanıcı kapsamlı).");}catch(e){showToast("Tez kaydedilemedi.");}
+}
+function researchAiDraft(){
+  const ai=window.STKSZProviders?.stkszAiProvider;
+  if(!ai?.configured?.()){showToast("STKSZ AI servisi hazır değil — yalnız doğrulanmış veri bölümleri gösterildi.");return;}
+  const thesis=document.getElementById("researchThesisInput")||null;
+  const txt="Araştırma özeti hazırla (varlık: "+researchSymbol+"). Yalnız uygulama verisiyle; pozisyon (lot/maliyet/fiyat), teknik özet, haber/katalizör, risk ve kaynaklar. Veri yoksa VERİ YOK de. Tez notu: "+((thesis&&thesis.value)||"yok")+". Kesin al/sat emri verme, yalnız bilgilendir.";
+  closeResearchCenter();
+  openStkszAi();
+  __aiSkipRoute=true;
+  const input=document.getElementById("aiQuestionInput");if(input)input.value=txt;
+  askStkszAi();
+}
+
+/* ===== FAZ 5: AI ROLE GATES (Task 106) — sahte ücretsiz açılım yok ===== */
+function aiRoleLevel(){
+  try{
+    const ent=window.STKSZEntitlement;
+    const r=ent&&typeof ent.role==="function"?ent.role():null;
+    return String(r||(typeof isGuest==="function"&&isGuest()?"GUEST":"FREE")).toLowerCase();
+  }catch(e){return "free";}
+}
+const AI_FEATURE_GATE={ask:"guest",image:"free",timeline:"free",intel:"free",research:"pro",scheduled:"pro"};
+function aiAllowed(feature){
+  const order=["guest","free","pro","elite","admin"];
+  return order.indexOf(aiRoleLevel())>=order.indexOf(AI_FEATURE_GATE[feature]||"guest");
+}
+function aiGateMessage(feature){
+  const need=AI_FEATURE_GATE[feature]||"guest";
+  return need==="pro"?"Araştırma Merkezi / raporlar STKSZ PRO veya ELITE üyelik gerektirir (sahte açılım yapılmaz).":need==="free"?"Bu özellik için hesabınla giriş yap.":"Bu özellik kullanılamıyor.";
+}
+
+/* ===== FAZ 5: AI NATURAL-LANGUAGE COMMANDS (Task 88-90) — deterministik, AI gerektirmez ===== */
+function routeAiCommand(question){
+  const q=String(question||"").toLocaleLowerCase("tr-TR").trim();
+  if(!q)return null;
+  if(/(araştır|arastır|derinlemesine)/.test(q))return {action:"research"};
+  if(/(rapor (üret|hazırla|oluştur|indir)|raporumu (üret|hazırla|oluştur|indir))/.test(q))return {action:"report"};
+  if(/(aktar|import|içe aktar|yükle|görsel|ekran görüntüsü)/.test(q))return {action:"import"};
+  if(/(analiz|özet|incele|değerlendir|durum|summary)/.test(q)&&/portf/.test(q))return {action:"snapshot"};
+  return null;
+}
+function aiPortfolioSnapshot(){
+  const act=activeAssets();
+  return {
+    at:new Date().toISOString(),
+    source:data.market?.lastSuccess?("doğrulanmış kayıt · kaynak: "+(data.market?.source||"belirsiz")):"yerel kayıt — piyasa verisi güncel değil",
+    total:calc(),
+    cash:{tl:finite(data.midasCash)===null?null:data.midasCash,fx:fxCashTl()},
+    positions:act.map(a=>({symbol:a.s,q:finite(a.q),price:finite(a.p)===null?null:a.p,verified:Boolean(a.marketVerified),source:a.source||null}))
+  };
+}
+async function runAiCommand(cmd,q){
+  if(cmd.action==="research"){openResearchFromAi();return;}
+  if(cmd.action==="import"){
+    openImportCenter();
+    aiAppendMessage("bot","📥 İçe Aktarma Merkezi açıldı — görsel/CSV/PDF/metin girişi tek merkezde birleşir. İçe aktarılan veri onay önizlemesiyle kaydedilir; sahte veri üretilmez.");
+    return;
+  }
+  if(cmd.action==="report"){
+    try{generateReport();aiAppendMessage("bot","Rapor Merkezi açıldı — rapor yalnız doğrulanmış yerel veriden üretilir.");}catch(e){aiAppendMessage("bot","Rapor üretilemedi: "+String(e&&e.message?e.message:"bilinmeyen hata"));}
+    return;
+  }
+  if(cmd.action==="snapshot"){
+    const snap=aiPortfolioSnapshot();
+    const lines=["NORMALİZE PORTFÖY ÖZETİ (yalnız doğrulanmış yerel veri)","Tarih: "+snap.at,"Veri durumu: "+snap.source,"Toplam varlık: "+(snap.total===null?"VERİ YOK":money(snap.total)),"Nakit (TL): "+(snap.cash.tl===null?"VERİ YOK":money(snap.cash.tl))];
+    if(snap.positions.length){
+      lines.push("Pozisyon ("+snap.positions.length+"):");
+      snap.positions.forEach(p=>lines.push("- "+p.symbol+" · "+(p.q===null?"adet bilinmiyor":String(p.q)+" adet")+" · fiyat: "+(p.price===null?"VERİ YOK":formatNumber(p.price,2,2))+" TL · doğrulanmış fiyat: "+(p.verified?"evet":"hayır")));
+    }else{
+      lines.push("Pozisyon: aktif yok");
+    }
+    lines.push("Bu bilgilendirmedir; yatırım tavsiyesi değildir. Karar senindir.");
+    aiAppendMessage("bot",lines.join("\n"));
+    if(!snap.positions.length&&snap.cash.tl===null){aiAppendMessage("bot","EXPOSURE VERİ YOK — içe aktarma merkezini açıyorum.");openImportCenter();}
+    return;
+  }
+}
+let __aiSkipRoute=false;
 
 /* ===== SECURITY: AI/OCR ISOLATION (Task 99-113) ===== */
 /* Already enforced: AI provider only receives redacted context via stkszAiContext()
@@ -6158,7 +6517,9 @@ const AI_QUICK_PROMPTS={
  daily:"Bugünün özetini çıkar: günlük K/Z, en çok hareket eden pozisyonlar ve yarın için dikkat noktaları.",
  asels:"ASELS hakkında ne düşünüyorsun? Uygulamadaki doğrulanmış fiyat, geçmiş ve portföy verisiyle değerlendir; veri yoksa hangi verinin eksik olduğunu açıkça söyle.",/* v120 */
  ipo:"Yaklaşan halka arzlar neler? Yalnızca uygulamadaki doğrulanmış halka arz takvimi kayıtlarını listele; kayıt yoksa VERİ YOK de ve Fırsatlar sayfasındaki taramayı öner.",/* v120 */
- gaps:"Uygulamadaki eksik (VERİ YOK) alanları listeledim. Her eksik için hangi veri kaynağını kontrol etmem gerektiğini kısa maddelerle söyle (örn: fiyat yoksa fiyat kaynağı testi, haber yoksa haber bağlantısı). API anahtarlarından ASLA bahsetme, anahtar değeri isteme."
+ gaps:"Uygulamadaki eksik (VERİ YOK) alanları listeledim. Her eksik için hangi veri kaynağını kontrol etmem gerektiğini kısa maddelerle söyle (örn: fiyat yoksa fiyat kaynağı testi, haber yoksa haber bağlantısı). API anahtarlarından ASLA bahsetme, anahtar değeri isteme.",
+  radar:"Radar göstergelerimi özetle: portföy sağlığı, senaryo, kazanç/risk oranı ve son günün fırsat taraması. Yalnız doğrulanmış tarayıcı/yerel veri; eksikse VERİ YOK de.",
+  portfolioimport:"Portföy verimi içe aktarmalıyım: mevcut kayıtları, eksik verileri göster ve içe aktarma için öneri ver."
 };
 /* VERİ YOK tarayıcısı: uygulamadaki eksik alanları güvenli özetler (anahtar içermez) */
 function stkszAiGapReport(){
@@ -6171,7 +6532,7 @@ function stkszAiGapReport(){
  });
  if(!(newsCache.items||[]).length)gaps.push("Haber akışı boş (Haberler sayfasında yenile)");
  if(!fxRates)gaps.push("Döviz kuru önbelleği boş (döviz nakitler toplama katılamaz)");
- if(!data.market?.lastSuccess)gaps.push("Hiç başarılı piyasa çekimi yok (üstteki yenile butonu / API Yönetimi testleri)");
+ if(!data.market?.lastSuccess)gaps.push("Hiç başarılı piyasa çekimi yok (üstteki yenile butonu ile yeniden dene; teknik kurulum yönetici panelindedir)");
  const st=riskAnalysis();if(!st.valid)gaps.push("Risk analizi üretilemiyor (lot+fiyat doğrulaması eksik)");
  return gaps.length?("EKSİK VERİ LİSTESİ:\n- "+gaps.join("\n- ")):"Eksik veri tespit edilmedi; tüm ana alanlar dolu.";
 }
@@ -6259,7 +6620,7 @@ function renderSyncState(status,detail){
 }
 async function syncCreateAccount(){
  try{
-  if(!window.STKSZSync?.baseUrl?.()){showToast("Önce API Yönetimi → STKSZ AI → Backend URL girin (senkron aynı sunucuyu kullanır).");return;}
+  if(!window.STKSZSync?.baseUrl?.()){showToast("Senkron hizmeti şu anda yapılandırılmamış — teknik kurulum yönetici tarafındadır.");return;}
   const out=await window.STKSZSync.register();
   const box=document.getElementById("syncPairCodeBox");
   if(box){box.hidden=false;box.innerHTML=`✅ Hesap oluşturuldu. Diğer cihazına şu EŞLEŞTİRME KODUNU gir:<br><b style="word-break:break-all">${esc(out.pairCode)}</b><br><small>Bu kodu güvenli sakla; kod = hesabın anahtarı. Ekran görüntüsü almak yerine not al.</small>`;}
@@ -6283,10 +6644,11 @@ function toggleLegacyOcr(){const el=document.getElementById("legacyOcrWrap");if(
    okunamayan alan null döner ve "görselden doğrulanamadı" yazılır.
    Kullanıcı ONAYLAMADAN sanal portföye/veritabanına yazılmaz. */
 async function aiHandleImage(file){
- if(!file)return;
- if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>8*1024*1024){showToast("En fazla 8MB JPG/PNG/WebP yükleyin.");return;}
- const ai=window.STKSZProviders?.stkszAiProvider;
- if(!ai?.usesBackend?.()){aiAppendMessage("bot","⚠️ Görsel analizi için AI Backend gerekli (anahtar cihazda tutulmadan). Menü → API Yönetimi → STKSZ AI → AI Backend URL alanını doldurun (kurulum rehberi: server/KURULUM-AI-BACKEND.md).");return;}
+  if(!file)return;
+  if(!aiAllowed("image")){showToast("Görsel analizi için hesap girişi gerekir — sahte erişim açılmaz.");return;}
+  if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size>8*1024*1024){showToast("En fazla 8MB JPG/PNG/WebP yükleyin.");return;}
+  const ai=window.STKSZProviders?.stkszAiProvider;
+  if(!ai?.usesBackend?.()){aiAppendMessage("bot","⚠️ Görsel analizi servisi şu anda hazır değil — teknik yapılandırma yapılandırılmadı (kurulum yönetici tarafındadır; normal kullanıcı panelinde gizlidir).");return;}
  const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});
  const log=document.getElementById("aiChatLog");
  const userMsg=document.createElement("div");userMsg.className="ai-msg ai-msg-user";userMsg.innerHTML=`<b>SEN</b><p>📷 Görsel yüklendi (${esc(file.name||"görüntü")})</p><img class="ai-image-thumb" src="${dataUrl}" alt="Yüklenen görsel">`;log?.appendChild(userMsg);
@@ -6601,8 +6963,17 @@ function aiRedactSecrets(text){
   return out;
  }catch(error){return text;}
 }
+function aiHistoryKey(){
+  /* FAZ 5 (5.8): sohbet geçmişi kullanıcı kapsamlı — başka kullanıcının geçmişi karışmaz */
+  return "stkszAiHistory_"+aiUserScope();
+}
 function aiAppendMessage(role,text,engine){
- try{const hist=safeJson(storageGet("stkszAiHistory"),[])||[];hist.push({role,text:String(text||"").slice(0,2000),engine:engine||"",at:new Date().toISOString()});storageSet("stkszAiHistory",JSON.stringify(hist.slice(-50)));window.STKSZSync?.markTouched?.("stkszAiHistory");}catch(e){}
+ try{
+  const histKey=aiHistoryKey();
+  let hist=safeJson(storageGet(histKey),[])||[];
+  /* tek seferlik geçiş: eski kullanıcısız anahtardan taşı */
+  if(!hist.length&&histKey!=="stkszAiHistory"){const old=safeJson(storageGet("stkszAiHistory"),[])||[];if(old.length){hist=old;storageSet(histKey,JSON.stringify(old));}}
+  hist.push({role,text:String(text||"").slice(0,2000),engine:engine||"",at:new Date().toISOString()});storageSet(histKey,JSON.stringify(hist.slice(-50)));window.STKSZSync?.markTouched?.(histKey);}catch(e){}
  const log=document.getElementById("aiChatLog");if(!log)return;
  const div=document.createElement("div");
  div.className="ai-msg "+(role==="user"?"ai-msg-user":"ai-msg-bot");
@@ -6612,24 +6983,34 @@ function aiAppendMessage(role,text,engine){
 async function askStkszAi(quickKey){
  if(aiBusy)return;
  const ai=window.STKSZProviders?.stkszAiProvider;
- const warning=document.getElementById("aiKeyWarning");
- if(!ai?.configured()){if(warning)warning.hidden=false;showToast("Önce STKSZ AI anahtarı ekle (API Yönetimi → STKSZ AI).");return;}
- if(warning)warning.hidden=true;
  const input=document.getElementById("aiQuestionInput");
  const question=quickKey?AI_QUICK_PROMPTS[quickKey]:input?.value.trim();
  if(!question){showToast("Soru yaz veya hazır analiz butonlarından seç.");return;}
  if(!quickKey&&input)input.value="";
  aiAppendMessage("user",aiRedactSecrets(quickKey?(document.querySelector(`#aiQuickTrack [onclick="askStkszAi('${quickKey}')"]`)?.textContent?.trim()||question):question));/* v120: chip metni carousel'den okunur */
+ /* FAZ 5 (5.2): doğal dil komutları AI gerektirmeden yerelde ve deterministik yürütülür (dürüstlük) */
+ const cmd=__aiSkipRoute?null:routeAiCommand(question);
+ __aiSkipRoute=false;
+ if(cmd){try{await runAiCommand(cmd,question);}catch(e){aiAppendMessage("bot","Komut işlenemedi: "+String(e&&e.message?e.message:"bilinmeyen hata"));}return;}
+ const warning=document.getElementById("aiKeyWarning");
+ if(!aiAllowed("ask")){aiAppendMessage("bot","Bu özellik için hesap girişi gerekir — sahte erişim açılmaz. Menü → Profil'den kayıt olabilirsin.");return;}
+ if(!ai?.configured()){
+  if(warning)warning.hidden=false;
+  showToast("STKSZ AI servisi şu anda hazır değil.");
+  aiAppendMessage("bot","STKSZ AI servisine şu anda ulaşılamıyor. Yalnızca doğrulanmış yerel verilerle sınırlı yanıt üretilebilir; teknik yapılandırma normal kullanıcı panelinde gizlidir.");
+  return;
+ }
+ if(warning)warning.hidden=true;
  aiBusy=true;
  const sendBtn=document.getElementById("aiSendBtn");if(sendBtn){sendBtn.disabled=true;sendBtn.textContent="DÜŞÜNÜYOR…";}
  const log=document.getElementById("aiChatLog");
  const thinking=document.createElement("div");thinking.className="ai-msg ai-msg-bot ai-thinking";thinking.innerHTML="<b>STKSZ AI</b><p>Analiz ediyor…</p>";log?.appendChild(thinking);log&&(log.scrollTop=log.scrollHeight);
  try{
-   /* v118 (1. ADIM): STKSZ AI ENGINE — soru modüllere yönlendirilir (MARKET/STOCK/NEWS/PORTFOLIO/RISK/CHART),
-      STKSZ MEMORY (profil+seviye+rozet) ve STKSZ RULES bağlama eklenir. Model Layer değişse bile bu katman sabittir. */
-   const engineCtx=window.STKSZAIEngine?.context?.(question)||"";
-   const centralCtx=window.STKSZAIEngine?.centralContext?.()||"";
-   const extraContext=(quickKey==="gaps"?stkszAiContext()+"\n\n"+stkszAiGapReport():stkszAiContext())+(engineCtx?"\n\n"+engineCtx:"")+(centralCtx?"\n\n"+centralCtx:"");
+  /* v118 (1. ADIM): STKSZ AI ENGINE — soru modüllere yönlendirilir (MARKET/STOCK/NEWS/PORTFOLIO/RISK/CHART),
+     STKSZ MEMORY (profil+seviye+rozet) ve STKSZ RULES bağlama eklenir. Model Layer değişse bile bu katman sabittir. */
+  const engineCtx=window.STKSZAIEngine?.context?.(question)||"";
+  const centralCtx=window.STKSZAIEngine?.centralContext?.()||"";
+  const extraContext=(quickKey==="gaps"?stkszAiContext()+"\n\n"+stkszAiGapReport():stkszAiContext())+(engineCtx?"\n\n"+engineCtx:"")+(centralCtx?"\n\n"+centralCtx:"");
   let result=await ai.ask(aiRedactSecrets(question),aiRedactSecrets(extraContext));
   /* v98 (SANAL ADIM 5): function calling döngüsü — read-only araçlar uygulama kontrolünde
      çalışır, sonuçlar AI'ya geri verilir (en fazla 3 tur); write önerileri onaya bekletilir */
@@ -6647,12 +7028,18 @@ async function askStkszAi(quickKey){
   }
   window.stkszAiLastSuccess=new Date().toISOString();/* v93 (EK-7): AI kartının ÇALIŞIYOR etiketi gerçek başarıdan beslenir */
   thinking.remove();
-  if(result.text)aiAppendMessage("bot",aiRedactSecrets(result.text),result.engine);
+  if(result.text){
+   let text=aiRedactSecrets(result.text);
+   /* FAZ 5 (5.8): deterministik finansal güvenlik cümlesi — model ayrıca eklese de yanıtın
+      sonunda en az bir bilgilendirme satırı bulunur (yatırım kararı garantisi yoktur). */
+   if(!/(tavsiye|bu bilgilendirmedir)/i.test(text))text+="\n\nBu bilgilendirmedir; yatırım tavsiyesi değildir. Karar senindir.";
+   aiAppendMessage("bot",text,result.engine);
+  }
   /* yazma önerileri: AI DOĞRUDAN İŞLEM YAPAMAZ — kullanıcı onay akışına yönlendirilir */
   (result.toolCalls||[]).filter(c=>!c.readOnly).forEach(call=>renderAiToolProposal(call));
  }catch(error){
   thinking.remove();
-  aiAppendMessage("bot","⚠️ "+String(error?.message||"AI yanıtı alınamadı."));
+  aiAppendMessage("bot","⚠️ "+aiRedactSecrets(String(error?.message||"AI yanıtı alınamadı.")));
  }finally{
   aiBusy=false;
   if(sendBtn){sendBtn.disabled=false;sendBtn.textContent="GÖNDER";}
